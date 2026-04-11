@@ -1,0 +1,221 @@
+/* ================================================================
+   STYLES.CSS
+   Page-level styles for the wedding invitation.
+   All colour values reference design-system.css tokens.
+================================================================ */
+
+/* ── Base ── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  background-color: hsl(var(--background));
+  color:            hsl(var(--foreground));
+  font-family:      var(--font-body);
+  font-weight:      300;
+  overflow-x:       hidden;
+}
+
+/* ── Typography helper ── */
+.font-display { font-family: var(--font-display); }
+
+/* ── Section label (overrides .label for non-form use) ── */
+.section-label {
+  font-family:    var(--font-body);
+  font-size:      var(--text-xs);
+  font-weight:    500;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color:          hsl(var(--accent));
+}
+
+/* ── Panel (card lite — no header/footer structure needed) ── */
+.panel {
+  background:    hsl(var(--card));
+  border:        1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  box-shadow:    var(--shadow-sm);
+}
+
+/* ── Countdown box ── */
+.cd-box {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  background:     hsl(var(--card));
+  border:         1px solid hsl(var(--border));
+  border-radius:  var(--radius);
+  padding:        1rem 1rem 0.75rem;
+  min-width:      68px;
+  flex:           1;
+  max-width:      96px;
+  box-shadow:     var(--shadow-sm);
+}
+.cd-num {
+  font-family:  var(--font-display);
+  font-size:    clamp(2rem, 8vw, 2.75rem);
+  font-weight:  300;
+  color:        hsl(var(--foreground));
+  line-height:  1;
+}
+.cd-label {
+  font-size:      0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color:          hsl(var(--accent));
+  margin-top:     0.4rem;
+}
+
+/* ── Ornament diamond ── */
+.diamond {
+  width:       6px;
+  height:      6px;
+  background:  hsl(var(--accent));
+  transform:   rotate(45deg);
+  display:     inline-block;
+  flex-shrink: 0;
+}
+
+/* ── Gold divider ── */
+.gold-divider {
+  display:         flex;
+  align-items:     center;
+  gap:             0.75rem;
+  justify-content: center;
+  margin:          1.5rem auto;
+}
+.gold-divider::before,
+.gold-divider::after {
+  content:    '';
+  flex:       1;
+  max-width:  80px;
+  height:     1px;
+}
+.gold-divider::before { background: linear-gradient(90deg, transparent, hsl(var(--accent))); }
+.gold-divider::after  { background: linear-gradient(90deg, hsl(var(--accent)), transparent); }
+
+/* ── Floral accent ── */
+.floral-accent {
+  font-size:      1.1rem;
+  color:          hsl(var(--accent));
+  opacity:        0.7;
+  letter-spacing: 0.1em;
+}
+
+/* ── Navbar ── */
+#navbar {
+  transition: background var(--duration-slow) var(--ease-default),
+              box-shadow  var(--duration-slow) var(--ease-default);
+}
+#navbar.scrolled {
+  background: hsl(var(--background) / 0.97) !important;
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Petal canvas ── */
+#petalCanvas {
+  position:       absolute;
+  inset:          0;
+  pointer-events: none;
+  z-index:        1;
+}
+
+/* ── Hero content layer ── */
+.hero-content { position: relative; z-index: 2; }
+
+/* ── Smooth scroll offset ── */
+section { scroll-margin-top: 72px; }
+
+/* ── Mobile menu ── */
+#mobile-menu {
+  max-height: 0;
+  overflow:   hidden;
+  transition: max-height var(--duration-slow) var(--ease-default);
+  background: hsl(var(--background));
+  border-top: 1px solid hsl(var(--border));
+}
+#mobile-menu.open { max-height: 300px; }
+
+/* ── RSVP radio cards ── */
+.radio-card input[type="radio"] { display: none; }
+.radio-card label {
+  display:        block;
+  padding:        0.6rem 1.4rem;
+  border:         1px solid hsl(var(--border));
+  border-radius:  var(--radius);
+  cursor:         pointer;
+  font-size:      var(--text-sm);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color:          hsl(var(--muted-foreground));
+  transition:     background var(--duration-base) var(--ease-default),
+                  border-color var(--duration-base) var(--ease-default),
+                  color var(--duration-base) var(--ease-default);
+  background:     hsl(var(--card));
+}
+.radio-card input[type="radio"]:checked + label {
+  background:   hsl(var(--accent));
+  border-color: hsl(var(--accent));
+  color:        hsl(var(--card));
+}
+.radio-card label:hover {
+  border-color: hsl(var(--accent));
+  color:        hsl(var(--accent));
+}
+
+/* ── Form input (page-specific alias of .input token class) ── */
+.form-input {
+  width:          100%;
+  background:     hsl(var(--card));
+  border:         1px solid hsl(var(--border));
+  border-radius:  var(--radius);
+  padding:        0.7rem 1rem;
+  font-family:    var(--font-body);
+  font-size:      var(--text-sm);
+  font-weight:    300;
+  color:          hsl(var(--foreground));
+  outline:        none;
+  transition:     border-color var(--duration-base) var(--ease-default),
+                  box-shadow   var(--duration-base) var(--ease-default);
+}
+.form-input:focus       { border-color: hsl(var(--accent)); box-shadow: var(--shadow-gold); }
+.form-input::placeholder { color: hsl(var(--muted-foreground)); opacity: 0.65; }
+
+/* ── Submit button (page-specific; uses .btn-default under the hood) ── */
+.btn-submit {
+  background:     hsl(var(--primary));
+  color:          hsl(var(--primary-foreground));
+  font-family:    var(--font-body);
+  font-size:      var(--text-xs);
+  font-weight:    500;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  padding:        0.9rem 2.5rem;
+  border:         1px solid hsl(var(--primary));
+  border-radius:  var(--radius);
+  cursor:         pointer;
+  transition:     background var(--duration-base) var(--ease-default),
+                  border-color var(--duration-base) var(--ease-default),
+                  color var(--duration-base) var(--ease-default),
+                  box-shadow var(--duration-base) var(--ease-default);
+  display:        inline-block;
+}
+.btn-submit:hover       { background: hsl(var(--accent)); border-color: hsl(var(--accent)); color: hsl(var(--card)); }
+.btn-submit:focus-visible { outline: none; box-shadow: var(--shadow-gold); }
+
+/* ── Reveal on scroll ── */
+.reveal {
+  opacity:    0;
+  transform:  translateY(24px);
+  transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+}
+.reveal.visible {
+  opacity:   1;
+  transform: translateY(0);
+}
+
+/* ── RSVP success ── */
+#rsvp-success {
+  display:    none;
+  text-align: center;
+  padding:    2rem;
+}
