@@ -146,3 +146,67 @@ document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
   init();
   draw();
 })();
+
+
+// ── MUSIC PLAYER ───────────────────────────────────────────────
+(function initMusicPlayer() {
+  const audio    = document.getElementById('bg-audio');
+  const btn      = document.getElementById('music-btn');
+  const panel    = document.getElementById('music-panel');
+  const progress = document.getElementById('music-progress');
+  const iconNote = document.getElementById('icon-note');
+  const iconMute = document.getElementById('icon-mute');
+
+  let isPlaying = false;
+  let hasStarted = false; // track first play to set start time once
+
+  function setPlaying(state) {
+    isPlaying = state;
+    if (state) {
+      if (!hasStarted) {
+        audio.currentTime = 100; // start at 1:40
+        hasStarted = true;
+      }
+      audio.play().catch(() => {}); // ignore autoplay-blocked errors silently
+      panel.classList.add('open');
+      btn.classList.add('is-playing');
+      iconNote.classList.remove('hidden');
+      iconMute.classList.add('hidden');
+    } else {
+      audio.pause();
+      panel.classList.remove('open');
+      btn.classList.remove('is-playing');
+      iconNote.classList.add('hidden');
+      iconMute.classList.remove('hidden');
+    }
+  }
+
+  // Toggle on button click
+  btn.addEventListener('click', () => setPlaying(!isPlaying));
+
+  // Progress bar
+  audio.addEventListener('timeupdate', () => {
+    if (!audio.duration) return;
+    progress.style.width = (audio.currentTime / audio.duration * 100) + '%';
+  });
+
+  // Pause when tab is hidden, resume when visible again
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && isPlaying) {
+      audio.pause();
+    } else if (!document.hidden && isPlaying) {
+      audio.play().catch(() => {});
+    }
+  });
+
+  // Auto-play on first user interaction (respects browser autoplay policy)
+  function tryAutoplay() {
+    setPlaying(true);
+    document.removeEventListener('click',      tryAutoplay);
+    document.removeEventListener('touchstart', tryAutoplay);
+    document.removeEventListener('keydown',    tryAutoplay);
+  }
+  document.addEventListener('click',      tryAutoplay, { once: true });
+  document.addEventListener('touchstart', tryAutoplay, { once: true });
+  document.addEventListener('keydown',    tryAutoplay, { once: true });
+})();
