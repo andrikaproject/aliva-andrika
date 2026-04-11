@@ -200,13 +200,12 @@ document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
   });
 
   // Auto-play on first user interaction (respects browser autoplay policy)
+  // NOTE: touchstart is intentionally excluded — on mobile, touchstart fires
+  // before the button's click handler, causing a double-toggle race condition
+  // that immediately pauses the music after starting it.
   function tryAutoplay() {
-    setPlaying(true);
-    document.removeEventListener('click',      tryAutoplay);
-    document.removeEventListener('touchstart', tryAutoplay);
-    document.removeEventListener('keydown',    tryAutoplay);
+    if (!isPlaying) setPlaying(true);
   }
-  document.addEventListener('click',      tryAutoplay, { once: true });
-  document.addEventListener('touchstart', tryAutoplay, { once: true });
-  document.addEventListener('keydown',    tryAutoplay, { once: true });
+  document.addEventListener('click',   tryAutoplay, { once: true });
+  document.addEventListener('keydown', tryAutoplay, { once: true });
 })();
