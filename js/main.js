@@ -1,3 +1,29 @@
+// ── COVER SCREEN ───────────────────────────────────────────────
+(function initCover() {
+  const cover   = document.getElementById('cover-screen');
+  const btn     = document.getElementById('cover-btn');
+  const guestEl = document.getElementById('cover-guest');
+
+  // Lock body scroll while cover is visible
+  document.body.style.overflow = 'hidden';
+
+  // Show guest name if ?to= param exists
+  const name = new URLSearchParams(window.location.search).get('to');
+  if (name) {
+    guestEl.textContent = 'Kepada: ' + name + ' & Pasangan';
+    guestEl.classList.remove('hidden');
+  }
+
+  btn.addEventListener('click', () => {
+    cover.classList.add('dismissed');
+    // Unlock scroll as soon as button is clicked
+    document.body.style.overflow = '';
+    // Remove from DOM after animation ends
+    cover.addEventListener('transitionend', () => cover.remove(), { once: true });
+  });
+})();
+
+
 // ── GUEST PERSONALIZATION ───────────────────────────────────────
 // Usage: share the link as  ?to=Nama+Tamu
 // e.g.  https://yourdomain.com/?to=Budi+%26+Sari
@@ -176,16 +202,14 @@ document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
   let isPlaying = false;
 
-  function setPlaying(state) {
+  function setUIPlaying(state) {
     isPlaying = state;
     if (state) {
-      audio.play().catch(() => {});
       panel.classList.add('open');
       btn.classList.add('is-playing');
       iconNote.classList.remove('hidden');
       iconMute.classList.add('hidden');
     } else {
-      audio.pause();
       panel.classList.remove('open');
       btn.classList.remove('is-playing');
       iconNote.classList.add('hidden');
@@ -193,16 +217,30 @@ document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
     }
   }
 
-  btn.addEventListener('click', () => setPlaying(!isPlaying));
+  function startPlay() {
+    audio.play().then(() => {
+      setUIPlaying(true);
+    }).catch(() => {});
+  }
 
+  function stopPlay() {
+    audio.pause();
+    setUIPlaying(false);
+  }
+
+  // Toggle button
+  btn.addEventListener('click', () => {
+    if (isPlaying) stopPlay(); else startPlay();
+  });
+
+  // Progress bar + loop at 1:40
   audio.addEventListener('timeupdate', () => {
-    if (audio.currentTime >= 100) {
-      audio.currentTime = 0;
-    }
+    if (audio.currentTime >= 100) audio.currentTime = 0;
     if (!audio.duration) return;
     progress.style.width = (audio.currentTime / audio.duration * 100) + '%';
   });
 
+  // Pause/resume on tab visibility change
   document.addEventListener('visibilitychange', () => {
     if (document.hidden && isPlaying) {
       audio.pause();
@@ -211,5 +249,20 @@ document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
     }
   });
 
-  setPlaying(true);
+  // ── MDN Autoplay strategy ──────────────────────────────────────
+  // 1. Try immediate autoplay (works on desktop / high media engagement)
+  // 2. If blocked, silently wait for first user interaction, then play
+  audio.play().then(() => {
+    setUIPlaying(true);
+  }).catch(() => {
+    function onFirstInteraction() {
+      audio.play().then(() => {
+        setUIPlaying(true);
+      }).catch(() => {});
+      document.removeEventListener('click',     onFirstInteraction);
+      document.removeEventListener('touchend',  onFirstInteraction);
+    }
+    document.addEventListener('click',    onFirstInteraction, { once: true });
+    document.addEventListener('touchend', onFirstInteraction, { once: true });
+  });
 })();
