@@ -25,7 +25,7 @@ body {
   font-weight:    500;
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  color:          hsl(var(--accent));
+  color:          var(--text-gold); /* was hsl(var(--accent)) — 3.18:1 FAIL → now 5.83:1 PASS */
 }
 
 /* ── Panel (card lite — no header/footer structure needed) ── */
@@ -61,7 +61,7 @@ body {
   font-size:      0.6rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color:          hsl(var(--accent));
+  color:          var(--text-gold); /* was hsl(var(--accent)) — 3.18:1 FAIL → now 5.83:1 PASS */
   margin-top:     0.4rem;
 }
 

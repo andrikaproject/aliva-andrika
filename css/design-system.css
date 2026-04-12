@@ -152,6 +152,14 @@
   --color-rose-muted: hsl(9 44% 69%);
   --color-rose-deep: hsl(10 35% 54%);
   --color-sage-light: hsl(107 11% 84%);
+
+  /* ── WCAG AA-safe text colours (≥4.5:1 on parchment & card) ─── */
+  /* gold-mid #C9A96E → 3.18:1  FAIL → darken to 5.83:1 PASS      */
+  --text-gold: hsl(35 55% 30%);   /* #7E5922  contrast 5.83:1     */
+  /* rose-muted #D4998A → 2.24:1 FAIL → darken to 5.49:1 PASS     */
+  --text-rose: hsl(10 38% 36%);   /* #7D4438  contrast 5.49:1     */
+  /* sage-mid #9CAF98  → 1.94:1 FAIL → darken to 5.47:1 PASS      */
+  --text-sage: hsl(110 18% 32%);  /* #486248  contrast 5.47:1     */
   --color-sage-mid: hsl(112 11% 64%);
 }
 
@@ -421,7 +429,7 @@
   font-weight: 500;
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  color: hsl(var(--accent));
+  color: var(--text-gold);
   margin-bottom: var(--space-2);
   cursor: default;
   line-height: 1;
@@ -459,7 +467,7 @@
 
 .badge-outline {
   background: transparent;
-  color: hsl(var(--accent));
+  color: var(--text-gold);
   border-color: hsl(var(--border));
 }
 
@@ -664,7 +672,7 @@
 }
 
 .text-token-accent {
-  color: hsl(var(--accent));
+  color: var(--text-gold);
 }
 
 .text-token-destructive {

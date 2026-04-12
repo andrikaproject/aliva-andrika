@@ -1,4 +1,21 @@
-// ── CONFIG ─────────────────────────────────────────────────────
+// ── GUEST PERSONALIZATION ───────────────────────────────────────
+// Usage: share the link as  ?to=Nama+Tamu
+// e.g.  https://yourdomain.com/?to=Budi+%26+Sari
+(function initGuestName() {
+  const params = new URLSearchParams(window.location.search);
+  const name   = params.get('to');
+  if (!name) return;                       // no param → keep default text
+
+  const line1 = document.getElementById('open-inv-line1');
+  if (!line1) return;
+
+  line1.innerHTML =
+    `You're Invited,<br>` +
+    `<span style="font-size:0.85em;opacity:0.85;">${name} &amp; Pasangan</span>`;
+})();
+
+
+
 // Change this to your actual wedding date/time
 const WEDDING_DATE = new Date('2026-10-17T08:30:00');
 
@@ -158,16 +175,11 @@ document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
   const iconMute = document.getElementById('icon-mute');
 
   let isPlaying = false;
-  let hasStarted = false; // track first play to set start time once
 
   function setPlaying(state) {
     isPlaying = state;
     if (state) {
-      if (!hasStarted) {
-        audio.currentTime = 100; // start at 1:40
-        hasStarted = true;
-      }
-      audio.play().catch(() => {}); // ignore autoplay-blocked errors silently
+      audio.play().catch(() => {});
       panel.classList.add('open');
       btn.classList.add('is-playing');
       iconNote.classList.remove('hidden');
@@ -181,16 +193,16 @@ document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
     }
   }
 
-  // Toggle on button click
   btn.addEventListener('click', () => setPlaying(!isPlaying));
 
-  // Progress bar
   audio.addEventListener('timeupdate', () => {
+    if (audio.currentTime >= 100) {
+      audio.currentTime = 0;
+    }
     if (!audio.duration) return;
     progress.style.width = (audio.currentTime / audio.duration * 100) + '%';
   });
 
-  // Pause when tab is hidden, resume when visible again
   document.addEventListener('visibilitychange', () => {
     if (document.hidden && isPlaying) {
       audio.pause();
@@ -199,7 +211,6 @@ document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
     }
   });
 
-  // Auto-play on first user interaction (respects browser autoplay policy)
   function tryAutoplay() {
     setPlaying(true);
     document.removeEventListener('click',      tryAutoplay);

@@ -77,6 +77,13 @@ tailwind.config = {
           mid:   '#9CAF98',
         },
         ink: '#2C2420',
+
+        /* ── WCAG AA-safe text colours ────────────────────── */
+        /* Use these for ANY readable text using palette hues. */
+        /* All ≥4.5:1 contrast on parchment (#FAF6EF).        */
+        'text-gold': '#7E5922',   /* 5.83:1 — replaces gold-mid/deep on text */
+        'text-rose': '#7D4438',   /* 5.49:1 — replaces rose-muted/deep on text */
+        'text-sage': '#486248',   /* 5.47:1 — replaces sage-mid on text */
       },
 
       /* ── Border radius (from tokens) ────────────────────── */
