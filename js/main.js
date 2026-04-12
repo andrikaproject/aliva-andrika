@@ -148,64 +148,36 @@ document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 })();
 
 
-// ── MUSIC PLAYER ───────────────────────────────────────────────
-(function initMusicPlayer() {
-  const audio    = document.getElementById('bg-audio');
-  const btn      = document.getElementById('music-btn');
-  const panel    = document.getElementById('music-panel');
-  const progress = document.getElementById('music-progress');
-  const iconNote = document.getElementById('icon-note');
-  const iconMute = document.getElementById('icon-mute');
+// ── BACKGROUND AUDIO ───────────────────────────────────────────
+// Browsers block autoplay until the user first interacts with the
+// page. We listen for the earliest possible gesture (touchstart on
+// mobile, click/keydown on desktop) and play exactly once.
+(function initBgAudio() {
+  const audio = document.getElementById('bg-audio');
+  let started = false;
 
-  let isPlaying = false;
-  let hasStarted = false; // track first play to set start time once
-
-  function setPlaying(state) {
-    isPlaying = state;
-    if (state) {
-      if (!hasStarted) {
-        audio.currentTime = 100; // start at 1:40
-        hasStarted = true;
-      }
-      audio.play().catch(() => {}); // ignore autoplay-blocked errors silently
-      panel.classList.add('open');
-      btn.classList.add('is-playing');
-      iconNote.classList.remove('hidden');
-      iconMute.classList.add('hidden');
-    } else {
-      audio.pause();
-      panel.classList.remove('open');
-      btn.classList.remove('is-playing');
-      iconNote.classList.add('hidden');
-      iconMute.classList.remove('hidden');
-    }
+  function start() {
+    if (started) return;
+    started = true;
+    audio.currentTime = 100; // begin at ~1:40 into the track
+    audio.play().catch(() => {});
+    // Remove all three listeners once audio has started
+    document.removeEventListener('touchstart', start);
+    document.removeEventListener('click',      start);
+    document.removeEventListener('keydown',    start);
   }
 
-  // Toggle on button click
-  btn.addEventListener('click', () => setPlaying(!isPlaying));
+  document.addEventListener('touchstart', start, { once: true, passive: true });
+  document.addEventListener('click',      start, { once: true });
+  document.addEventListener('keydown',    start, { once: true });
 
-  // Progress bar
-  audio.addEventListener('timeupdate', () => {
-    if (!audio.duration) return;
-    progress.style.width = (audio.currentTime / audio.duration * 100) + '%';
-  });
-
-  // Pause when tab is hidden, resume when visible again
+  // Pause when tab/browser goes to background, resume when returning
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden && isPlaying) {
+    if (!started) return;
+    if (document.hidden) {
       audio.pause();
-    } else if (!document.hidden && isPlaying) {
+    } else {
       audio.play().catch(() => {});
     }
   });
-
-  // Auto-play on first user interaction (respects browser autoplay policy)
-  // NOTE: touchstart is intentionally excluded — on mobile, touchstart fires
-  // before the button's click handler, causing a double-toggle race condition
-  // that immediately pauses the music after starting it.
-  function tryAutoplay() {
-    if (!isPlaying) setPlaying(true);
-  }
-  document.addEventListener('click',   tryAutoplay, { once: true });
-  document.addEventListener('keydown', tryAutoplay, { once: true });
 })();
