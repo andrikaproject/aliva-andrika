@@ -211,13 +211,5 @@ document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
     }
   });
 
-  function tryAutoplay() {
-    setPlaying(true);
-    document.removeEventListener('click',      tryAutoplay);
-    document.removeEventListener('touchstart', tryAutoplay);
-    document.removeEventListener('keydown',    tryAutoplay);
-  }
-  document.addEventListener('click',      tryAutoplay, { once: true });
-  document.addEventListener('touchstart', tryAutoplay, { once: true });
-  document.addEventListener('keydown',    tryAutoplay, { once: true });
+  setPlaying(true);
 })();
