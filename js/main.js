@@ -149,31 +149,15 @@ document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
 
 // ── BACKGROUND AUDIO ───────────────────────────────────────────
-// Browsers block autoplay until the user first interacts with the
-// page. We listen for the earliest possible gesture (touchstart on
-// mobile, click/keydown on desktop) and play exactly once.
+// Attempts to autoplay immediately on page load.
+// Pauses when user leaves the tab/browser, resumes on return.
 (function initBgAudio() {
   const audio = document.getElementById('bg-audio');
-  let started = false;
-
-  function start() {
-    if (started) return;
-    started = true;
-    audio.currentTime = 100; // begin at ~1:40 into the track
-    audio.play().catch(() => {});
-    // Remove all three listeners once audio has started
-    document.removeEventListener('touchstart', start);
-    document.removeEventListener('click',      start);
-    document.removeEventListener('keydown',    start);
-  }
-
-  document.addEventListener('touchstart', start, { once: true, passive: true });
-  document.addEventListener('click',      start, { once: true });
-  document.addEventListener('keydown',    start, { once: true });
+  audio.currentTime = 100; // begin at ~1:40 into the track
+  audio.play().catch(() => {});
 
   // Pause when tab/browser goes to background, resume when returning
   document.addEventListener('visibilitychange', () => {
-    if (!started) return;
     if (document.hidden) {
       audio.pause();
     } else {
