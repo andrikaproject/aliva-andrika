@@ -381,6 +381,58 @@ section { scroll-margin-top: 72px; }
   padding:    2rem;
 }
 
+/* ================================================================
+   PREMIUM POLISH
+   Small, on-brand refinements: texture, typographic finish,
+   and tactile interaction feedback. No colour or layout changes.
+================================================================ */
+
+/* ── Grain: a whisper of texture so surfaces don't read as flat ── */
+#grain {
+  position:       fixed;
+  inset:          0;
+  pointer-events: none;
+  z-index:        45;   /* over petals, under navbar/cover/music */
+  opacity:        0.04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ── Typographic finish ── */
+/* Tabular figures so ticking numbers never shift width */
+.cd-num,
+.cd-label { font-variant-numeric: tabular-nums; }
+#when .font-display.text-4xl,
+#when .font-display.text-3xl { font-variant-numeric: tabular-nums; }
+
+/* Balance headings, tidy the last line of body copy */
+h1, h2, h3,
+.font-display { text-wrap: balance; }
+p { text-wrap: pretty; }
+
+/* Large couple names: a touch tighter for a more composed look */
+#hero h1.text-5xl,
+#hero h1.text-6xl,
+#cover-screen h1 { letter-spacing: 0.01em; }
+
+/* ── Tactile feedback: press + accessible focus ── */
+.btn-submit { transition-property: background, border-color, color, box-shadow, transform; }
+.btn-submit:active { transform: translateY(1px) scale(0.99); }
+
+.music-btn:active { transform: scale(0.95); }
+
+.radio-card input[type="radio"]:focus-visible + label {
+  border-color: hsl(var(--accent));
+  box-shadow:   var(--shadow-gold);
+}
+.radio-card label:active { transform: translateY(1px); }
+
+/* Visible keyboard focus for links that carry the gold-outline pattern */
+a:focus-visible {
+  outline:        none;
+  border-radius:  var(--radius-sm);
+  box-shadow:     var(--shadow-gold);
+}
+
 /* ── Reduced motion: keep everything readable, drop the flourish ── */
 @media (prefers-reduced-motion: reduce) {
   .reveal,
