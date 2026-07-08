@@ -1,8 +1,14 @@
-// ── COVER SCREEN ───────────────────────────────────────────────
+// ── Motion preference (shared) ─────────────────────────────────
+const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+
+// ── COVER SCREEN + LIGHT-BLOOM OPENING ─────────────────────────
 (function initCover() {
   const cover   = document.getElementById('cover-screen');
   const btn     = document.getElementById('cover-btn');
   const guestEl = document.getElementById('cover-guest');
+  const bloom   = document.getElementById('bloom');
+  const hero    = document.getElementById('hero');
 
   // Lock body scroll while cover is visible
   document.body.style.overflow = 'hidden';
@@ -10,16 +16,38 @@
   // Show guest name if ?to= param exists
   const name = new URLSearchParams(window.location.search).get('to');
   if (name) {
-    guestEl.textContent = 'Kepada: ' + name + ' & Pasangan';
+    guestEl.textContent = 'Dear ' + name + ' & Partner';
     guestEl.classList.remove('hidden');
   }
 
   btn.addEventListener('click', () => {
-    cover.classList.add('dismissed');
-    // Unlock scroll as soon as button is clicked
+    // Unlock scroll as soon as the journey begins
     document.body.style.overflow = '';
-    // Remove from DOM after animation ends
-    cover.addEventListener('transitionend', () => cover.remove(), { once: true });
+
+    // Reduced motion → simple cross-fade, no bloom
+    if (REDUCED_MOTION) {
+      cover.classList.add('dismissed');
+      cover.addEventListener('transitionend', () => cover.remove(), { once: true });
+      return;
+    }
+
+    // Anchor the golden bloom at the button, then flare it out
+    const rect = btn.getBoundingClientRect();
+    bloom.style.left = (rect.left + rect.width  / 2) + 'px';
+    bloom.style.top  = (rect.top  + rect.height / 2) + 'px';
+    bloom.classList.add('active');
+
+    // Dissolve the cover into the light
+    setTimeout(() => cover.classList.add('dismissed'), 250);
+
+    // Hero emerges from within the light
+    setTimeout(() => { if (hero) hero.classList.add('hero-emerge'); }, 500);
+
+    // Clean up once the flare has faded
+    setTimeout(() => {
+      cover.remove();
+      bloom.classList.remove('active');
+    }, 1650);
   });
 })();
 
@@ -37,7 +65,7 @@
 
   line1.innerHTML =
     `You're Invited,<br>` +
-    `<span style="font-size:0.85em;opacity:0.85;">${name} &amp; Pasangan</span>`;
+    `<span style="font-size:0.85em;opacity:0.85;">${name} &amp; Partner</span>`;
 })();
 
 
@@ -121,48 +149,71 @@ const revealObserver = new IntersectionObserver((entries) => {
 document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
 
-// ── PETAL / CONFETTI ANIMATION ─────────────────────────────────
+// ── PETALS — depth-layered, site-wide, scroll-parallax ─────────
+// Each petal has a `depth` (0 = far, 1 = near). Far petals are
+// larger, softer, slower and fainter; near petals are smaller,
+// crisper, faster. Positions shift subtly with scroll, scaled by
+// depth, so the layers separate as you move through the story.
 (function initPetals() {
   const canvas = document.getElementById('petalCanvas');
-  const ctx    = canvas.getContext('2d');
-  let   W, H, petals = [];
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
 
   const COLORS = ['#E8C4B8', '#D4998A', '#E8D5A3', '#C9A96E', '#D4DDD0', '#9CAF98'];
-  const COUNT  = 28;
+  let W, H, VH, petals = [];
+
+  const isMobile = window.matchMedia('(max-width: 640px)').matches;
+  const COUNT = isMobile ? 12 : 24;
 
   function resize() {
-    W = canvas.width  = canvas.offsetWidth;
-    H = canvas.height = canvas.offsetHeight;
+    W  = canvas.width  = window.innerWidth;
+    H  = canvas.height = window.innerHeight;
+    VH = H + 120;                    // virtual band, taller than viewport for seamless wrap
   }
 
-  function randomPetal() {
+  function makePetal(spread) {
+    const depth = Math.random();     // 0 far … 1 near
     return {
       x:     Math.random() * W,
-      y:     Math.random() * H * -1,
-      size:  Math.random() * 6 + 4,
+      y:     spread ? Math.random() * VH : -20,
+      depth: depth,
+      size:  (Math.random() * 3 + 3) * (1.6 - depth * 0.9),   // far → larger
       color: COLORS[Math.floor(Math.random() * COLORS.length)],
-      speed: Math.random() * 0.6 + 0.3,
-      drift: (Math.random() - 0.5) * 0.5,
+      speed: 0.18 + depth * 0.65,                             // near → faster fall
+      drift: (Math.random() - 0.5) * (0.15 + depth * 0.45),
       rot:   Math.random() * Math.PI * 2,
-      rotS:  (Math.random() - 0.5) * 0.04,
-      alpha: Math.random() * 0.5 + 0.2,
+      rotS:  (Math.random() - 0.5) * (0.01 + depth * 0.03),
+      alpha: 0.12 + depth * 0.20,                             // near → more present
+      par:   0.04 + depth * 0.16,                             // scroll parallax factor
     };
   }
 
   function init() {
     resize();
-    petals = Array.from({ length: COUNT }, () => {
-      const p = randomPetal();
-      p.y = Math.random() * H; // distribute initially
-      return p;
-    });
+    petals = Array.from({ length: COUNT }, () => makePetal(true));
   }
 
-  function draw() {
+  function wrap(v, max) {
+    return ((v % max) + max) % max;
+  }
+
+  function frame() {
     ctx.clearRect(0, 0, W, H);
-    petals.forEach(p => {
+    const scrollY = window.scrollY || window.pageYOffset || 0;
+
+    for (const p of petals) {
+      // advance the fall + spin in virtual space
+      p.y   = wrap(p.y + p.speed, VH);
+      p.x  += p.drift;
+      if (p.x < -20)      p.x = W + 20;
+      else if (p.x > W + 20) p.x = -20;
+      p.rot += p.rotS;
+
+      // parallax: nearer petals shift more with scroll
+      const ry = wrap(p.y - scrollY * p.par, VH) - 60;
+
       ctx.save();
-      ctx.translate(p.x, p.y);
+      ctx.translate(p.x, ry);
       ctx.rotate(p.rot);
       ctx.globalAlpha = p.alpha;
       ctx.fillStyle   = p.color;
@@ -170,24 +221,51 @@ document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
       ctx.ellipse(0, 0, p.size, p.size * 0.55, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
-
-      p.y   += p.speed;
-      p.x   += p.drift;
-      p.rot += p.rotS;
-
-      if (p.y > H + 20) {
-        const fresh = randomPetal();
-        p.x = fresh.x; p.y = -20; p.speed = fresh.speed;
-        p.drift = fresh.drift; p.color = fresh.color;
-        p.size = fresh.size; p.alpha = fresh.alpha;
-      }
-    });
-    requestAnimationFrame(draw);
+    }
+    requestAnimationFrame(frame);
   }
 
-  window.addEventListener('resize', resize);
+  function drawStatic() {
+    // reduced-motion: a few faint petals, no animation loop
+    ctx.clearRect(0, 0, W, H);
+    for (const p of petals) {
+      ctx.save();
+      ctx.translate(p.x, wrap(p.y, H));
+      ctx.rotate(p.rot);
+      ctx.globalAlpha = p.alpha;
+      ctx.fillStyle   = p.color;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, p.size, p.size * 0.55, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  window.addEventListener('resize', () => {
+    resize();
+    if (REDUCED_MOTION) drawStatic();
+  });
+
   init();
-  draw();
+  if (REDUCED_MOTION) drawStatic();
+  else requestAnimationFrame(frame);
+})();
+
+
+// ── PHOTO BAND PARALLAX (subtle; ready for real photos) ────────
+(function initPhotoBand() {
+  if (REDUCED_MOTION) return;
+  const band = document.querySelector('#photo-band .photo-band-inner');
+  if (!band) return;
+
+  function onScroll() {
+    const r = band.getBoundingClientRect();
+    const prog = (window.innerHeight - r.top) / (window.innerHeight + r.height);
+    const clamped = Math.max(0, Math.min(1, prog));
+    band.style.backgroundPositionY = (30 + clamped * 40) + '%';
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
 })();
 
 
@@ -233,9 +311,8 @@ document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
     if (isPlaying) stopPlay(); else startPlay();
   });
 
-  // Progress bar + loop at 1:40
+  // Progress bar (track loops naturally via the `loop` attribute)
   audio.addEventListener('timeupdate', () => {
-    if (audio.currentTime >= 100) audio.currentTime = 0;
     if (!audio.duration) return;
     progress.style.width = (audio.currentTime / audio.duration * 100) + '%';
   });

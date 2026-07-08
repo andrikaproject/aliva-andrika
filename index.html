@@ -31,8 +31,16 @@
 <body class="antialiased">
 
   <!-- ================================================================
+     ATMOSPHERE: falling petals (site-wide, fixed behind content)
+     and light-bloom overlay used for the cover→hero transition.
+================================================================ -->
+  <canvas id="petalCanvas" aria-hidden="true"></canvas>
+  <div id="bloom" aria-hidden="true"></div>
+
+
+  <!-- ================================================================
      COMPONENT: COVER SCREEN
-     Full-screen gate — user must tap "Buka Undangan" to enter.
+     Full-screen gate — user must tap "Open the Invitation" to enter.
      Click also triggers music autoplay (first interaction).
 ================================================================ -->
   <div id="cover-screen" class="fixed inset-0 z-[70] flex flex-col items-center justify-center text-center px-6"
@@ -42,7 +50,7 @@
     <div class="floral-accent mb-8 tracking-widest text-2xl">✦ &nbsp; ✦ &nbsp; ✦</div>
 
     <!-- Label -->
-    <p class="section-label mb-8 tracking-widest2">Undangan Pernikahan</p>
+    <p class="section-label mb-8 tracking-widest2">The Wedding Invitation</p>
 
     <!-- Couple names -->
     <h1 class="font-display font-light text-ink leading-none text-5xl sm:text-6xl">Andrika</h1>
@@ -54,16 +62,16 @@
     <div class="gold-divider my-8 w-32 mx-auto"><span class="diamond"></span></div>
 
     <!-- Date -->
-    <p class="section-label text-text-gold tracking-widest2 mb-8">17 · Oktober · 2026</p>
+    <p class="section-label text-text-gold tracking-widest2 mb-8">17 · October · 2026</p>
 
     <!-- Guest name — shown only if ?to= param exists -->
     <p id="cover-guest" class="font-display italic text-text-rose text-base mb-6 hidden"></p>
 
     <!-- CTA -->
-    <button id="cover-btn" class="btn-submit">Buka Undangan</button>
+    <button id="cover-btn" class="btn-submit">Open the Invitation</button>
 
     <!-- Hint -->
-    <p class="section-label mt-8 opacity-35" style="font-size:0.5rem;">Ketuk untuk membuka</p>
+    <p class="section-label mt-8 opacity-35" style="font-size:0.5rem;">Tap to open</p>
 
   </div>
 
@@ -122,8 +130,8 @@
     class="relative min-h-screen flex flex-col items-center justify-center text-center px-4 sm:px-6 overflow-hidden"
     style="background: linear-gradient(180deg, #F5EFE4 0%, #FAF6EF 60%, #F0E8DA 100%);">
 
-    <!-- Petal canvas animation -->
-    <canvas id="petalCanvas"></canvas>
+    <!-- Soft golden-hour glow from above -->
+    <div class="hero-glow" aria-hidden="true"></div>
 
     <!-- Hero content -->
     <div class="hero-content w-full max-w-xs sm:max-w-sm mx-auto">
@@ -167,7 +175,7 @@
 
         <!-- Date -->
         <p class="section-label text-text-gold tracking-widest2 mb-8">
-          17 &nbsp;·&nbsp; Oktober &nbsp;·&nbsp; 2026
+          17 &nbsp;·&nbsp; October &nbsp;·&nbsp; 2026
         </p>
 
         <!-- Open Invitation CTA -->
@@ -208,12 +216,12 @@
       <!-- Gold divider -->
       <div class="gold-divider my-6 w-28 mx-auto"><span class="diamond"></span></div>
 
-      <!-- Indonesian translation -->
+      <!-- English translation -->
       <p class="font-display italic text-text-rose leading-relaxed mx-auto mb-2"
         style="font-size: clamp(1rem, 3.5vw, 1.15rem); max-width: 30rem;">
-        "Dan di antara tanda-tanda kebesaran-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri,
-        agar kamu cenderung dan merasa tenteram kepadanya, dan Dia menjadikan di antaramu rasa kasih dan sayang.
-        Sesungguhnya pada yang demikian itu benar-benar terdapat tanda-tanda bagi kaum yang berpikir."
+        "And among His signs is that He created for you mates from among yourselves, that you may find tranquility
+        in them; and He placed between you affection and mercy. Indeed in that are signs for a people who give
+        thought."
       </p>
 
     </div>
@@ -224,11 +232,11 @@
      COMPONENT: COUPLE
      Edit: bride/groom names, descriptions, and photo URLs
 ================================================================ -->
-  <section id="couple" class="py-16 sm:py-24 px-4 sm:px-6">
+  <section id="couple" class="py-20 sm:py-28 px-4 sm:px-6">
     <div class="max-w-4xl mx-auto">
 
       <!-- Section header -->
-      <div class="text-center reveal">
+      <div class="text-center reveal stagger">
         <p class="section-label mb-3">The Couple</p>
         <h2 class="font-display text-4xl md:text-5xl font-light text-ink">Two Hearts, One Story</h2>
         <div class="gold-divider mt-5 w-32 mx-auto"><span class="diamond"></span></div>
@@ -282,15 +290,36 @@
 
 
   <!-- ================================================================
+     COMPONENT: PHOTO BAND (prewedding)
+     Full-width parallax strip. Swap the background-image on
+     #photo-band when the prewedding photos are ready.
+================================================================ -->
+  <section id="photo-band" aria-label="Our story in photos">
+    <div class="photo-band-inner">
+      <div class="photo-band-overlay"></div>
+      <div class="photo-band-content reveal">
+        <p class="section-label mb-3" style="color:#F3E7CF;">Our Story</p>
+        <p class="font-display italic text-2xl sm:text-3xl font-light leading-snug" style="color:#FCF7EC;">
+          Our story in frames
+        </p>
+        <p class="section-label mt-4 tracking-widest2" style="font-size:0.55rem; color:#EBD9B4; opacity:0.9;">
+          coming soon
+        </p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ================================================================
      COMPONENT: WHEN (Date + Countdown Timer)
      Edit: WEDDING_DATE constant in JS below, and the display text
 ================================================================ -->
-  <section id="when" class="py-16 sm:py-24 px-4 sm:px-6"
+  <section id="when" class="py-20 sm:py-28 px-4 sm:px-6"
     style="background: linear-gradient(180deg, #F0E8DA 0%, #FAF6EF 100%);">
     <div class="max-w-3xl mx-auto text-center">
 
       <!-- Section header -->
-      <div class="reveal">
+      <div class="reveal stagger">
         <p class="section-label mb-3">The Date</p>
         <h2 class="font-display text-4xl md:text-5xl font-light text-ink italic">Save the Date!!</h2>
         <div class="gold-divider mt-5 w-32 mx-auto"><span class="diamond"></span></div>
@@ -314,7 +343,7 @@
               style="border: 2px solid hsl(var(--destructive)); box-shadow: 0 0 0 3px hsl(var(--destructive) / 0.12);">
               <span class="font-display text-3xl font-light text-ink leading-none">17</span>
             </div>
-            <p class="section-label mt-3 text-text-gold" style="font-size:0.5rem;">Okt 2026</p>
+            <p class="section-label mt-3 text-text-gold" style="font-size:0.5rem;">Oct 2026</p>
           </div>
 
           <!-- Sunday 18 -->
@@ -328,23 +357,23 @@
 
       <!-- Countdown Timer -->
       <div class="mt-10 reveal" style="transition-delay: 0.1s;">
-        <p class="section-label mb-5 tracking-widest2">Waktu Mundur</p>
+        <p class="section-label mb-5 tracking-widest2">Counting the Days</p>
         <div class="flex justify-center gap-2 sm:gap-4 w-full max-w-sm mx-auto">
           <div class="cd-box panel">
             <span class="cd-num" id="cd-days">--</span>
-            <span class="cd-label">Hari</span>
+            <span class="cd-label">Days</span>
           </div>
           <div class="cd-box panel">
             <span class="cd-num" id="cd-hours">--</span>
-            <span class="cd-label">Jam</span>
+            <span class="cd-label">Hours</span>
           </div>
           <div class="cd-box panel">
             <span class="cd-num" id="cd-minutes">--</span>
-            <span class="cd-label">Menit</span>
+            <span class="cd-label">Minutes</span>
           </div>
           <div class="cd-box panel">
             <span class="cd-num" id="cd-seconds">--</span>
-            <span class="cd-label">Detik</span>
+            <span class="cd-label">Seconds</span>
           </div>
         </div>
       </div>
@@ -355,7 +384,7 @@
         <!-- Akad Nikah -->
         <div class="panel px-6 py-6">
           <p class="section-label mb-4 text-text-rose">Akad Nikah</p>
-          <p class="font-display text-lg font-light text-ink leading-snug">Sabtu, 17 Oktober 2026</p>
+          <p class="font-display text-lg font-light text-ink leading-snug">Saturday, 17 October 2026</p>
           <p class="font-display italic text-text-gold text-base mt-1">08:30 – 10:00 WIB</p>
           <div class="w-8 h-px bg-gold-light my-4"></div>
           <p class="text-sm text-ink opacity-70 leading-relaxed">Ballroom<br />V Hotel &amp; Residence, Bandung</p>
@@ -364,7 +393,7 @@
         <!-- Resepsi -->
         <div class="panel px-6 py-6" style="transition-delay: 0.1s;">
           <p class="section-label mb-4 text-text-gold">Resepsi</p>
-          <p class="font-display text-lg font-light text-ink leading-snug">Sabtu, 17 Oktober 2026</p>
+          <p class="font-display text-lg font-light text-ink leading-snug">Saturday, 17 October 2026</p>
           <p class="font-display italic text-text-gold text-base mt-1">11:00 – 13:30 WIB</p>
           <div class="w-8 h-px bg-gold-light my-4"></div>
           <p class="text-sm text-ink opacity-70 leading-relaxed">Ballroom<br />V Hotel &amp; Residence, Bandung</p>
@@ -380,11 +409,11 @@
      COMPONENT: WHERE (Venue)
      Edit: venue name, address, maps URL, events list
 ================================================================ -->
-  <section id="where" class="py-16 sm:py-24 px-4 sm:px-6">
+  <section id="where" class="py-20 sm:py-28 px-4 sm:px-6">
     <div class="max-w-4xl mx-auto">
 
       <!-- Section header -->
-      <div class="text-center reveal">
+      <div class="text-center reveal stagger">
         <p class="section-label mb-3">Venue</p>
         <h2 class="font-display text-4xl md:text-5xl font-light text-ink">Where We Celebrate</h2>
         <div class="gold-divider mt-5 w-32 mx-auto"><span class="diamond"></span></div>
@@ -441,7 +470,7 @@
               </div>
               <div class="pl-4" style="grid-column: 3; grid-row: 2;">
                 <p class="font-body text-sm font-medium text-ink">Akad Nikah</p>
-                <p class="text-xs text-ink opacity-70 mt-0.5">Ijab Kabul & Pemberkatan</p>
+                <p class="text-xs text-ink opacity-70 mt-0.5">The Sacred Vows</p>
               </div>
 
               <!-- 10:30 -->
@@ -449,8 +478,8 @@
                 <span class="font-display text-text-gold text-sm">10:30</span>
               </div>
               <div class="pl-4" style="grid-column: 3; grid-row: 3;">
-                <p class="font-body text-sm font-medium text-ink">Resepsi Pernikahan</p>
-                <p class="text-xs text-ink opacity-70 mt-0.5">Makan Siang & Perayaan</p>
+                <p class="font-body text-sm font-medium text-ink">Resepsi</p>
+                <p class="text-xs text-ink opacity-70 mt-0.5">Luncheon & Celebration</p>
               </div>
 
               <!-- 12:00 -->
@@ -458,8 +487,8 @@
                 <span class="font-display text-text-gold text-sm">12:00</span>
               </div>
               <div class="pl-4" style="grid-column: 3; grid-row: 4;">
-                <p class="font-body text-sm font-medium text-ink">Sesi Foto</p>
-                <p class="text-xs text-ink opacity-70 mt-0.5">Bersama Keluarga & Tamu</p>
+                <p class="font-body text-sm font-medium text-ink">Photo Session</p>
+                <p class="text-xs text-ink opacity-70 mt-0.5">With Family & Guests</p>
               </div>
 
               <!-- 13:30 -->
@@ -467,8 +496,8 @@
                 <span class="font-display text-text-gold text-sm">13:30</span>
               </div>
               <div class="pl-4" style="grid-column: 3; grid-row: 5;">
-                <p class="font-body text-sm font-medium text-ink">Penutupan</p>
-                <p class="text-xs text-ink opacity-70 mt-0.5">Terima kasih, sampai jumpa</p>
+                <p class="font-body text-sm font-medium text-ink">Farewell</p>
+                <p class="text-xs text-ink opacity-70 mt-0.5">Thank you, until we meet again</p>
               </div>
 
             </div>
@@ -486,17 +515,17 @@
      COMPONENT: RSVP
      Edit: form action (or wire to your backend), guest limit note
 ================================================================ -->
-  <section id="rsvp" class="py-16 sm:py-24 px-4 sm:px-6"
+  <section id="rsvp" class="py-20 sm:py-28 px-4 sm:px-6"
     style="background: linear-gradient(180deg, #FAF6EF 0%, #F0E8DA 100%);">
     <div class="max-w-2xl mx-auto">
 
       <!-- Section header -->
-      <div class="text-center reveal">
+      <div class="text-center reveal stagger">
         <p class="section-label mb-3">RSVP</p>
         <h2 class="font-display text-4xl md:text-5xl font-light text-ink">Will You Join Us?</h2>
         <div class="gold-divider mt-5 w-32 mx-auto"><span class="diamond"></span></div>
         <p class="mt-5 text-sm text-ink opacity-65 leading-relaxed max-w-sm mx-auto">
-          Kindly confirm your attendance by <strong class="font-medium text-text-rose">1 Oktober 2026</strong>.
+          Kindly confirm your attendance by <strong class="font-medium text-text-rose">1 October 2026</strong>.
           We can't wait to celebrate with you.
         </p>
       </div>
@@ -585,7 +614,7 @@
       </p>
 
       <p class="text-xs text-ink opacity-50 mt-10 tracking-wider">
-        Made with love &nbsp;·&nbsp; 2027
+        Made with love &nbsp;·&nbsp; 2026
       </p>
 
     </div>
@@ -597,7 +626,7 @@
      Local audio — floats bottom-right, auto-plays after first
      user interaction (browser autoplay policy), pauses when tab
      is hidden.
-     Song: Stray Kids — CINEMA (Lee Know & Seungmin)
+     Song: 끝나지 않을 이야기 (An Endless Story)
 ================================================================ -->
   <audio id="bg-audio" loop preload="metadata">
     <source src="끝나지 않을 이야기 ( 128kbps ).mp3" type="audio/mpeg" />
@@ -610,7 +639,7 @@
       <p class="section-label text-gold-deep mb-1" style="font-size:0.55rem;">Now Playing</p>
       <p class="font-display text-sm font-light text-ink leading-snug mb-2">
         끝나지 않을 이야기<br />
-        <span class="text-xs text-ink opacity-50 font-body not-italic">—</span>
+        <span class="text-xs text-ink opacity-50 font-body not-italic">An Endless Story</span>
       </p>
       <!-- Progress bar -->
       <div class="w-full h-px bg-gold-light rounded-full overflow-hidden">

@@ -111,16 +111,29 @@ body {
   box-shadow: var(--shadow-md);
 }
 
-/* ── Petal canvas ── */
+/* ── Petal canvas (fixed, drifts gently over the whole page) ── */
 #petalCanvas {
-  position:       absolute;
+  position:       fixed;
   inset:          0;
+  width:          100%;
+  height:         100%;
   pointer-events: none;
-  z-index:        1;
+  z-index:        40;   /* above content, below navbar/cover/music (z-50/70) */
 }
 
 /* ── Hero content layer ── */
 .hero-content { position: relative; z-index: 2; }
+
+/* ── Hero golden-hour glow ── */
+.hero-glow {
+  position:       absolute;
+  inset:          0;
+  pointer-events: none;
+  z-index:        0;
+  background:     radial-gradient(120% 70% at 50% -10%,
+                    hsl(40 70% 88% / 0.85) 0%,
+                    hsl(42 47% 96% / 0) 60%);
+}
 
 /* ── Smooth scroll offset ── */
 section { scroll-margin-top: 72px; }
@@ -205,12 +218,33 @@ section { scroll-margin-top: 72px; }
 /* ── Reveal on scroll ── */
 .reveal {
   opacity:    0;
-  transform:  translateY(24px);
-  transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+  transform:  translateY(26px);
+  filter:     blur(6px);
+  transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+              filter 0.9s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .reveal.visible {
   opacity:   1;
   transform: translateY(0);
+  filter:    blur(0);
+}
+
+/* ── Staggered reveal (section headers): children rise in sequence ── */
+.reveal.stagger {
+  transform: none;   /* children handle the motion, container just fades */
+}
+.reveal.stagger.visible > * {
+  animation: reveal-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.reveal.stagger.visible > *:nth-child(1) { animation-delay: 0.05s; }
+.reveal.stagger.visible > *:nth-child(2) { animation-delay: 0.18s; }
+.reveal.stagger.visible > *:nth-child(3) { animation-delay: 0.31s; }
+.reveal.stagger.visible > *:nth-child(4) { animation-delay: 0.44s; }
+.reveal.stagger.visible > *:nth-child(5) { animation-delay: 0.57s; }
+@keyframes reveal-rise {
+  from { opacity: 0; transform: translateY(18px); filter: blur(5px); }
+  to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
 }
 
 /* ── Music Player ── */
@@ -259,15 +293,85 @@ section { scroll-margin-top: 72px; }
 
 /* ── Cover Screen ── */
 #cover-screen {
-  overflow:   hidden;
+  overflow:     hidden;
   touch-action: none;
-  transition: transform 0.9s cubic-bezier(0.76, 0, 0.24, 1),
-              opacity   0.7s ease-out;
+  transition:   transform 1s cubic-bezier(0.22, 1, 0.36, 1),
+                opacity   0.9s ease-out;
 }
+/* Cover dissolves into the light rather than sliding away */
 #cover-screen.dismissed {
-  transform:      translateY(-100%);
+  transform:      scale(1.06);
   opacity:        0;
   pointer-events: none;
+}
+
+/* ── Light-bloom transition (cover → hero) ── */
+#bloom {
+  position:       fixed;
+  left:           50%;
+  top:            50%;
+  width:          24px;
+  height:         24px;
+  border-radius:  50%;
+  transform:      translate(-50%, -50%) scale(0);
+  opacity:        0;
+  pointer-events: none;
+  z-index:        65;   /* above cover content, below nothing else during transition */
+  background:     radial-gradient(circle,
+                    #FFFBEF 0%,
+                    #F8E9C4 32%,
+                    #EBCB86 56%,
+                    rgba(235, 203, 134, 0) 70%);
+}
+#bloom.active {
+  animation: bloom-flare 1.5s ease-out forwards;
+}
+@keyframes bloom-flare {
+  0%   { transform: translate(-50%, -50%) scale(0);   opacity: 0; }
+  20%  { opacity: 1; }
+  55%  { transform: translate(-50%, -50%) scale(120); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(150); opacity: 0; }
+}
+
+/* Hero emerges from the light after the cover is dismissed */
+.hero-emerge .hero-content {
+  animation: hero-emerge 1.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes hero-emerge {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); filter: blur(6px); }
+  to   { opacity: 1; transform: none;                         filter: blur(0); }
+}
+
+/* ── Prewedding photo band ── */
+#photo-band {
+  position: relative;
+  z-index:  1;
+}
+.photo-band-inner {
+  position:        relative;
+  min-height:      58vh;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  overflow:        hidden;
+  /* Placeholder — replace with: background-image: url('your-photo.jpg') */
+  background-image:
+    radial-gradient(circle at 28% 30%, hsl(30 42% 56% / 0.55), transparent 55%),
+    radial-gradient(circle at 76% 72%, hsl(14 36% 44% / 0.50), transparent 55%),
+    linear-gradient(135deg, #6b5647 0%, #8a6f5c 48%, #a98a6e 100%);
+  background-size:     cover;
+  background-position: center 50%;
+}
+.photo-band-overlay {
+  position: absolute;
+  inset:    0;
+  background: linear-gradient(180deg, rgba(38, 28, 20, 0.30) 0%, rgba(38, 28, 20, 0.55) 100%);
+}
+.photo-band-content {
+  position:   relative;
+  z-index:    2;
+  text-align: center;
+  padding:    2.5rem 1.5rem;
 }
 
 /* ── RSVP success ── */
@@ -275,4 +379,33 @@ section { scroll-margin-top: 72px; }
   display:    none;
   text-align: center;
   padding:    2rem;
+}
+
+/* ── Reduced motion: keep everything readable, drop the flourish ── */
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal.stagger.visible > * {
+    transition: none !important;
+    animation:  none !important;
+    opacity:    1 !important;
+    transform:  none !important;
+    filter:     none !important;
+  }
+  #bloom,
+  #bloom.active {
+    animation: none !important;
+    opacity:   0 !important;
+  }
+  #cover-screen {
+    transition: opacity 0.4s ease-out !important;
+  }
+  #cover-screen.dismissed {
+    transform: none !important;
+  }
+  .hero-emerge .hero-content {
+    animation: none !important;
+  }
+  .music-btn.is-playing::after {
+    animation: none !important;
+  }
 }
