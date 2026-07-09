@@ -21,6 +21,13 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
   }
 
   btn.addEventListener('click', () => {
+    // iOS requires audio.play() to run synchronously inside the trusted
+    // click gesture. Fire it first, capture the Promise, and hand it to the
+    // music player via a custom event so it can sync its UI to the outcome.
+    const audio = document.getElementById('bg-audio');
+    const playPromise = audio ? audio.play() : null;
+    window.dispatchEvent(new CustomEvent('invitation-opened', { detail: { playPromise } }));
+
     // Unlock scroll as soon as the journey begins
     document.body.style.overflow = '';
 
@@ -326,20 +333,19 @@ document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
     }
   });
 
-  // ── MDN Autoplay strategy ──────────────────────────────────────
-  // 1. Try immediate autoplay (works on desktop / high media engagement)
-  // 2. If blocked, silently wait for first user interaction, then play
-  audio.play().then(() => {
-    setUIPlaying(true);
-  }).catch(() => {
-    function onFirstInteraction() {
-      audio.play().then(() => {
-        setUIPlaying(true);
-      }).catch(() => {});
-      document.removeEventListener('click',     onFirstInteraction);
-      document.removeEventListener('touchend',  onFirstInteraction);
+  // ── iOS-reliable autoplay ──────────────────────────────────────
+  // The cover button calls audio.play() synchronously inside its click
+  // (the trusted user gesture iOS requires) and hands us the resulting
+  // Promise. We only mirror the UI to whether playback actually started.
+  window.addEventListener('invitation-opened', (e) => {
+    const playPromise = e.detail && e.detail.playPromise;
+    if (playPromise && typeof playPromise.then === 'function') {
+      playPromise
+        .then(() => setUIPlaying(true))
+        .catch(() => {/* blocked — widget stays available for a manual tap */});
+    } else {
+      // No promise handed over (e.g. missing audio) — try once, ignore failure.
+      audio.play().then(() => setUIPlaying(true)).catch(() => {});
     }
-    document.addEventListener('click',    onFirstInteraction, { once: true });
-    document.addEventListener('touchend', onFirstInteraction, { once: true });
   });
 })();
