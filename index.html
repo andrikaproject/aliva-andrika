@@ -42,7 +42,7 @@
        GLOBAL STYLES
   ============================================================ -->
   <link rel="stylesheet" href="css/design-system.css" />
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/styles.css?v=20260725-tear3" />
 </head>
 
 <body class="antialiased">
@@ -61,36 +61,40 @@
      Full-screen gate — user must tap "Open the Invitation" to enter.
      Click also triggers music autoplay (first interaction).
 ================================================================ -->
-  <div id="cover-screen" class="fixed inset-0 z-[70] flex flex-col items-center justify-center text-center px-6"
-    style="background: linear-gradient(180deg, #F5EFE4 0%, #FAF6EF 55%, #F0E8DA 100%);">
+  <div id="cover-screen" class="fixed inset-0 z-[70] text-center">
+    <div class="cover-photo" aria-hidden="true"></div>
 
-    <!-- Floral ornament -->
-    <div class="floral-accent mb-8 tracking-widest text-2xl">✦ &nbsp; ✦ &nbsp; ✦</div>
+    <article class="cover-ticket" aria-label="Andrika and Aliva wedding invitation">
+      <header class="cover-ticket-header">
+        <p>The Wedding Of</p>
+      </header>
 
-    <!-- Label -->
-    <p class="section-label mb-8 tracking-widest2">The Wedding Invitation</p>
+      <figure class="cover-ticket-photo">
+        <img src="assets/cover/wedding-rings.jpeg" alt="Andrika and Aliva showing their wedding rings" />
+      </figure>
 
-    <!-- Couple names -->
-    <h1 class="font-display font-light text-ink leading-none text-5xl sm:text-6xl">Andrika</h1>
-    <div class="font-display italic text-text-gold leading-none select-none my-1"
-      style="font-size: clamp(2.8rem, 11vw, 4rem);">&amp;</div>
-    <h1 class="font-display font-light text-ink leading-none text-5xl sm:text-6xl">Aliva</h1>
+      <div class="cover-ticket-dash" aria-hidden="true"></div>
 
-    <!-- Gold divider -->
-    <div class="gold-divider my-8 w-32 mx-auto"><span class="diamond"></span></div>
+      <div class="cover-ticket-details">
+        <div class="cover-ticket-names">
+          <p>Andrika</p>
+          <p aria-hidden="true">&amp;</p>
+          <p>Aliva</p>
+        </div>
 
-    <!-- Date -->
-    <p class="section-label text-text-gold tracking-widest2 mb-8">17 · October · 2026</p>
+        <img class="cover-ticket-ornament" src="assets/cover/ring-ornament.svg" alt="" aria-hidden="true" />
 
-    <!-- Guest name — shown only if ?to= param exists -->
-    <p id="cover-guest" class="font-display italic text-text-rose text-base mb-6 hidden"></p>
+        <div class="cover-ticket-date">
+          <p>Save The Date!</p>
+          <p>17 October 2026</p>
+        </div>
 
-    <!-- CTA -->
-    <button id="cover-btn" class="btn-submit">Open the Invitation</button>
+        <!-- Guest name — shown only if ?to= param exists -->
+        <p id="cover-guest" class="cover-ticket-guest hidden"></p>
+      </div>
 
-    <!-- Hint -->
-    <p class="section-label mt-8 opacity-35" style="font-size:0.5rem;">Tap to open</p>
-
+      <button id="cover-btn" type="button">Open Invitation</button>
+    </article>
   </div>
 
 
@@ -684,7 +688,7 @@
   <!-- ================================================================
      SCRIPTS
 ================================================================ -->
-  <script src="js/main.js"></script>
+  <script src="js/main.js?v=20260725-tear3"></script>
 
 </body>
 

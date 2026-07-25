@@ -5,107 +5,125 @@
 ================================================================ */
 
 /* ── Base ── */
-*, *::before, *::after { box-sizing: border-box; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
 body {
   background-color: hsl(var(--background));
-  color:            hsl(var(--foreground));
-  font-family:      var(--font-body);
-  font-weight:      300;
-  overflow-x:       hidden;
+  color: hsl(var(--foreground));
+  font-family: var(--font-body);
+  font-weight: 300;
+  overflow-x: hidden;
 }
 
 /* ── Typography helper ── */
-.font-display { font-family: var(--font-display); }
+.font-display {
+  font-family: var(--font-display);
+}
 
 /* ── Section label (overrides .label for non-form use) ── */
 .section-label {
-  font-family:    var(--font-body);
-  font-size:      var(--text-xs);
-  font-weight:    500;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 500;
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  color:          var(--text-gold); /* was hsl(var(--accent)) — 3.18:1 FAIL → now 5.83:1 PASS */
+  color: var(--text-gold);
+  /* was hsl(var(--accent)) — 3.18:1 FAIL → now 5.83:1 PASS */
 }
 
 /* ── Panel (card lite — no header/footer structure needed) ── */
 .panel {
-  background:    hsl(var(--card));
-  border:        1px solid hsl(var(--border));
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
   border-radius: var(--radius);
-  box-shadow:    var(--shadow-sm);
+  box-shadow: var(--shadow-sm);
 }
 
 /* ── Countdown box ── */
 .cd-box {
-  display:        flex;
+  display: flex;
   flex-direction: column;
-  align-items:    center;
-  background:     hsl(var(--card));
-  border:         1px solid hsl(var(--border));
-  border-radius:  var(--radius);
-  padding:        1rem 1rem 0.75rem;
-  min-width:      68px;
-  flex:           1;
-  max-width:      96px;
-  box-shadow:     var(--shadow-sm);
+  align-items: center;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  padding: 1rem 1rem 0.75rem;
+  min-width: 68px;
+  flex: 1;
+  max-width: 96px;
+  box-shadow: var(--shadow-sm);
 }
+
 .cd-num {
-  font-family:  var(--font-display);
-  font-size:    clamp(2rem, 8vw, 2.75rem);
-  font-weight:  300;
-  color:        hsl(var(--foreground));
-  line-height:  1;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 8vw, 2.75rem);
+  font-weight: 300;
+  color: hsl(var(--foreground));
+  line-height: 1;
 }
+
 .cd-label {
-  font-size:      0.6rem;
+  font-size: 0.6rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color:          var(--text-gold); /* was hsl(var(--accent)) — 3.18:1 FAIL → now 5.83:1 PASS */
-  margin-top:     0.4rem;
+  color: var(--text-gold);
+  /* was hsl(var(--accent)) — 3.18:1 FAIL → now 5.83:1 PASS */
+  margin-top: 0.4rem;
 }
 
 /* ── Ornament diamond ── */
 .diamond {
-  width:       6px;
-  height:      6px;
-  background:  hsl(var(--accent));
-  transform:   rotate(45deg);
-  display:     inline-block;
+  width: 6px;
+  height: 6px;
+  background: hsl(var(--accent));
+  transform: rotate(45deg);
+  display: inline-block;
   flex-shrink: 0;
 }
 
 /* ── Gold divider ── */
 .gold-divider {
-  display:         flex;
-  align-items:     center;
-  gap:             0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   justify-content: center;
-  margin:          1.5rem auto;
+  margin: 1.5rem auto;
 }
+
 .gold-divider::before,
 .gold-divider::after {
-  content:    '';
-  flex:       1;
-  max-width:  80px;
-  height:     1px;
+  content: '';
+  flex: 1;
+  max-width: 80px;
+  height: 1px;
 }
-.gold-divider::before { background: linear-gradient(90deg, transparent, hsl(var(--accent))); }
-.gold-divider::after  { background: linear-gradient(90deg, hsl(var(--accent)), transparent); }
+
+.gold-divider::before {
+  background: linear-gradient(90deg, transparent, hsl(var(--accent)));
+}
+
+.gold-divider::after {
+  background: linear-gradient(90deg, hsl(var(--accent)), transparent);
+}
 
 /* ── Floral accent ── */
 .floral-accent {
-  font-size:      1.1rem;
-  color:          hsl(var(--accent));
-  opacity:        0.7;
+  font-size: 1.1rem;
+  color: hsl(var(--accent));
+  opacity: 0.7;
   letter-spacing: 0.1em;
 }
 
 /* ── Navbar ── */
 #navbar {
   transition: background var(--duration-slow) var(--ease-default),
-              box-shadow  var(--duration-slow) var(--ease-default);
+    box-shadow var(--duration-slow) var(--ease-default);
 }
+
 #navbar.scrolled {
   background: hsl(var(--background) / 0.97) !important;
   box-shadow: var(--shadow-md);
@@ -113,272 +131,738 @@ body {
 
 /* ── Petal canvas (fixed, drifts gently over the whole page) ── */
 #petalCanvas {
-  position:       fixed;
-  inset:          0;
-  width:          100%;
-  height:         100%;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
-  z-index:        40;   /* above content, below navbar/cover/music (z-50/70) */
+  z-index: 40;
+  /* above content, below navbar/cover/music (z-50/70) */
 }
 
 /* ── Hero content layer ── */
-.hero-content { position: relative; z-index: 2; }
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
 
 /* ── Hero golden-hour glow ── */
 .hero-glow {
-  position:       absolute;
-  inset:          0;
+  position: absolute;
+  inset: 0;
   pointer-events: none;
-  z-index:        0;
-  background:     radial-gradient(120% 70% at 50% -10%,
-                    hsl(40 70% 88% / 0.85) 0%,
-                    hsl(42 47% 96% / 0) 60%);
+  z-index: 0;
+  background: radial-gradient(120% 70% at 50% -10%,
+      hsl(40 70% 88% / 0.85) 0%,
+      hsl(42 47% 96% / 0) 60%);
 }
 
 /* ── Smooth scroll offset ── */
-section { scroll-margin-top: 72px; }
+section {
+  scroll-margin-top: 72px;
+}
 
 /* ── Mobile menu ── */
 #mobile-menu {
   max-height: 0;
-  overflow:   hidden;
+  overflow: hidden;
   transition: max-height var(--duration-slow) var(--ease-default);
   background: hsl(var(--background));
   border-top: 1px solid hsl(var(--border));
 }
-#mobile-menu.open { max-height: 300px; }
+
+#mobile-menu.open {
+  max-height: 300px;
+}
 
 /* ── RSVP radio cards ── */
-.radio-card input[type="radio"] { display: none; }
+.radio-card input[type="radio"] {
+  display: none;
+}
+
 .radio-card label {
-  display:        block;
-  padding:        0.6rem 1.4rem;
-  border:         1px solid hsl(var(--border));
-  border-radius:  var(--radius);
-  cursor:         pointer;
-  font-size:      var(--text-sm);
+  display: block;
+  padding: 0.6rem 1.4rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: var(--text-sm);
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color:          hsl(var(--muted-foreground));
-  transition:     background var(--duration-base) var(--ease-default),
-                  border-color var(--duration-base) var(--ease-default),
-                  color var(--duration-base) var(--ease-default);
-  background:     hsl(var(--card));
+  color: hsl(var(--muted-foreground));
+  transition: background var(--duration-base) var(--ease-default),
+    border-color var(--duration-base) var(--ease-default),
+    color var(--duration-base) var(--ease-default);
+  background: hsl(var(--card));
 }
-.radio-card input[type="radio"]:checked + label {
-  background:   hsl(var(--accent));
+
+.radio-card input[type="radio"]:checked+label {
+  background: hsl(var(--accent));
   border-color: hsl(var(--accent));
-  color:        hsl(var(--card));
+  color: hsl(var(--card));
 }
+
 .radio-card label:hover {
   border-color: hsl(var(--accent));
-  color:        hsl(var(--accent));
+  color: hsl(var(--accent));
 }
 
 /* ── Form input (page-specific alias of .input token class) ── */
 .form-input {
-  width:          100%;
-  background:     hsl(var(--card));
-  border:         1px solid hsl(var(--border));
-  border-radius:  var(--radius);
-  padding:        0.7rem 1rem;
-  font-family:    var(--font-body);
-  font-size:      var(--text-sm);
-  font-weight:    300;
-  color:          hsl(var(--foreground));
-  outline:        none;
-  transition:     border-color var(--duration-base) var(--ease-default),
-                  box-shadow   var(--duration-base) var(--ease-default);
+  width: 100%;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  padding: 0.7rem 1rem;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 300;
+  color: hsl(var(--foreground));
+  outline: none;
+  transition: border-color var(--duration-base) var(--ease-default),
+    box-shadow var(--duration-base) var(--ease-default);
 }
-.form-input:focus       { border-color: hsl(var(--accent)); box-shadow: var(--shadow-gold); }
-.form-input::placeholder { color: hsl(var(--muted-foreground)); opacity: 0.65; }
+
+.form-input:focus {
+  border-color: hsl(var(--accent));
+  box-shadow: var(--shadow-gold);
+}
+
+.form-input::placeholder {
+  color: hsl(var(--muted-foreground));
+  opacity: 0.65;
+}
 
 /* ── Submit button (page-specific; uses .btn-default under the hood) ── */
 .btn-submit {
-  background:     hsl(var(--primary));
-  color:          hsl(var(--primary-foreground));
-  font-family:    var(--font-body);
-  font-size:      var(--text-xs);
-  font-weight:    500;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 500;
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  padding:        0.9rem 2.5rem;
-  border:         1px solid hsl(var(--primary));
-  border-radius:  var(--radius);
-  cursor:         pointer;
-  transition:     background var(--duration-base) var(--ease-default),
-                  border-color var(--duration-base) var(--ease-default),
-                  color var(--duration-base) var(--ease-default),
-                  box-shadow var(--duration-base) var(--ease-default);
-  display:        inline-block;
+  padding: 0.9rem 2.5rem;
+  border: 1px solid hsl(var(--primary));
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background var(--duration-base) var(--ease-default),
+    border-color var(--duration-base) var(--ease-default),
+    color var(--duration-base) var(--ease-default),
+    box-shadow var(--duration-base) var(--ease-default);
+  display: inline-block;
 }
-.btn-submit:hover       { background: hsl(var(--accent)); border-color: hsl(var(--accent)); color: hsl(var(--card)); }
-.btn-submit:focus-visible { outline: none; box-shadow: var(--shadow-gold); }
+
+.btn-submit:hover {
+  background: hsl(var(--accent));
+  border-color: hsl(var(--accent));
+  color: hsl(var(--card));
+}
+
+.btn-submit:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-gold);
+}
 
 /* ── Reveal on scroll ── */
 .reveal {
-  opacity:    0;
-  transform:  translateY(26px);
-  filter:     blur(6px);
+  opacity: 0;
+  transform: translateY(26px);
+  filter: blur(6px);
   transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.9s cubic-bezier(0.22, 1, 0.36, 1),
-              filter 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.9s cubic-bezier(0.22, 1, 0.36, 1);
 }
+
 .reveal.visible {
-  opacity:   1;
+  opacity: 1;
   transform: translateY(0);
-  filter:    blur(0);
+  filter: blur(0);
 }
 
 /* ── Staggered reveal (section headers): children rise in sequence ── */
 .reveal.stagger {
-  transform: none;   /* children handle the motion, container just fades */
+  transform: none;
+  /* children handle the motion, container just fades */
 }
-.reveal.stagger.visible > * {
+
+.reveal.stagger.visible>* {
   animation: reveal-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
-.reveal.stagger.visible > *:nth-child(1) { animation-delay: 0.05s; }
-.reveal.stagger.visible > *:nth-child(2) { animation-delay: 0.18s; }
-.reveal.stagger.visible > *:nth-child(3) { animation-delay: 0.31s; }
-.reveal.stagger.visible > *:nth-child(4) { animation-delay: 0.44s; }
-.reveal.stagger.visible > *:nth-child(5) { animation-delay: 0.57s; }
+
+.reveal.stagger.visible>*:nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+.reveal.stagger.visible>*:nth-child(2) {
+  animation-delay: 0.18s;
+}
+
+.reveal.stagger.visible>*:nth-child(3) {
+  animation-delay: 0.31s;
+}
+
+.reveal.stagger.visible>*:nth-child(4) {
+  animation-delay: 0.44s;
+}
+
+.reveal.stagger.visible>*:nth-child(5) {
+  animation-delay: 0.57s;
+}
+
 @keyframes reveal-rise {
-  from { opacity: 0; transform: translateY(18px); filter: blur(5px); }
-  to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+    filter: blur(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
 }
 
 /* ── Music Player ── */
 .music-btn {
-  width:         48px;
-  height:        48px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  background:    hsl(var(--primary));
-  color:         hsl(var(--primary-foreground));
-  border:        1px solid hsl(var(--accent));
-  display:       flex;
-  align-items:   center;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border: 1px solid hsl(var(--accent));
+  display: flex;
+  align-items: center;
   justify-content: center;
-  cursor:        pointer;
-  box-shadow:    0 4px 16px rgba(44, 36, 32, 0.18);
-  transition:    background var(--duration-base) var(--ease-default),
-                 transform  var(--duration-base) var(--ease-default);
-  position:      relative;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(44, 36, 32, 0.18);
+  transition: background var(--duration-base) var(--ease-default),
+    transform var(--duration-base) var(--ease-default);
+  position: relative;
 }
-.music-btn:hover { background: hsl(var(--accent)); transform: scale(1.08); }
+
+.music-btn:hover {
+  background: hsl(var(--accent));
+  transform: scale(1.08);
+}
+
 .music-btn.is-playing::after {
-  content:       '';
-  position:      absolute;
-  inset:         -5px;
+  content: '';
+  position: absolute;
+  inset: -5px;
   border-radius: 50%;
-  border:        1px solid hsl(var(--accent) / 0.45);
-  animation:     music-pulse 2s ease-in-out infinite;
+  border: 1px solid hsl(var(--accent) / 0.45);
+  animation: music-pulse 2s ease-in-out infinite;
 }
+
 @keyframes music-pulse {
-  0%, 100% { transform: scale(1);    opacity: 1; }
-  50%       { transform: scale(1.18); opacity: 0; }
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.18);
+    opacity: 0;
+  }
 }
 
 .music-panel {
   transform-origin: bottom right;
-  transform:      scale(0.9) translateY(8px);
-  opacity:        0;
+  transform: scale(0.9) translateY(8px);
+  opacity: 0;
   pointer-events: none;
-  transition:     transform 0.3s var(--ease-out), opacity 0.3s var(--ease-out);
+  transition: transform 0.3s var(--ease-out), opacity 0.3s var(--ease-out);
 }
+
 .music-panel.open {
-  transform:      scale(1) translateY(0);
-  opacity:        1;
+  transform: scale(1) translateY(0);
+  opacity: 1;
   pointer-events: auto;
 }
 
 /* ── Cover Screen ── */
 #cover-screen {
-  overflow:     hidden;
+  --cover-surface: hsl(var(--secondary));
+  --ticket-surface: hsl(var(--muted));
+  overflow: hidden;
+  min-height: 100vh;
+  min-height: 100dvh;
   touch-action: none;
-  transition:   transform 1s cubic-bezier(0.22, 1, 0.36, 1),
-                opacity   0.9s ease-out;
+  background: var(--cover-surface);
+  font-family: var(--font-body);
+  color: hsl(var(--foreground));
+  transition:
+    transform 1s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.9s ease-out;
 }
+
+.cover-photo {
+  position: absolute;
+  z-index: 0;
+  top: clamp(-10.2rem, -36vw, -8.45rem);
+  left: 50%;
+  width: min(100vw, 42rem);
+  aspect-ratio: 2 / 3;
+  transform: translateX(-50%);
+  background:
+    linear-gradient(180deg,
+      hsl(var(--secondary) / 0) 16%,
+      hsl(var(--foreground) / 0.2) 44%,
+      hsl(var(--secondary) / 0.72) 68%,
+      var(--cover-surface) 84%),
+    url("../assets/cover/andrika-aliva-curtain.jpeg") center / cover no-repeat;
+}
+
+.cover-ticket {
+  --ticket-gap: clamp(1.35rem, 8.27vw, 1.9375rem);
+  --ticket-padding: clamp(0.8rem, 4.27vw, 1rem);
+  --ticket-photo-height: clamp(4.7rem, 23.73vw, 5.5625rem);
+  --ticket-notch-y: calc(var(--ticket-padding) + 1.5625rem + var(--ticket-gap) + var(--ticket-photo-height) + var(--ticket-gap) + 0.09375rem);
+  position: absolute;
+  z-index: 1;
+  top: clamp(17.125rem, calc(35dvh + 3.125rem), 23.125rem);
+  left: 50%;
+  isolation: isolate;
+  display: flex;
+  width: min(75.47vw, 17.6875rem);
+  min-height: min(68.49dvh, 31.5rem);
+  transform: translateX(-50%);
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ticket-gap);
+  padding: var(--ticket-padding);
+  border-radius: 1.5rem;
+  background: var(--ticket-surface);
+  box-shadow: 0 0.4rem 1.25rem hsl(var(--foreground) / 0.04);
+  -webkit-mask-image:
+    radial-gradient(circle 0.75rem at left var(--ticket-notch-y),
+      transparent 0.72rem,
+      #000 0.75rem),
+    radial-gradient(circle 0.75rem at right var(--ticket-notch-y),
+      transparent 0.72rem,
+      #000 0.75rem);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    radial-gradient(circle 0.75rem at left var(--ticket-notch-y),
+      transparent 0.72rem,
+      #000 0.75rem),
+    radial-gradient(circle 0.75rem at right var(--ticket-notch-y),
+      transparent 0.72rem,
+      #000 0.75rem);
+  mask-composite: intersect;
+}
+
+.cover-ticket-header {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  min-height: 1.5625rem;
+}
+
+.cover-ticket-header p,
+.cover-ticket-names {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.55;
+}
+
+.cover-ticket-header p {
+  text-transform: uppercase;
+}
+
+.cover-ticket-photo {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  height: var(--ticket-photo-height);
+  overflow: hidden;
+  margin: 0;
+  border: 3px solid hsl(var(--muted-foreground) / 0.25);
+  border-radius: var(--radius);
+}
+
+.cover-ticket-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 48%;
+}
+
+.cover-ticket-dash {
+  position: relative;
+  z-index: 3;
+  width: 84%;
+  height: 1px;
+  background: repeating-linear-gradient(90deg,
+      hsl(var(--accent) / 0.65) 0 0.5rem,
+      transparent 0.5rem 0.9rem);
+}
+
+.cover-ticket-details {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cover-ticket-names {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cover-ticket-ornament {
+  width: 0.8125rem;
+  height: 1.1336rem;
+}
+
+.cover-ticket-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+.cover-ticket-date p:last-child {
+  font-weight: 600;
+}
+
+.cover-ticket-guest {
+  max-width: 100%;
+  color: var(--text-rose);
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  font-style: italic;
+  line-height: 1.3;
+}
+
+#cover-btn {
+  position: relative;
+  z-index: 3;
+  display: inline-flex;
+  width: 100%;
+  min-height: 3.0625rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.25rem;
+  border: 1px solid hsl(var(--primary));
+  border-radius: 0.75rem;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.55;
+  cursor: pointer;
+  transition:
+    background var(--duration-base) var(--ease-default),
+    border-color var(--duration-base) var(--ease-default),
+    color var(--duration-base) var(--ease-default),
+    box-shadow var(--duration-base) var(--ease-default),
+    transform var(--duration-fast) var(--ease-default);
+}
+
+#cover-btn:hover {
+  border-color: hsl(var(--accent));
+  background: hsl(var(--accent));
+  color: hsl(var(--card));
+}
+
+#cover-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-gold);
+}
+
+#cover-btn:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+@media (max-height: 50rem) {
+  .cover-ticket {
+    --ticket-gap: 1.5rem;
+  }
+}
+
+@media (max-height: 41rem) {
+  .cover-ticket {
+    --ticket-gap: 1.2rem;
+    top: clamp(12.625rem, calc(26dvh + 3.125rem), 13.625rem);
+  }
+}
+
+@media (min-width: 48rem) {
+  .cover-photo {
+    width: 32rem;
+  }
+}
+
+/* ── Ticket tear → full-screen opening transition ── */
+#cover-screen.ticket-transitioning {
+  transition: opacity 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+#cover-screen.ticket-transitioning>.cover-ticket {
+  visibility: hidden;
+}
+
+#cover-screen.ticket-transitioning.dismissed {
+  transform: none;
+}
+
+.ticket-transition-stage {
+  position: fixed;
+  z-index: 4;
+  overflow: visible;
+  pointer-events: none;
+  transform: translateZ(0) scale(1);
+  transform-origin: center center;
+  will-change: transform;
+}
+
+.ticket-transition-stage.is-active {
+  animation: ticket-stage-zoom 1.45s cubic-bezier(0.45, 0, 0.2, 1) forwards;
+}
+
+.ticket-transition-clone {
+  position: absolute;
+  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  transform: none;
+  box-shadow: none;
+  pointer-events: none;
+  filter: blur(0);
+  will-change: transform, filter;
+}
+
+.ticket-transition-clone--top {
+  transform-origin: center var(--ticket-tear-y);
+}
+
+.ticket-transition-clone--bottom {
+  transform-origin: center var(--ticket-tear-y);
+}
+
+.ticket-transition-stage.is-active .ticket-transition-clone--top {
+  animation:
+    ticket-tear-top 1.45s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+    ticket-motion-blur 1.45s linear forwards;
+}
+
+.ticket-transition-stage.is-active .ticket-transition-clone--bottom {
+  animation:
+    ticket-tear-bottom 1.45s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+    ticket-motion-blur 1.45s linear forwards;
+}
+
+@keyframes ticket-tear-top {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0);
+  }
+
+  30% {
+    transform: translate3d(-3px, -16px, 0) rotate(-0.65deg);
+  }
+
+  46% {
+    transform: translate3d(-3px, -16px, 0) rotate(-0.65deg);
+  }
+
+  68% {
+    transform: translate3d(-1px, -7px, 0) rotate(-0.25deg);
+  }
+
+  100% {
+    transform: translate3d(0, -2px, 0) rotate(0);
+  }
+}
+
+@keyframes ticket-tear-bottom {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0);
+  }
+
+  30% {
+    transform: translate3d(3px, 20px, 0) rotate(0.7deg);
+  }
+
+  46% {
+    transform: translate3d(3px, 20px, 0) rotate(0.7deg);
+  }
+
+  68% {
+    transform: translate3d(1px, 9px, 0) rotate(0.28deg);
+  }
+
+  100% {
+    transform: translate3d(0, 3px, 0) rotate(0);
+  }
+}
+
+@keyframes ticket-stage-zoom {
+
+  0%,
+  46% {
+    transform: translateZ(0) scale(1);
+  }
+
+  55% {
+    transform: translateZ(0) scale(0.985);
+  }
+
+  100% {
+    transform: translateZ(0) scale(var(--ticket-zoom-scale));
+  }
+}
+
+@keyframes ticket-motion-blur {
+
+  0%,
+  46% {
+    filter: blur(0);
+  }
+
+  62% {
+    filter: blur(0.35px);
+  }
+
+  78% {
+    filter: blur(1px);
+  }
+
+  90% {
+    filter: blur(2px);
+  }
+
+  100% {
+    filter: blur(3px);
+  }
+}
+
 /* Cover dissolves into the light rather than sliding away */
 #cover-screen.dismissed {
-  transform:      scale(1.06);
-  opacity:        0;
+  transform: scale(1.06);
+  opacity: 0;
   pointer-events: none;
 }
 
 /* ── Light-bloom transition (cover → hero) ── */
 #bloom {
-  position:       fixed;
-  left:           50%;
-  top:            50%;
-  width:          24px;
-  height:         24px;
-  border-radius:  50%;
-  transform:      translate(-50%, -50%) scale(0);
-  opacity:        0;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
   pointer-events: none;
-  z-index:        65;   /* above cover content, below nothing else during transition */
-  background:     radial-gradient(circle,
-                    #FFFBEF 0%,
-                    #F8E9C4 32%,
-                    #EBCB86 56%,
-                    rgba(235, 203, 134, 0) 70%);
+  z-index: 65;
+  /* above cover content, below nothing else during transition */
+  background: radial-gradient(circle,
+      #FFFBEF 0%,
+      #F8E9C4 32%,
+      #EBCB86 56%,
+      rgba(235, 203, 134, 0) 70%);
 }
+
 #bloom.active {
   animation: bloom-flare 1.5s ease-out forwards;
 }
+
 @keyframes bloom-flare {
-  0%   { transform: translate(-50%, -50%) scale(0);   opacity: 0; }
-  20%  { opacity: 1; }
-  55%  { transform: translate(-50%, -50%) scale(120); opacity: 1; }
-  100% { transform: translate(-50%, -50%) scale(150); opacity: 0; }
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  55% {
+    transform: translate(-50%, -50%) scale(120);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(150);
+    opacity: 0;
+  }
 }
 
 /* Hero emerges from the light after the cover is dismissed */
 .hero-emerge .hero-content {
   animation: hero-emerge 1.3s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+
 @keyframes hero-emerge {
-  from { opacity: 0; transform: translateY(12px) scale(0.98); filter: blur(6px); }
-  to   { opacity: 1; transform: none;                         filter: blur(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+    filter: blur(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
 }
 
 /* ── Prewedding photo band ── */
 #photo-band {
   position: relative;
-  z-index:  1;
+  z-index: 1;
 }
+
 .photo-band-inner {
-  position:        relative;
-  min-height:      58vh;
-  display:         flex;
-  align-items:     center;
+  position: relative;
+  min-height: 58vh;
+  display: flex;
+  align-items: center;
   justify-content: center;
-  overflow:        hidden;
+  overflow: hidden;
   /* Placeholder — replace with: background-image: url('your-photo.jpg') */
   background-image:
     radial-gradient(circle at 28% 30%, hsl(30 42% 56% / 0.55), transparent 55%),
     radial-gradient(circle at 76% 72%, hsl(14 36% 44% / 0.50), transparent 55%),
     linear-gradient(135deg, #6b5647 0%, #8a6f5c 48%, #a98a6e 100%);
-  background-size:     cover;
+  background-size: cover;
   background-position: center 50%;
 }
+
 .photo-band-overlay {
   position: absolute;
-  inset:    0;
+  inset: 0;
   background: linear-gradient(180deg, rgba(38, 28, 20, 0.30) 0%, rgba(38, 28, 20, 0.55) 100%);
 }
+
 .photo-band-content {
-  position:   relative;
-  z-index:    2;
+  position: relative;
+  z-index: 2;
   text-align: center;
-  padding:    2.5rem 1.5rem;
+  padding: 2.5rem 1.5rem;
 }
 
 /* ── RSVP success ── */
 #rsvp-success {
-  display:    none;
+  display: none;
   text-align: center;
-  padding:    2rem;
+  padding: 2rem;
 }
 
 /* ================================================================
@@ -389,74 +873,111 @@ section { scroll-margin-top: 72px; }
 
 /* ── Grain: a whisper of texture so surfaces don't read as flat ── */
 #grain {
-  position:       fixed;
-  inset:          0;
+  position: fixed;
+  inset: 0;
   pointer-events: none;
-  z-index:        45;   /* over petals, under navbar/cover/music */
-  opacity:        0.04;
+  z-index: 45;
+  /* over petals, under navbar/cover/music */
+  opacity: 0.04;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 /* ── Typographic finish ── */
 /* Tabular figures so ticking numbers never shift width */
 .cd-num,
-.cd-label { font-variant-numeric: tabular-nums; }
+.cd-label {
+  font-variant-numeric: tabular-nums;
+}
+
 #when .font-display.text-4xl,
-#when .font-display.text-3xl { font-variant-numeric: tabular-nums; }
+#when .font-display.text-3xl {
+  font-variant-numeric: tabular-nums;
+}
 
 /* Balance headings, tidy the last line of body copy */
-h1, h2, h3,
-.font-display { text-wrap: balance; }
-p { text-wrap: pretty; }
+h1,
+h2,
+h3,
+.font-display {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
 
 /* Large couple names: a touch tighter for a more composed look */
 #hero h1.text-5xl,
 #hero h1.text-6xl,
-#cover-screen h1 { letter-spacing: 0.01em; }
+#cover-screen h1 {
+  letter-spacing: 0.01em;
+}
 
 /* ── Tactile feedback: press + accessible focus ── */
-.btn-submit { transition-property: background, border-color, color, box-shadow, transform; }
-.btn-submit:active { transform: translateY(1px) scale(0.99); }
-
-.music-btn:active { transform: scale(0.95); }
-
-.radio-card input[type="radio"]:focus-visible + label {
-  border-color: hsl(var(--accent));
-  box-shadow:   var(--shadow-gold);
+.btn-submit {
+  transition-property: background, border-color, color, box-shadow, transform;
 }
-.radio-card label:active { transform: translateY(1px); }
+
+.btn-submit:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+.music-btn:active {
+  transform: scale(0.95);
+}
+
+.radio-card input[type="radio"]:focus-visible+label {
+  border-color: hsl(var(--accent));
+  box-shadow: var(--shadow-gold);
+}
+
+.radio-card label:active {
+  transform: translateY(1px);
+}
 
 /* Visible keyboard focus for links that carry the gold-outline pattern */
 a:focus-visible {
-  outline:        none;
-  border-radius:  var(--radius-sm);
-  box-shadow:     var(--shadow-gold);
+  outline: none;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-gold);
 }
 
 /* ── Reduced motion: keep everything readable, drop the flourish ── */
 @media (prefers-reduced-motion: reduce) {
+
   .reveal,
-  .reveal.stagger.visible > * {
+  .reveal.stagger.visible>* {
     transition: none !important;
-    animation:  none !important;
-    opacity:    1 !important;
-    transform:  none !important;
-    filter:     none !important;
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
   }
+
   #bloom,
   #bloom.active {
     animation: none !important;
-    opacity:   0 !important;
+    opacity: 0 !important;
   }
+
   #cover-screen {
     transition: opacity 0.4s ease-out !important;
   }
+
   #cover-screen.dismissed {
     transform: none !important;
   }
+
+  .ticket-transition-stage,
+  .ticket-transition-clone {
+    animation: none !important;
+    transform: none !important;
+  }
+
   .hero-emerge .hero-content {
     animation: none !important;
   }
+
   .music-btn.is-playing::after {
     animation: none !important;
   }

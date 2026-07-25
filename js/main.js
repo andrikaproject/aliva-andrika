@@ -2,13 +2,16 @@
 const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 
-// ── COVER SCREEN + LIGHT-BLOOM OPENING ─────────────────────────
+// ── COVER SCREEN + TICKET-TEAR OPENING ─────────────────────────
 (function initCover() {
   const cover   = document.getElementById('cover-screen');
   const btn     = document.getElementById('cover-btn');
   const guestEl = document.getElementById('cover-guest');
   const bloom   = document.getElementById('bloom');
   const hero    = document.getElementById('hero');
+  const ticket  = cover.querySelector('.cover-ticket');
+  const dash    = cover.querySelector('.cover-ticket-dash');
+  let isOpening = false;
 
   // Lock body scroll while cover is visible
   document.body.style.overflow = 'hidden';
@@ -20,7 +23,106 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
     guestEl.classList.remove('hidden');
   }
 
+  function makeTicketClone(modifier) {
+    const clone = ticket.cloneNode(true);
+    clone.classList.add('ticket-transition-clone', modifier);
+    clone.setAttribute('aria-hidden', 'true');
+    clone.inert = true;
+    clone.querySelectorAll('[id]').forEach((element) => element.removeAttribute('id'));
+    return clone;
+  }
+
+  function makeTearClipPaths(width, height, tearY) {
+    const segments = 14;
+    const topEdge = [];
+    const bottomEdge = [];
+
+    for (let index = 0; index <= segments; index += 1) {
+      const x = (width / segments) * index;
+      const offset = index % 2 === 0 ? -1.5 : 1.5;
+      const y = tearY + offset;
+      bottomEdge.push(`${x.toFixed(2)}px ${y.toFixed(2)}px`);
+      topEdge.unshift(`${x.toFixed(2)}px ${y.toFixed(2)}px`);
+    }
+
+    return {
+      top: `polygon(0 0, ${width.toFixed(2)}px 0, ${topEdge.join(', ')})`,
+      bottom: `polygon(${bottomEdge.join(', ')}, ${width.toFixed(2)}px ${height.toFixed(2)}px, 0 ${height.toFixed(2)}px)`,
+    };
+  }
+
+  function runTicketTransition() {
+    if (!ticket || !dash) return false;
+
+    const ticketRect = ticket.getBoundingClientRect();
+    const dashRect = dash.getBoundingClientRect();
+    const tearY = dashRect.top - ticketRect.top + dashRect.height / 2;
+    const zoomScale = Math.max(
+      window.innerWidth / ticketRect.width,
+      window.innerHeight / ticketRect.height
+    ) * 1.18;
+
+    const stage = document.createElement('div');
+    stage.className = 'ticket-transition-stage';
+    stage.setAttribute('aria-hidden', 'true');
+    stage.style.left = ticketRect.left + 'px';
+    stage.style.top = ticketRect.top + 'px';
+    stage.style.width = ticketRect.width + 'px';
+    stage.style.height = ticketRect.height + 'px';
+    stage.style.setProperty('--ticket-tear-y', tearY + 'px');
+    stage.style.setProperty('--ticket-zoom-scale', zoomScale.toFixed(3));
+
+    const topClone = makeTicketClone('ticket-transition-clone--top');
+    const bottomClone = makeTicketClone('ticket-transition-clone--bottom');
+    const clipPaths = makeTearClipPaths(ticketRect.width, ticketRect.height, tearY);
+    topClone.style.clipPath = clipPaths.top;
+    topClone.style.webkitClipPath = clipPaths.top;
+    bottomClone.style.clipPath = clipPaths.bottom;
+    bottomClone.style.webkitClipPath = clipPaths.bottom;
+    stage.append(topClone, bottomClone);
+
+    cover.appendChild(stage);
+    cover.classList.add('ticket-transitioning');
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => stage.classList.add('is-active'));
+    });
+
+    setTimeout(() => {
+      if (hero) hero.classList.add('hero-emerge');
+    }, 1250);
+
+    setTimeout(() => cover.classList.add('dismissed'), 1450);
+
+    setTimeout(() => {
+      stage.remove();
+      cover.remove();
+    }, 1750);
+
+    return true;
+  }
+
+  function runBloomFallback() {
+    const rect = btn.getBoundingClientRect();
+    bloom.style.left = (rect.left + rect.width / 2) + 'px';
+    bloom.style.top = (rect.top + rect.height / 2) + 'px';
+    bloom.classList.add('active');
+
+    setTimeout(() => cover.classList.add('dismissed'), 250);
+    setTimeout(() => {
+      if (hero) hero.classList.add('hero-emerge');
+    }, 500);
+    setTimeout(() => {
+      cover.remove();
+      bloom.classList.remove('active');
+    }, 1400);
+  }
+
   btn.addEventListener('click', () => {
+    if (isOpening) return;
+    isOpening = true;
+    btn.disabled = true;
+
     // iOS requires audio.play() to run synchronously inside the trusted
     // click gesture. Fire it first, capture the Promise, and hand it to the
     // music player via a custom event so it can sync its UI to the outcome.
@@ -38,23 +140,9 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
       return;
     }
 
-    // Anchor the golden bloom at the button, then flare it out
-    const rect = btn.getBoundingClientRect();
-    bloom.style.left = (rect.left + rect.width  / 2) + 'px';
-    bloom.style.top  = (rect.top  + rect.height / 2) + 'px';
-    bloom.classList.add('active');
-
-    // Dissolve the cover into the light
-    setTimeout(() => cover.classList.add('dismissed'), 250);
-
-    // Hero emerges from within the light
-    setTimeout(() => { if (hero) hero.classList.add('hero-emerge'); }, 500);
-
-    // Clean up once the flare has faded
-    setTimeout(() => {
-      cover.remove();
-      bloom.classList.remove('active');
-    }, 1650);
+    // If cloning is unavailable for any reason, retain the original bloom
+    // transition rather than leaving the guest on a frozen cover.
+    if (!runTicketTransition()) runBloomFallback();
   });
 })();
 
