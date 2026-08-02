@@ -42,12 +42,15 @@ The masthead is part of the hero rather than a persistent site-wide navigation. 
 
 ## Responsive Behavior
 
-- Wide screens retain the Figma composition and left/right masthead alignment.
+- Wide screens retain the Figma composition and left/right masthead alignment inside a balanced editorial inset.
+- Desktop hero content uses fluid horizontal spacing of `clamp(24px, 3vw, 48px)` and 24 px vertical spacing so the masthead and metadata do not touch the viewport edges.
+- Tablet hero content uses a 24 px inset; mobile uses 16 px.
 - Headline type and image widths scale down fluidly with `clamp()` rather than wrapping individual phrases.
 - On narrow screens, all four editorial rows remain intact and fit the viewport width. The masthead keeps two compact columns.
 - The metadata footer becomes a compact grid: tagline across the first row, couple mark and date beneath it.
 - Image crops keep their designed aspect and use `object-fit` plus tuned `object-position` values.
 - The hero respects small-height devices without clipping by using a minimum viewport height and content-driven overflow.
+- The inset does not introduce a card, border, corner radius, or separate surface; the warm background continues to fill the viewport.
 
 ## Components and Code Changes
 
