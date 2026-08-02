@@ -1,0 +1,585 @@
+{
+    "version": "1.0.0",
+    "source": {
+        "fileName": "Wedding Invite - Aliva & Andrika",
+        "selection": [
+            "305:111"
+        ],
+        "extractedAt": "2026-08-02T13:16:05.685Z"
+    },
+    "tokens": {
+        "colors": {
+            "color-1": "#000000",
+            "color-2": "#D9D9D9"
+        },
+        "typography": {
+            "h3-medium": {
+                "fontWeight": 500,
+                "fontSize": 20,
+                "letterSpacing": 4
+            },
+            "display-bold": {
+                "fontWeight": 700,
+                "fontSize": 64,
+                "letterSpacing": 1
+            },
+            "display-bold-2": {
+                "fontWeight": 700,
+                "fontSize": 64,
+                "letterSpacing": 3
+            },
+            "body-sm-medium": {
+                "fontWeight": 500,
+                "fontSize": 12,
+                "letterSpacing": 4
+            },
+            "body-sm-medium-2": {
+                "fontWeight": 500,
+                "fontSize": 12,
+                "letterSpacing": -2
+            }
+        },
+        "spacing": {
+            "spacing-80": 80,
+            "spacing-sm": 8,
+            "spacing-11": 11,
+            "spacing-xs": 4
+        },
+        "radius": {
+            "radius-lg": 12
+        },
+        "shadows": {}
+    },
+    "components": [],
+    "root": {
+        "id": "305:111",
+        "kind": "screen",
+        "name": "62",
+        "width": 1305,
+        "height": 590,
+        "position": "relational",
+        "layout": {
+            "direction": "vertical",
+            "gap": "spacing-80",
+            "alignItems": "center"
+        },
+        "children": [
+            {
+                "id": "305:110",
+                "kind": "container",
+                "name": "61",
+                "width": 1305,
+                "height": 26,
+                "position": "relational",
+                "layout": {
+                    "direction": "horizontal",
+                    "justifyContent": "space-between",
+                    "alignItems": "center"
+                },
+                "responsive": {
+                    "width": "hug"
+                },
+                "children": [
+                    {
+                        "id": "305:107",
+                        "kind": "text",
+                        "name": "ANDRIKA & ALIVA",
+                        "width": 192,
+                        "height": 26,
+                        "position": "relational",
+                        "text": {
+                            "content": "ANDRIKA & ALIVA",
+                            "typography": "h3-medium",
+                            "color": "color-1",
+                            "textAlign": "left"
+                        },
+                        "semanticRole": "semantic",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "hierarchyDepth": 2
+                        }
+                    },
+                    {
+                        "id": "305:108",
+                        "kind": "text",
+                        "name": "WEDDING CELEBRATION / 2026",
+                        "width": 332,
+                        "height": 26,
+                        "position": "relational",
+                        "text": {
+                            "content": "WEDDING CELEBRATION / 2026",
+                            "typography": "h3-medium",
+                            "color": "color-1",
+                            "textAlign": "left"
+                        },
+                        "semanticRole": "semantic",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "hierarchyDepth": 2
+                        }
+                    }
+                ],
+                "semanticRole": "structural",
+                "signals": {
+                    "nonInteractive": true
+                },
+                "context": {
+                    "zIndex": -1,
+                    "hierarchyDepth": 1
+                }
+            },
+            {
+                "id": "305:106",
+                "kind": "container",
+                "name": "60",
+                "width": 607,
+                "height": 368,
+                "position": "relational",
+                "layout": {
+                    "direction": "vertical",
+                    "gap": "spacing-sm"
+                },
+                "responsive": {
+                    "height": "hug"
+                },
+                "children": [
+                    {
+                        "id": "305:77",
+                        "kind": "container",
+                        "name": "56",
+                        "width": 607,
+                        "height": 86,
+                        "position": "relational",
+                        "layout": {
+                            "direction": "horizontal",
+                            "gap": "spacing-11",
+                            "alignItems": "center"
+                        },
+                        "responsive": {
+                            "width": "hug"
+                        },
+                        "children": [
+                            {
+                                "id": "305:72",
+                                "kind": "text",
+                                "name": "MERAYAKAN",
+                                "width": 409,
+                                "height": 86,
+                                "position": "relational",
+                                "text": {
+                                    "content": "MERAYAKAN",
+                                    "typography": "display-bold",
+                                    "color": "color-1",
+                                    "textAlign": "left"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            },
+                            {
+                                "id": "305:76",
+                                "kind": "rectangle",
+                                "name": "1553",
+                                "width": 189,
+                                "height": 86,
+                                "position": "relational",
+                                "style": {
+                                    "background": "color-2",
+                                    "borderRadius": "radius-lg"
+                                },
+                                "semanticRole": "structural",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            }
+                        ],
+                        "semanticRole": "structural",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "hierarchyDepth": 2
+                        }
+                    },
+                    {
+                        "id": "305:81",
+                        "kind": "container",
+                        "name": "57",
+                        "width": 607,
+                        "height": 86,
+                        "position": "relational",
+                        "layout": {
+                            "direction": "horizontal",
+                            "gap": "spacing-11",
+                            "alignItems": "center"
+                        },
+                        "responsive": {
+                            "width": "hug"
+                        },
+                        "children": [
+                            {
+                                "id": "305:83",
+                                "kind": "rectangle",
+                                "name": "1553",
+                                "width": 122,
+                                "height": 86,
+                                "position": "relational",
+                                "style": {
+                                    "background": "color-2",
+                                    "borderRadius": "radius-lg"
+                                },
+                                "semanticRole": "structural",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            },
+                            {
+                                "id": "305:82",
+                                "kind": "text",
+                                "name": "HARI BAHAGIA",
+                                "width": 474,
+                                "height": 86,
+                                "position": "relational",
+                                "text": {
+                                    "content": "HARI BAHAGIA",
+                                    "typography": "display-bold",
+                                    "color": "color-1",
+                                    "textAlign": "left"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            }
+                        ],
+                        "semanticRole": "structural",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "hierarchyDepth": 2
+                        }
+                    },
+                    {
+                        "id": "305:84",
+                        "kind": "container",
+                        "name": "58",
+                        "width": 607,
+                        "height": 86,
+                        "position": "relational",
+                        "layout": {
+                            "direction": "horizontal",
+                            "gap": "spacing-11",
+                            "alignItems": "center"
+                        },
+                        "responsive": {
+                            "width": "hug"
+                        },
+                        "children": [
+                            {
+                                "id": "305:86",
+                                "kind": "text",
+                                "name": "ANDRIKA DAN",
+                                "width": 467,
+                                "height": 86,
+                                "position": "relational",
+                                "text": {
+                                    "content": "ANDRIKA DAN",
+                                    "typography": "display-bold",
+                                    "color": "color-1",
+                                    "textAlign": "left"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            },
+                            {
+                                "id": "305:85",
+                                "kind": "rectangle",
+                                "name": "1553",
+                                "width": 130,
+                                "height": 86,
+                                "position": "relational",
+                                "style": {
+                                    "background": "color-2",
+                                    "borderRadius": "radius-lg"
+                                },
+                                "semanticRole": "structural",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            }
+                        ],
+                        "semanticRole": "structural",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "hierarchyDepth": 2
+                        }
+                    },
+                    {
+                        "id": "305:87",
+                        "kind": "container",
+                        "name": "59",
+                        "width": 607,
+                        "height": 86,
+                        "position": "relational",
+                        "layout": {
+                            "direction": "horizontal",
+                            "gap": "spacing-11",
+                            "alignItems": "center"
+                        },
+                        "responsive": {
+                            "width": "hug"
+                        },
+                        "children": [
+                            {
+                                "id": "305:89",
+                                "kind": "rectangle",
+                                "name": "1553",
+                                "width": 404,
+                                "height": 86,
+                                "position": "relational",
+                                "style": {
+                                    "background": "color-2",
+                                    "borderRadius": "radius-lg"
+                                },
+                                "semanticRole": "structural",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            },
+                            {
+                                "id": "305:88",
+                                "kind": "text",
+                                "name": "ALIVA",
+                                "width": 191,
+                                "height": 86,
+                                "position": "relational",
+                                "text": {
+                                    "content": "ALIVA",
+                                    "typography": "display-bold-2",
+                                    "color": "color-1",
+                                    "textAlign": "left"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            }
+                        ],
+                        "semanticRole": "structural",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "hierarchyDepth": 2
+                        }
+                    }
+                ],
+                "semanticRole": "structural",
+                "signals": {
+                    "nonInteractive": true
+                },
+                "context": {
+                    "zIndex": -1,
+                    "hierarchyDepth": 1
+                }
+            },
+            {
+                "id": "305:112",
+                "kind": "container",
+                "name": "62",
+                "width": 1305,
+                "height": 36,
+                "position": "relational",
+                "layout": {
+                    "direction": "horizontal",
+                    "justifyContent": "space-between",
+                    "alignItems": "center"
+                },
+                "responsive": {
+                    "width": "hug"
+                },
+                "children": [
+                    {
+                        "id": "305:113",
+                        "kind": "text",
+                        "name": "Merayakan langkah baru, bersama orang-orang yang kami sayangi",
+                        "width": 336,
+                        "height": 32,
+                        "position": "relational",
+                        "text": {
+                            "content": "Merayakan langkah baru, bersama orang-orang yang kami sayangi",
+                            "typography": "body-sm-medium",
+                            "color": "color-1",
+                            "textAlign": "left"
+                        },
+                        "semanticRole": "semantic",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "hierarchyDepth": 2
+                        }
+                    },
+                    {
+                        "id": "305:115",
+                        "kind": "text",
+                        "name": "ANDRIKA ❤️‍🔥 ALIVA",
+                        "width": 336,
+                        "height": 16,
+                        "position": "relational",
+                        "text": {
+                            "content": "ANDRIKA ❤️‍🔥 ALIVA",
+                            "typography": "body-sm-medium",
+                            "color": "color-1",
+                            "textAlign": "left"
+                        },
+                        "semanticRole": "semantic",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "hierarchyDepth": 2
+                        }
+                    },
+                    {
+                        "id": "305:117",
+                        "kind": "container",
+                        "name": "63",
+                        "width": 98,
+                        "height": 36,
+                        "position": "relational",
+                        "layout": {
+                            "direction": "vertical",
+                            "gap": "spacing-xs",
+                            "justifyContent": "center",
+                            "alignItems": "end"
+                        },
+                        "responsive": {
+                            "width": "hug",
+                            "height": "hug"
+                        },
+                        "children": [
+                            {
+                                "id": "305:114",
+                                "kind": "text",
+                                "name": "SAVE THE DATE",
+                                "width": 91,
+                                "height": 16,
+                                "position": "relational",
+                                "text": {
+                                    "content": "SAVE THE DATE",
+                                    "typography": "body-sm-medium-2",
+                                    "color": "color-1",
+                                    "textAlign": "left"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            },
+                            {
+                                "id": "305:116",
+                                "kind": "text",
+                                "name": "17 • 10 • 2026",
+                                "width": 98,
+                                "height": 16,
+                                "position": "relational",
+                                "text": {
+                                    "content": "17 • 10 • 2026",
+                                    "typography": "body-sm-medium-2",
+                                    "color": "color-1",
+                                    "textAlign": "left"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            }
+                        ],
+                        "semanticRole": "structural",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "hierarchyDepth": 2
+                        }
+                    }
+                ],
+                "semanticRole": "structural",
+                "signals": {
+                    "nonInteractive": true
+                },
+                "context": {
+                    "zIndex": -1,
+                    "hierarchyDepth": 1
+                }
+            }
+        ],
+        "semanticRole": "structural",
+        "signals": {
+            "nonInteractive": true
+        },
+        "context": {
+            "zIndex": -1
+        }
+    }
+}

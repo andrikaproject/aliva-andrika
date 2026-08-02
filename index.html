@@ -29,7 +29,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@300;400;500&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&amp;family=DM+Mono:wght@500&amp;family=Jost:wght@300;400;500&amp;display=swap"
     rel="stylesheet" />
 
   <!-- ============================================================
@@ -42,7 +42,7 @@
        GLOBAL STYLES
   ============================================================ -->
   <link rel="stylesheet" href="css/design-system.css" />
-  <link rel="stylesheet" href="css/styles.css?v=20260725-tear3" />
+  <link rel="stylesheet" href="css/styles.css?v=20260802-scroll-cue-v2" />
 </head>
 
 <body class="antialiased">
@@ -98,121 +98,68 @@
   </div>
 
 
-  <!-- ================================================================
-     COMPONENT: NAVBAR
-     Edit: couple names, nav links
-================================================================ -->
-  <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 bg-transparent">
-    <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-
-      <!-- Monogram / Couple Name -->
-      <a href="#hero"
-        class="font-display text-lg tracking-widest text-ink opacity-90 hover:opacity-100 transition-opacity">
-        A <span class="text-text-gold mx-1">&amp;</span> Al
-      </a>
-
-      <!-- Desktop Nav Links -->
-      <div class="hidden md:flex items-center gap-8">
-        <a href="#couple" class="section-label hover:text-rose-deep transition-colors">Couple</a>
-        <a href="#when" class="section-label hover:text-rose-deep transition-colors">When</a>
-        <a href="#where" class="section-label hover:text-rose-deep transition-colors">Where</a>
-        <a href="#rsvp" class="section-label hover:text-rose-deep transition-colors">RSVP</a>
-        <!-- Accent CTA -->
-        <a href="#rsvp"
-          class="section-label border border-gold-mid px-4 py-1.5 text-text-gold hover:bg-gold-mid hover:text-white transition-all">
-          RSVP Now
-        </a>
-      </div>
-
-      <!-- Mobile Hamburger -->
-      <button id="menu-toggle" class="md:hidden flex flex-col gap-1.5 p-1" aria-label="Toggle menu">
-        <span class="block w-6 h-px bg-ink transition-transform duration-300" id="bar1"></span>
-        <span class="block w-6 h-px bg-ink transition-transform duration-300" id="bar2"></span>
-        <span class="block w-4 h-px bg-gold-mid ml-auto transition-transform duration-300" id="bar3"></span>
-      </button>
-    </div>
-
-    <!-- Mobile Dropdown Menu -->
-    <div id="mobile-menu" class="md:hidden bg-parchment border-t border-gold-light">
-      <div class="max-w-5xl mx-auto px-6 py-4 flex flex-col gap-4">
-        <a href="#couple" class="section-label">Couple</a>
-        <a href="#when" class="section-label">When</a>
-        <a href="#where" class="section-label">Where</a>
-        <a href="#rsvp" class="section-label">RSVP</a>
-      </div>
-    </div>
-  </nav>
-
+  <div id="smooth-wrapper">
+    <div id="smooth-content">
 
   <!-- ================================================================
      COMPONENT: HERO
-     Edit: heading text, couple names, tagline, wedding date display
+     Figma frame 305:111 — editorial celebration masthead
 ================================================================ -->
-  <section id="hero"
-    class="relative min-h-screen flex flex-col items-center justify-center text-center px-4 sm:px-6 overflow-hidden"
-    style="background: linear-gradient(180deg, #F5EFE4 0%, #FAF6EF 60%, #F0E8DA 100%);">
+  <section id="hero" aria-labelledby="hero-title">
+    <div class="hero-content">
+      <header class="hero-masthead" data-node-id="305:110">
+        <p data-node-id="305:107">ANDRIKA &amp; ALIVA</p>
+        <p data-node-id="305:108">WEDDING CELEBRATION / 2026</p>
+      </header>
 
-    <!-- Soft golden-hour glow from above -->
-    <div class="hero-glow" aria-hidden="true"></div>
+      <div class="hero-statement-wrap">
+        <h1 id="hero-title" class="sr-only">Merayakan hari bahagia Andrika dan Aliva</h1>
 
-    <!-- Hero content -->
-    <div class="hero-content w-full max-w-xs sm:max-w-sm mx-auto">
+        <div class="hero-statement" aria-hidden="true" data-node-id="305:106">
+          <div class="hero-line hero-line--celebrate" data-node-id="305:77">
+            <span data-node-id="305:72">MERAYAKAN</span>
+            <figure class="hero-crop hero-crop--stage" data-node-id="305:76">
+              <img src="assets/hero/hero-section-merayakan-text.jpg" alt="" />
+            </figure>
+          </div>
 
-      <!-- Invitation Card -->
-      <div class="panel px-8 py-10 sm:py-12 text-center relative overflow-hidden"
-        style="border: 1px solid hsl(var(--accent) / 0.35); box-shadow: 0 8px 40px rgba(44,36,32,0.10);">
+          <div class="hero-line hero-line--happy" data-node-id="305:81">
+            <figure class="hero-crop hero-crop--hands" data-node-id="305:83">
+              <img src="assets/hero/hands-celebration.png" alt="" />
+            </figure>
+            <span data-node-id="305:82">HARI BAHAGIA</span>
+          </div>
 
-        <!-- Corner ornaments -->
-        <span
-          class="absolute top-4 left-4 text-text-gold opacity-30 font-display text-lg leading-none select-none">✦</span>
-        <span
-          class="absolute top-4 right-4 text-text-gold opacity-30 font-display text-lg leading-none select-none">✦</span>
-        <span
-          class="absolute bottom-4 left-4 text-text-gold opacity-30 font-display text-lg leading-none select-none">✦</span>
-        <span
-          class="absolute bottom-4 right-4 text-text-gold opacity-30 font-display text-lg leading-none select-none">✦</span>
+          <div class="hero-line hero-line--names" data-node-id="305:84">
+            <span data-node-id="305:86">ANDRIKA DAN</span>
+            <figure class="hero-crop hero-crop--portrait" data-node-id="305:85">
+              <img src="assets/hero/couple-portrait.jpg" alt="" />
+            </figure>
+          </div>
 
-        <!-- The wedding of -->
-        <p class="section-label tracking-widest mb-7">The wedding of
-
-        </p>
-
-        <!-- Andrika -->
-        <h1 class="font-display text-5xl sm:text-6xl font-light text-ink leading-none tracking-wide">Andrika</h1>
-
-        <!-- Ampersand -->
-        <div class="font-display italic text-text-gold leading-none my-2 select-none"
-          style="font-size: clamp(3rem, 12vw, 4rem);">&amp;</div>
-
-        <!-- Aliva -->
-        <h1 class="font-display text-5xl sm:text-6xl font-light text-ink leading-none tracking-wide">Aliva</h1>
-
-        <!-- Gold divider -->
-        <div class="gold-divider my-7 w-36 mx-auto">
-          <span class="diamond"></span>
+          <div class="hero-line hero-line--aliva" data-node-id="305:87">
+            <figure class="hero-crop hero-crop--garden" data-node-id="305:89">
+              <img src="assets/hero/hero-section-aliva-text.jpg" alt="" />
+            </figure>
+            <span data-node-id="305:88">ALIVA</span>
+          </div>
         </div>
 
-        <!-- Save the date -->
-        <p class="font-display italic text-text-rose text-xl sm:text-2xl mb-3 leading-snug">Save the date!</p>
-
-        <!-- Date -->
-        <p class="section-label text-text-gold tracking-widest2 mb-8">
-          17 &nbsp;·&nbsp; October &nbsp;·&nbsp; 2026
+        <p class="hero-scroll-cue">
+          SCROLL FOR MORE INFORMATION <span aria-hidden="true">↓</span>
         </p>
-
-        <!-- Open Invitation CTA -->
-        <a id="open-inv-btn" href="#couple" class="btn-submit inline-block leading-snug">
-          <span id="open-inv-line1">Open Invitation</span>
-        </a>
-
       </div>
 
-      <!-- Scroll indicator -->
-      <div class="mt-8 flex flex-col items-center gap-2 opacity-40">
-        <span class="section-label" style="font-size:0.55rem;">Scroll</span>
-        <div class="w-px h-10 bg-gradient-to-b from-gold-mid to-transparent animate-pulse"></div>
-      </div>
-
+      <footer class="hero-meta" data-node-id="305:112">
+        <p class="hero-meta__tagline" data-node-id="305:113">
+          Merayakan langkah baru, bersama orang-orang yang kami sayangi
+        </p>
+        <p class="hero-meta__couple" data-node-id="305:115">ANDRIKA ❤️‍🔥 ALIVA</p>
+        <div class="hero-meta__date" data-node-id="305:117">
+          <p data-node-id="305:114">SAVE THE DATE</p>
+          <p data-node-id="305:116">17 • 10 • 2026</p>
+        </div>
+      </footer>
     </div>
   </section>
 
@@ -254,21 +201,21 @@
      COMPONENT: COUPLE
      Edit: bride/groom names, descriptions, and photo URLs
 ================================================================ -->
-  <section id="couple" class="py-20 sm:py-28 px-4 sm:px-6">
-    <div class="max-w-4xl mx-auto">
+  <section id="couple" class="couple-story py-20 sm:py-28 px-4 sm:px-6">
+    <div class="couple-stage max-w-4xl mx-auto">
 
       <!-- Section header -->
-      <div class="text-center reveal stagger">
+      <div class="couple-heading text-center reveal stagger">
         <p class="section-label mb-3">The Couple</p>
         <h2 class="font-display text-4xl md:text-5xl font-light text-ink">Two Hearts, One Story</h2>
         <div class="gold-divider mt-5 w-32 mx-auto"><span class="diamond"></span></div>
       </div>
 
       <!-- Bride & Groom cards -->
-      <div class="mt-14 grid md:grid-cols-2 gap-8">
+      <div class="couple-cards mt-14 grid md:grid-cols-2 gap-8">
 
         <!-- Groom Card -->
-        <div class="panel p-5 sm:p-8 text-center reveal">
+        <div class="couple-card couple-card--groom panel p-5 sm:p-8 text-center reveal">
           <!-- Avatar placeholder — replace src with actual photo -->
           <div class="w-24 h-24 rounded-full mx-auto mb-5 overflow-hidden border-2 border-gold-light">
             <img src="Andrika-Thegroom.jpeg" alt="Andrika" class="w-full h-full object-cover"
@@ -284,7 +231,8 @@
         </div>
 
         <!-- Bride Card -->
-        <div class="panel p-5 sm:p-8 text-center reveal" style="transition-delay: 0.15s;">
+        <div class="couple-card couple-card--bride panel p-5 sm:p-8 text-center reveal"
+          style="transition-delay: 0.15s;">
           <div class="w-24 h-24 rounded-full mx-auto mb-5 overflow-hidden border-2 border-gold-light">
             <img src="Aliva-thebride.jpeg" alt="Aliva" class="w-full h-full object-cover"
               style="transform: scale(1.6); transform-origin: center 15%;" />
@@ -301,7 +249,7 @@
       </div>
 
       <!-- Love story note -->
-      <div class="mt-12 text-center reveal" style="transition-delay: 0.25s;">
+      <div class="couple-quote mt-12 text-center reveal" style="transition-delay: 0.25s;">
         <p class="font-display italic text-xl text-text-rose max-w-md mx-auto leading-relaxed">
           "They found in each other not just a partner, but a home."
         </p>
@@ -528,8 +476,6 @@
 
       </div>
     </div>
-
-    </div>
   </section>
 
 
@@ -642,6 +588,9 @@
     </div>
   </footer>
 
+    </div>
+  </div>
+
 
   <!-- ================================================================
      COMPONENT: MUSIC PLAYER
@@ -688,7 +637,10 @@
   <!-- ================================================================
      SCRIPTS
 ================================================================ -->
-  <script src="js/main.js?v=20260725-tear3"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollSmoother.min.js"></script>
+  <script src="js/main.js?v=20260802-scroll-cue-v2"></script>
 
 </body>
 

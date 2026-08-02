@@ -12,11 +12,32 @@
 }
 
 body {
+  margin: 0;
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
   font-family: var(--font-body);
   font-weight: 300;
   overflow-x: hidden;
+}
+
+/* ScrollSmoother transforms only the story layer. Fixed atmosphere,
+   cover and audio controls remain outside these wrappers. */
+#smooth-wrapper {
+  width: 100%;
+  overflow: hidden;
+}
+
+#smooth-content {
+  width: 100%;
+  overflow: visible;
+}
+
+html.motion-enhanced {
+  scroll-behavior: auto !important;
+}
+
+.motion-enhanced .reveal {
+  transition: none;
 }
 
 /* ── Typography helper ── */
@@ -118,17 +139,6 @@ body {
   letter-spacing: 0.1em;
 }
 
-/* ── Navbar ── */
-#navbar {
-  transition: background var(--duration-slow) var(--ease-default),
-    box-shadow var(--duration-slow) var(--ease-default);
-}
-
-#navbar.scrolled {
-  background: hsl(var(--background) / 0.97) !important;
-  box-shadow: var(--shadow-md);
-}
-
 /* ── Petal canvas (fixed, drifts gently over the whole page) ── */
 #petalCanvas {
   position: fixed;
@@ -137,42 +147,301 @@ body {
   height: 100%;
   pointer-events: none;
   z-index: 40;
-  /* above content, below navbar/cover/music (z-50/70) */
+  /* above page content, below the editorial hero/cover/music */
 }
 
-/* ── Hero content layer ── */
+/* ── Editorial Hero — Figma frame 305:111 ── */
+#hero {
+  position: relative;
+  z-index: 46;
+  isolation: isolate;
+  min-height: 100vh;
+  min-height: 100svh;
+  overflow: hidden;
+  color: #000;
+  background: #f5f0eb;
+}
+
 .hero-content {
   position: relative;
   z-index: 2;
+  display: grid;
+  grid-template-rows: 26px minmax(368px, 1fr) 36px;
+  width: 100%;
+  min-height: max(590px, 100svh);
+  padding: 24px clamp(24px, 3vw, 48px);
 }
 
-/* ── Hero golden-hour glow ── */
-.hero-glow {
+.hero-masthead,
+.hero-meta {
+  font-family: "DM Mono", monospace;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.hero-masthead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  font-size: 20px;
+  line-height: 1.3;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.hero-statement-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+.hero-statement {
+  display: grid;
+  grid-template-rows: repeat(4, 23.369565%);
+  gap: 2.173913% 0;
+  width: min(607px, calc(100vw - 32px));
+  aspect-ratio: 607 / 368;
+  font-family: "Reflow Sans", Arial, Helvetica, sans-serif;
+  font-size: clamp(29px, calc(10.5436vw - 3.374px), 64px);
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.01em;
+}
+
+.hero-line {
+  display: grid;
+  align-items: center;
+  column-gap: 1.812191%;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.hero-line--celebrate {
+  grid-template-columns: minmax(0, 1fr) 31.136738%;
+}
+
+.hero-line--happy {
+  grid-template-columns: 20.098847% minmax(0, 1fr);
+}
+
+.hero-line--names {
+  grid-template-columns: minmax(0, 1fr) 21.416804%;
+}
+
+.hero-line--aliva {
+  grid-template-columns: 66.556837% minmax(0, 1fr);
+}
+
+.hero-line--aliva>span {
+  letter-spacing: 0.03em;
+}
+
+.hero-crop {
+  position: relative;
+  align-self: stretch;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #d9d9d9;
+}
+
+.hero-crop img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+}
+
+/* The pinned chapter uses a viewport-sized stage on capable desktop
+   layouts. Short and narrow viewports keep the section in normal flow. */
+@media (min-width: 768px) and (min-height: 700px) {
+  .motion-enhanced #couple {
+    display: flex;
+    min-height: 100svh;
+    align-items: center;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .motion-enhanced .couple-stage {
+    display: flex;
+    width: 100%;
+    min-height: 100svh;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: clamp(3rem, 7vh, 5rem);
+    padding-bottom: clamp(3rem, 7vh, 5rem);
+  }
+}
+
+.hero-crop--portrait img {
   position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background: radial-gradient(120% 70% at 50% -10%,
-      hsl(40 70% 88% / 0.85) 0%,
-      hsl(42 47% 96% / 0) 60%);
+  top: -122.49%;
+  left: -56.65%;
+  width: 213.31%;
+  height: 483.61%;
+}
+
+.hero-meta {
+  display: grid;
+  grid-template-columns: 336px 336px 98px;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.3334;
+  letter-spacing: 0.04em;
+}
+
+.hero-meta__tagline,
+.hero-meta__couple,
+.hero-scroll-cue,
+.hero-meta__date p,
+.hero-masthead p {
+  margin: 0;
+}
+
+.hero-meta__tagline,
+.hero-meta__couple {
+  width: 336px;
+}
+
+.hero-scroll-cue {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin-top: clamp(12px, 2.2vh, 22px);
+  color: #000;
+  font-family: "DM Mono", monospace;
+  font-size: 9px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  opacity: 0.58;
+  white-space: nowrap;
+}
+
+.hero-scroll-cue span {
+  display: inline-block;
+  font-size: 12px;
+  line-height: 1;
+  animation: scroll-cue-drop 1.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+@keyframes scroll-cue-drop {
+  0%,
+  100% {
+    transform: translateY(-1px);
+    opacity: 0.45;
+  }
+
+  50% {
+    transform: translateY(3px);
+    opacity: 1;
+  }
+}
+
+.hero-meta__date {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  width: max-content;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+@media (max-width: 820px) {
+  .hero-content {
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    min-height: 100vh;
+    min-height: 100svh;
+    padding: 24px;
+  }
+
+  .hero-masthead {
+    gap: 16px;
+    font-size: clamp(9px, 2.65vw, 14px);
+  }
+
+  .hero-masthead p:last-child {
+    text-align: right;
+  }
+
+  .hero-statement {
+    width: min(607px, calc(100vw - 48px));
+    font-size: clamp(29px, calc(10.5436vw - 5.0609px), 64px);
+  }
+
+  .hero-meta {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px 16px;
+    font-size: clamp(9px, 2.4vw, 11px);
+  }
+
+  .hero-meta__tagline {
+    grid-column: 1 / -1;
+    width: min(100%, 336px);
+    line-height: 1.4;
+  }
+
+  .hero-meta__couple {
+    align-self: end;
+    width: auto;
+    white-space: nowrap;
+  }
+
+  .hero-scroll-cue {
+    gap: 5px;
+    margin-top: clamp(10px, 2vh, 16px);
+    font-size: clamp(7px, 1.9vw, 9px);
+  }
+}
+
+@media (max-width: 520px) {
+  .hero-content {
+    padding: 16px;
+  }
+
+  .hero-statement {
+    width: calc(100vw - 32px);
+    font-size: clamp(29px, calc(10.5436vw - 3.374px), 64px);
+  }
+}
+
+@media (max-width: 420px) {
+  .hero-masthead {
+    align-items: flex-start;
+  }
+
+  .hero-masthead p:first-child {
+    max-width: 9rem;
+  }
+
+  .hero-masthead p:last-child {
+    max-width: 12rem;
+    white-space: normal;
+  }
+
+}
+
+@media (max-height: 650px) and (max-width: 820px) {
+  .hero-meta {
+    row-gap: 8px;
+  }
 }
 
 /* ── Smooth scroll offset ── */
 section {
   scroll-margin-top: 72px;
-}
-
-/* ── Mobile menu ── */
-#mobile-menu {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height var(--duration-slow) var(--ease-default);
-  background: hsl(var(--background));
-  border-top: 1px solid hsl(var(--border));
-}
-
-#mobile-menu.open {
-  max-height: 300px;
 }
 
 /* ── RSVP radio cards ── */
@@ -877,7 +1146,7 @@ section {
   inset: 0;
   pointer-events: none;
   z-index: 45;
-  /* over petals, under navbar/cover/music */
+  /* over petals, under the editorial hero/cover/music */
   opacity: 0.04;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
@@ -945,6 +1214,11 @@ a:focus-visible {
 /* ── Reduced motion: keep everything readable, drop the flourish ── */
 @media (prefers-reduced-motion: reduce) {
 
+  #smooth-wrapper,
+  #smooth-content {
+    overflow: visible !important;
+  }
+
   .reveal,
   .reveal.stagger.visible>* {
     transition: none !important;
@@ -979,6 +1253,10 @@ a:focus-visible {
   }
 
   .music-btn.is-playing::after {
+    animation: none !important;
+  }
+
+  .hero-scroll-cue span {
     animation: none !important;
   }
 }

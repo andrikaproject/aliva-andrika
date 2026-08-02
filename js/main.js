@@ -147,24 +147,6 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
 })();
 
 
-// ── GUEST PERSONALIZATION ───────────────────────────────────────
-// Usage: share the link as  ?to=Nama+Tamu
-// e.g.  https://yourdomain.com/?to=Budi+%26+Sari
-(function initGuestName() {
-  const params = new URLSearchParams(window.location.search);
-  const name   = params.get('to');
-  if (!name) return;                       // no param → keep default text
-
-  const line1 = document.getElementById('open-inv-line1');
-  if (!line1) return;
-
-  line1.innerHTML =
-    `You're Invited,<br>` +
-    `<span style="font-size:0.85em;opacity:0.85;">${name} &amp; Partner</span>`;
-})();
-
-
-
 // Change this to your actual wedding date/time
 const WEDDING_DATE = new Date('2026-10-17T08:30:00');
 
@@ -198,28 +180,6 @@ updateCountdown();
 setInterval(updateCountdown, 1000);
 
 
-// ── NAVBAR SCROLL ──────────────────────────────────────────────
-const navbar = document.getElementById('navbar');
-window.addEventListener('scroll', () => {
-  if (window.scrollY > 60) navbar.classList.add('scrolled');
-  else navbar.classList.remove('scrolled');
-});
-
-
-// ── MOBILE MENU ────────────────────────────────────────────────
-const toggle     = document.getElementById('menu-toggle');
-const mobileMenu = document.getElementById('mobile-menu');
-
-toggle.addEventListener('click', () => {
-  mobileMenu.classList.toggle('open');
-});
-
-// Close menu on nav link click
-mobileMenu.querySelectorAll('a').forEach(link => {
-  link.addEventListener('click', () => mobileMenu.classList.remove('open'));
-});
-
-
 // ── RSVP FORM ──────────────────────────────────────────────────
 function handleRsvp(e) {
   e.preventDefault();
@@ -233,15 +193,26 @@ function handleRsvp(e) {
 
 
 // ── REVEAL ON SCROLL ───────────────────────────────────────────
-const revealObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-    }
-  });
-}, { threshold: 0.12 });
+let revealObserver = null;
 
-document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+function initFallbackReveals() {
+  if (revealObserver || !('IntersectionObserver' in window)) {
+    if (!('IntersectionObserver' in window)) {
+      document.querySelectorAll('.reveal').forEach((element) => element.classList.add('visible'));
+    }
+    return;
+  }
+
+  revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.reveal').forEach((element) => revealObserver.observe(element));
+}
+
+initFallbackReveals();
 
 
 // ── PETALS — depth-layered, site-wide, scroll-parallax ─────────
@@ -347,11 +318,14 @@ document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 })();
 
 
-// ── PHOTO BAND PARALLAX (subtle; ready for real photos) ────────
-(function initPhotoBand() {
-  if (REDUCED_MOTION) return;
+// ── PHOTO BAND PARALLAX FALLBACK ───────────────────────────────
+// Used only when GSAP is unavailable. The enhanced version lives in
+// initScrollStory() so there is never more than one scroll listener.
+function initFallbackPhotoBand() {
+  if (REDUCED_MOTION || window.__photoBandFallbackStarted) return;
   const band = document.querySelector('#photo-band .photo-band-inner');
   if (!band) return;
+  window.__photoBandFallbackStarted = true;
 
   function onScroll() {
     const r = band.getBoundingClientRect();
@@ -361,7 +335,7 @@ document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
   }
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
-})();
+}
 
 
 // ── MUSIC PLAYER ───────────────────────────────────────────────
@@ -437,3 +411,310 @@ document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
     }
   });
 })();
+
+
+// ── GSAP SCROLL STORY ──────────────────────────────────────────
+// Faithful adaptation of New Form Capital's interaction model:
+// inertial scrolling, scroll-scrubbed editorial layers, and a pinned
+// narrative chapter. Content and timing stay specific to this invitation.
+function initScrollStory() {
+  if (REDUCED_MOTION) return false;
+
+  const gsap = window.gsap;
+  const ScrollTrigger = window.ScrollTrigger;
+  const ScrollSmoother = window.ScrollSmoother;
+
+  if (!gsap || !ScrollTrigger || !ScrollSmoother) {
+    console.warn('Scroll story unavailable; using native-scroll fallbacks.');
+    return false;
+  }
+
+  const animatedTargets = new Set();
+  let smoother = null;
+  let coupleMedia = null;
+
+  function remember(targets) {
+    gsap.utils.toArray(targets).forEach((target) => animatedTargets.add(target));
+    return targets;
+  }
+
+  function setWillChange(targets, active) {
+    gsap.set(targets, { willChange: active ? 'transform, opacity, filter' : 'auto' });
+  }
+
+  try {
+    gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
+    ScrollTrigger.config({ ignoreMobileResize: true });
+
+    if (revealObserver) {
+      revealObserver.disconnect();
+      revealObserver = null;
+    }
+
+    document.documentElement.classList.add('motion-enhanced');
+    document.querySelectorAll('.reveal.visible').forEach((element) => element.classList.remove('visible'));
+
+    smoother = ScrollSmoother.create({
+      wrapper: '#smooth-wrapper',
+      content: '#smooth-content',
+      smooth: 0.8,
+      smoothTouch: 0.15,
+      effects: true,
+      normalizeScroll: false,
+    });
+
+    const cover = document.getElementById('cover-screen');
+    const coverIsVisible = Boolean(cover && cover.isConnected && !cover.classList.contains('dismissed'));
+    smoother.paused(coverIsVisible);
+
+    if (coverIsVisible) {
+      window.addEventListener('invitation-opened', () => {
+        requestAnimationFrame(() => {
+          smoother.paused(false);
+          smoother.scrollTo(0, false);
+          ScrollTrigger.refresh();
+        });
+
+        // The torn-ticket transition changes fixed layers for 1.75s.
+        // Refresh once more after it leaves the DOM.
+        window.setTimeout(() => ScrollTrigger.refresh(), 1850);
+      }, { once: true });
+    }
+
+    // Hero: each editorial row exits at a slightly different depth while
+    // the image crops tighten, creating the layered magazine-like scroll.
+    const heroTargets = remember(
+      '.hero-masthead, .hero-meta, .hero-statement, .hero-scroll-cue, .hero-line, .hero-crop img'
+    );
+
+    const heroTimeline = gsap.timeline({
+      defaults: { ease: 'none' },
+      scrollTrigger: {
+        trigger: '#hero',
+        start: 'top top',
+        end: 'bottom top',
+        scrub: 0.75,
+        invalidateOnRefresh: true,
+        onToggle: (self) => setWillChange(heroTargets, self.isActive),
+      },
+    });
+
+    heroTimeline
+      .to('.hero-masthead', { yPercent: -70, autoAlpha: 0.15, duration: 1 }, 0)
+      .to('.hero-meta', { yPercent: -38, autoAlpha: 0, duration: 0.85 }, 0)
+      .to('.hero-line--celebrate', { yPercent: -24, duration: 1 }, 0)
+      .to('.hero-line--happy', { yPercent: -11, duration: 1 }, 0)
+      .to('.hero-line--names', { yPercent: 9, duration: 1 }, 0)
+      .to('.hero-line--aliva', { yPercent: 19, duration: 1 }, 0)
+      .to('.hero-crop img', { scale: 1.08, duration: 1 }, 0)
+      .to('.hero-scroll-cue', { yPercent: 35, autoAlpha: 0, duration: 0.4 }, 0.56)
+      .to('.hero-statement', { autoAlpha: 0.18, duration: 0.34 }, 0.66);
+
+    // Verse: a calm, non-pinned pause between the energetic Hero and the
+    // Couple chapter. Its lines enter in reading order.
+    const verse = document.querySelector('#verse .reveal');
+    if (verse) {
+      const verseLines = remember(Array.from(verse.children));
+      remember(verse);
+      gsap.set(verse, { autoAlpha: 1, y: 0, filter: 'blur(0px)' });
+
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: '#verse',
+          start: 'top 74%',
+          toggleActions: 'play none none none',
+          onToggle: (self) => setWillChange(verseLines, self.isActive),
+        },
+      }).fromTo(verseLines,
+        { autoAlpha: 0, y: 30, filter: 'blur(7px)' },
+        {
+          autoAlpha: 1,
+          y: 0,
+          filter: 'blur(0px)',
+          duration: 0.85,
+          stagger: 0.11,
+          ease: 'power3.out',
+          onComplete: () => setWillChange(verseLines, false),
+        }
+      );
+    }
+
+    // Couple: full pinned sequence on roomy screens, shorter scrubbed flow
+    // on compact screens so content never becomes trapped below the fold.
+    const couple = document.getElementById('couple');
+    const coupleStage = document.querySelector('.couple-stage');
+    const coupleHeading = document.querySelector('.couple-heading');
+    const coupleHeadingLines = coupleHeading ? Array.from(coupleHeading.children) : [];
+    const groom = document.querySelector('.couple-card--groom');
+    const bride = document.querySelector('.couple-card--bride');
+    const quote = document.querySelector('.couple-quote');
+    const coupleMotionTargets = remember([...coupleHeadingLines, groom, bride, quote].filter(Boolean));
+
+    if (couple && coupleStage && coupleHeading && groom && bride && quote) {
+      remember([coupleStage, coupleHeading]);
+      gsap.set(coupleHeading, { autoAlpha: 1, y: 0, filter: 'blur(0px)' });
+
+      coupleMedia = gsap.matchMedia();
+      coupleMedia.add({
+        desktop: '(min-width: 768px) and (min-height: 700px)',
+        compact: '(max-width: 767px), (max-height: 699px)',
+      }, (context) => {
+        const isDesktop = context.conditions.desktop;
+        const distance = isDesktop ? 1700 : 0;
+        const sideOffset = isDesktop ? 140 : 42;
+
+        const timeline = gsap.timeline({
+          defaults: { ease: 'none' },
+          scrollTrigger: {
+            trigger: couple,
+            start: isDesktop ? 'top top' : 'top 78%',
+            end: isDesktop ? `+=${distance}` : 'bottom 24%',
+            scrub: isDesktop ? 0.85 : 0.55,
+            pin: isDesktop ? coupleStage : false,
+            pinSpacing: true,
+            anticipatePin: isDesktop ? 1 : 0,
+            invalidateOnRefresh: true,
+            onToggle: (self) => setWillChange(coupleMotionTargets, self.isActive),
+          },
+        });
+
+        timeline
+          .fromTo(coupleHeadingLines,
+            { autoAlpha: 0, y: 38, filter: 'blur(7px)' },
+            { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.2, stagger: 0.025, ease: 'power3.out' },
+            0
+          )
+          .fromTo(groom,
+            { autoAlpha: 0, x: -sideOffset, y: 44, rotation: -1.4, filter: 'blur(9px)' },
+            { autoAlpha: 1, x: 0, y: 0, rotation: 0, filter: 'blur(0px)', duration: 0.29, ease: 'power3.out' },
+            0.16
+          )
+          .fromTo(bride,
+            { autoAlpha: 0, x: sideOffset, y: 44, rotation: 1.4, filter: 'blur(9px)' },
+            { autoAlpha: 1, x: 0, y: 0, rotation: 0, filter: 'blur(0px)', duration: 0.29, ease: 'power3.out' },
+            0.29
+          )
+          .fromTo(quote,
+            { autoAlpha: 0, y: 48, filter: 'blur(8px)' },
+            { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.23, ease: 'power3.out' },
+            0.71
+          );
+
+        return () => setWillChange(coupleMotionTargets, false);
+      });
+    }
+
+    // Photo band: a single scrubbed camera move replaces the old manual
+    // window-scroll listener and keeps all work inside ScrollTrigger.
+    const photoBand = document.querySelector('#photo-band .photo-band-inner');
+    const photoContent = document.querySelector('#photo-band .photo-band-content');
+    if (photoBand && photoContent) {
+      const photoTargets = remember([photoBand, photoContent]);
+      gsap.timeline({
+        defaults: { ease: 'none' },
+        scrollTrigger: {
+          trigger: '#photo-band',
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: 0.7,
+          invalidateOnRefresh: true,
+          onToggle: (self) => setWillChange(photoTargets, self.isActive),
+        },
+      })
+        .fromTo(photoBand,
+          { backgroundPositionY: '38%' },
+          { backgroundPositionY: '68%', duration: 1 },
+          0
+        )
+        .fromTo(photoContent,
+          { autoAlpha: 0, y: 54, filter: 'blur(8px)' },
+          { autoAlpha: 1, y: -24, filter: 'blur(0px)', duration: 0.7 },
+          0.13
+        );
+    }
+
+    // Remaining sections keep their existing markup and gain restrained
+    // GSAP reveals. Special story chapters above are deliberately excluded.
+    const remainingReveals = Array.from(document.querySelectorAll('.reveal')).filter((element) => (
+      !element.closest('#verse, #couple, #photo-band, #hero')
+    ));
+
+    remainingReveals.forEach((element) => {
+      remember(element);
+
+      if (element.classList.contains('stagger') && element.children.length) {
+        const children = remember(Array.from(element.children));
+        gsap.set(element, { autoAlpha: 1, y: 0, filter: 'blur(0px)' });
+        gsap.fromTo(children,
+          { autoAlpha: 0, y: 24, filter: 'blur(5px)' },
+          {
+            autoAlpha: 1,
+            y: 0,
+            filter: 'blur(0px)',
+            duration: 0.78,
+            stagger: 0.08,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: element,
+              start: 'top 82%',
+              toggleActions: 'play none none none',
+              onToggle: (self) => setWillChange(children, self.isActive),
+            },
+            onComplete: () => setWillChange(children, false),
+          }
+        );
+        return;
+      }
+
+      gsap.fromTo(element,
+        { autoAlpha: 0, y: 30, filter: 'blur(6px)' },
+        {
+          autoAlpha: 1,
+          y: 0,
+          filter: 'blur(0px)',
+          duration: 0.85,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: element,
+            start: 'top 84%',
+            toggleActions: 'play none none none',
+            onToggle: (self) => setWillChange(element, self.isActive),
+          },
+          onComplete: () => setWillChange(element, false),
+        }
+      );
+    });
+
+    let resizeTimer = 0;
+    window.addEventListener('resize', () => {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(() => ScrollTrigger.refresh(), 180);
+    }, { passive: true });
+
+    window.addEventListener('load', () => ScrollTrigger.refresh(), { once: true });
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => ScrollTrigger.refresh()).catch(() => {});
+    }
+
+    requestAnimationFrame(() => ScrollTrigger.refresh());
+    window.__scrollStoryActive = true;
+    return true;
+  } catch (error) {
+    console.warn('Scroll story initialization failed; using native-scroll fallbacks.', error);
+
+    if (coupleMedia) coupleMedia.revert();
+    if (smoother) smoother.kill();
+    ScrollTrigger.getAll().forEach((trigger) => trigger.kill(true));
+    animatedTargets.forEach((target) => {
+      if (!target || !target.style) return;
+      ['transform', 'opacity', 'visibility', 'filter', 'will-change', 'background-position-y']
+        .forEach((property) => target.style.removeProperty(property));
+    });
+
+    document.documentElement.classList.remove('motion-enhanced');
+    initFallbackReveals();
+    return false;
+  }
+}
+
+if (!initScrollStory()) initFallbackPhotoBand();
