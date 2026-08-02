@@ -1,16 +1,76 @@
 // ── Motion preference (shared) ─────────────────────────────────
 const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const MUSIC_START_SECONDS = 12;
+const MUSIC_FADE_IN_MS = 1800;
+
+function primeMusicStart(audio) {
+  if (!audio || audio.dataset.startPositionApplied === 'true') return;
+
+  const seekToOpening = () => {
+    if (audio.dataset.startPositionApplied === 'true') return;
+    if (!Number.isFinite(audio.duration) || audio.duration <= 0) return;
+
+    try {
+      audio.currentTime = Math.min(MUSIC_START_SECONDS, Math.max(0, audio.duration - 0.1));
+      audio.dataset.startPositionApplied = 'true';
+    } catch {
+      // The browser may defer seeking until metadata is fully available.
+    }
+  };
+
+  if (audio.readyState >= 1) seekToOpening();
+  if (audio.dataset.startPositionApplied !== 'true') {
+    audio.addEventListener('loadedmetadata', seekToOpening, { once: true });
+  }
+}
+
+function playMusicSmoothly(audio) {
+  if (!audio) return null;
+
+  const shouldFadeIn = audio.paused;
+  if (shouldFadeIn) {
+    cancelAnimationFrame(audio.__musicFadeFrame || 0);
+    audio.volume = REDUCED_MOTION ? 1 : 0;
+  }
+
+  const playPromise = audio.play();
+  if (shouldFadeIn && playPromise && typeof playPromise.then === 'function') {
+    playPromise.then(() => {
+      if (REDUCED_MOTION) {
+        audio.volume = 1;
+        return;
+      }
+
+      const startedAt = performance.now();
+      const fadeStep = (now) => {
+        const progress = Math.min(1, (now - startedAt) / MUSIC_FADE_IN_MS);
+        audio.volume = progress;
+        if (progress < 1 && !audio.paused) {
+          audio.__musicFadeFrame = requestAnimationFrame(fadeStep);
+        } else {
+          audio.volume = 1;
+          audio.__musicFadeFrame = 0;
+        }
+      };
+      audio.__musicFadeFrame = requestAnimationFrame(fadeStep);
+    }).catch(() => {
+      audio.volume = 1;
+    });
+  }
+
+  return playPromise;
+}
 
 
 // ── COVER SCREEN + TICKET-TEAR OPENING ─────────────────────────
 (function initCover() {
-  const cover   = document.getElementById('cover-screen');
-  const btn     = document.getElementById('cover-btn');
+  const cover = document.getElementById('cover-screen');
+  const btn = document.getElementById('cover-btn');
   const guestEl = document.getElementById('cover-guest');
-  const bloom   = document.getElementById('bloom');
-  const hero    = document.getElementById('hero');
-  const ticket  = cover.querySelector('.cover-ticket');
-  const dash    = cover.querySelector('.cover-ticket-dash');
+  const bloom = document.getElementById('bloom');
+  const hero = document.getElementById('hero');
+  const ticket = cover.querySelector('.cover-ticket');
+  const dash = cover.querySelector('.cover-ticket-dash');
   let isOpening = false;
 
   // Lock body scroll while cover is visible
@@ -127,7 +187,8 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
     // click gesture. Fire it first, capture the Promise, and hand it to the
     // music player via a custom event so it can sync its UI to the outcome.
     const audio = document.getElementById('bg-audio');
-    const playPromise = audio ? audio.play() : null;
+    primeMusicStart(audio);
+    const playPromise = playMusicSmoothly(audio);
     window.dispatchEvent(new CustomEvent('invitation-opened', { detail: { playPromise } }));
 
     // Unlock scroll as soon as the journey begins
@@ -154,24 +215,24 @@ const WEDDING_DATE = new Date('2026-10-17T08:30:00');
 function pad(n) { return String(n).padStart(2, '0'); }
 
 function updateCountdown() {
-  const now  = new Date();
+  const now = new Date();
   const diff = WEDDING_DATE - now;
 
   if (diff <= 0) {
-    document.getElementById('cd-days').textContent    = '00';
-    document.getElementById('cd-hours').textContent   = '00';
+    document.getElementById('cd-days').textContent = '00';
+    document.getElementById('cd-hours').textContent = '00';
     document.getElementById('cd-minutes').textContent = '00';
     document.getElementById('cd-seconds').textContent = '00';
     return;
   }
 
-  const days    = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const hours   = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
   const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-  document.getElementById('cd-days').textContent    = pad(days);
-  document.getElementById('cd-hours').textContent   = pad(hours);
+  document.getElementById('cd-days').textContent = pad(days);
+  document.getElementById('cd-hours').textContent = pad(hours);
   document.getElementById('cd-minutes').textContent = pad(minutes);
   document.getElementById('cd-seconds').textContent = pad(seconds);
 }
@@ -183,11 +244,11 @@ setInterval(updateCountdown, 1000);
 // ── RSVP FORM ──────────────────────────────────────────────────
 function handleRsvp(e) {
   e.preventDefault();
-  const form    = document.getElementById('rsvp-form');
+  const form = document.getElementById('rsvp-form');
   const success = document.getElementById('rsvp-success');
   // Here you can send form data to your backend or a service like Formspree
   // For now, just show success UI
-  form.style.display    = 'none';
+  form.style.display = 'none';
   success.style.display = 'block';
 }
 
@@ -232,25 +293,25 @@ initFallbackReveals();
   const COUNT = isMobile ? 12 : 24;
 
   function resize() {
-    W  = canvas.width  = window.innerWidth;
-    H  = canvas.height = window.innerHeight;
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
     VH = H + 120;                    // virtual band, taller than viewport for seamless wrap
   }
 
   function makePetal(spread) {
     const depth = Math.random();     // 0 far … 1 near
     return {
-      x:     Math.random() * W,
-      y:     spread ? Math.random() * VH : -20,
+      x: Math.random() * W,
+      y: spread ? Math.random() * VH : -20,
       depth: depth,
-      size:  (Math.random() * 3 + 3) * (1.6 - depth * 0.9),   // far → larger
+      size: (Math.random() * 3 + 3) * (1.6 - depth * 0.9),   // far → larger
       color: COLORS[Math.floor(Math.random() * COLORS.length)],
       speed: 0.18 + depth * 0.65,                             // near → faster fall
       drift: (Math.random() - 0.5) * (0.15 + depth * 0.45),
-      rot:   Math.random() * Math.PI * 2,
-      rotS:  (Math.random() - 0.5) * (0.01 + depth * 0.03),
+      rot: Math.random() * Math.PI * 2,
+      rotS: (Math.random() - 0.5) * (0.01 + depth * 0.03),
       alpha: 0.12 + depth * 0.20,                             // near → more present
-      par:   0.04 + depth * 0.16,                             // scroll parallax factor
+      par: 0.04 + depth * 0.16,                             // scroll parallax factor
     };
   }
 
@@ -269,9 +330,9 @@ initFallbackReveals();
 
     for (const p of petals) {
       // advance the fall + spin in virtual space
-      p.y   = wrap(p.y + p.speed, VH);
-      p.x  += p.drift;
-      if (p.x < -20)      p.x = W + 20;
+      p.y = wrap(p.y + p.speed, VH);
+      p.x += p.drift;
+      if (p.x < -20) p.x = W + 20;
       else if (p.x > W + 20) p.x = -20;
       p.rot += p.rotS;
 
@@ -282,7 +343,7 @@ initFallbackReveals();
       ctx.translate(p.x, ry);
       ctx.rotate(p.rot);
       ctx.globalAlpha = p.alpha;
-      ctx.fillStyle   = p.color;
+      ctx.fillStyle = p.color;
       ctx.beginPath();
       ctx.ellipse(0, 0, p.size, p.size * 0.55, 0, 0, Math.PI * 2);
       ctx.fill();
@@ -299,7 +360,7 @@ initFallbackReveals();
       ctx.translate(p.x, wrap(p.y, H));
       ctx.rotate(p.rot);
       ctx.globalAlpha = p.alpha;
-      ctx.fillStyle   = p.color;
+      ctx.fillStyle = p.color;
       ctx.beginPath();
       ctx.ellipse(0, 0, p.size, p.size * 0.55, 0, 0, Math.PI * 2);
       ctx.fill();
@@ -340,9 +401,9 @@ function initFallbackPhotoBand() {
 
 // ── MUSIC PLAYER ───────────────────────────────────────────────
 (function initMusicPlayer() {
-  const audio    = document.getElementById('bg-audio');
-  const btn      = document.getElementById('music-btn');
-  const panel    = document.getElementById('music-panel');
+  const audio = document.getElementById('bg-audio');
+  const btn = document.getElementById('music-btn');
+  const panel = document.getElementById('music-panel');
   const progress = document.getElementById('music-progress');
   const iconNote = document.getElementById('icon-note');
   const iconMute = document.getElementById('icon-mute');
@@ -365,13 +426,17 @@ function initFallbackPhotoBand() {
   }
 
   function startPlay() {
-    audio.play().then(() => {
+    primeMusicStart(audio);
+    playMusicSmoothly(audio).then(() => {
       setUIPlaying(true);
-    }).catch(() => {});
+    }).catch(() => { });
   }
 
   function stopPlay() {
+    cancelAnimationFrame(audio.__musicFadeFrame || 0);
+    audio.__musicFadeFrame = 0;
     audio.pause();
+    audio.volume = 1;
     setUIPlaying(false);
   }
 
@@ -391,7 +456,7 @@ function initFallbackPhotoBand() {
     if (document.hidden && isPlaying) {
       audio.pause();
     } else if (!document.hidden && isPlaying) {
-      audio.play().catch(() => {});
+      audio.play().catch(() => { });
     }
   });
 
@@ -404,10 +469,10 @@ function initFallbackPhotoBand() {
     if (playPromise && typeof playPromise.then === 'function') {
       playPromise
         .then(() => setUIPlaying(true))
-        .catch(() => {/* blocked — widget stays available for a manual tap */});
+        .catch(() => {/* blocked — widget stays available for a manual tap */ });
     } else {
       // No promise handed over (e.g. missing audio) — try once, ignore failure.
-      audio.play().then(() => setUIPlaying(true)).catch(() => {});
+      playMusicSmoothly(audio).then(() => setUIPlaying(true)).catch(() => { });
     }
   });
 })();
@@ -609,7 +674,9 @@ function initScrollStory() {
     const photoBand = document.querySelector('#photo-band .photo-band-inner');
     const photoContent = document.querySelector('#photo-band .photo-band-content');
     if (photoBand && photoContent) {
-      const photoTargets = remember([photoBand, photoContent]);
+      const photoTargets = remember(photoBand);
+      remember(photoContent);
+
       gsap.timeline({
         defaults: { ease: 'none' },
         scrollTrigger: {
@@ -625,12 +692,25 @@ function initScrollStory() {
           { backgroundPositionY: '38%' },
           { backgroundPositionY: '68%', duration: 1 },
           0
-        )
-        .fromTo(photoContent,
-          { autoAlpha: 0, y: 54, filter: 'blur(8px)' },
-          { autoAlpha: 1, y: -24, filter: 'blur(0px)', duration: 0.7 },
-          0.13
         );
+
+      gsap.fromTo(photoContent,
+        { autoAlpha: 0, y: 24, filter: 'blur(5px)' },
+        {
+          autoAlpha: 1,
+          y: 0,
+          filter: 'blur(0px)',
+          duration: 0.75,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: '#photo-band',
+            start: 'top 82%',
+            toggleActions: 'play none none none',
+            onToggle: (self) => setWillChange(photoContent, self.isActive),
+          },
+          onComplete: () => setWillChange(photoContent, false),
+        }
+      );
     }
 
     // Remaining sections keep their existing markup and gain restrained
@@ -693,7 +773,7 @@ function initScrollStory() {
 
     window.addEventListener('load', () => ScrollTrigger.refresh(), { once: true });
     if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(() => ScrollTrigger.refresh()).catch(() => {});
+      document.fonts.ready.then(() => ScrollTrigger.refresh()).catch(() => { });
     }
 
     requestAnimationFrame(() => ScrollTrigger.refresh());

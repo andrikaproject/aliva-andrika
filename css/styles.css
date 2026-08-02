@@ -158,7 +158,7 @@ html.motion-enhanced {
   min-height: 100vh;
   min-height: 100svh;
   overflow: hidden;
-  color: #000;
+  color: #514741;
   background: #f5f0eb;
 }
 
@@ -224,12 +224,22 @@ html.motion-enhanced {
   grid-template-columns: minmax(0, 1fr) 31.136738%;
 }
 
+.hero-line--celebrate>span {
+  font-size: 0.88em;
+  letter-spacing: 0.005em;
+}
+
 .hero-line--happy {
   grid-template-columns: 20.098847% minmax(0, 1fr);
 }
 
 .hero-line--names {
-  grid-template-columns: minmax(0, 1fr) 21.416804%;
+  grid-template-columns: minmax(0, 1fr) 18%;
+}
+
+.hero-line--names>span {
+  font-size: 0.82em;
+  letter-spacing: 0;
 }
 
 .hero-line--aliva {
@@ -318,7 +328,7 @@ html.motion-enhanced {
   justify-content: center;
   gap: 7px;
   margin-top: clamp(12px, 2.2vh, 22px);
-  color: #000;
+  color: #514741;
   font-family: "DM Mono", monospace;
   font-size: 9px;
   font-weight: 500;
@@ -403,6 +413,32 @@ html.motion-enhanced {
     gap: 5px;
     margin-top: clamp(10px, 2vh, 16px);
     font-size: clamp(7px, 1.9vw, 9px);
+  }
+}
+
+/* On phones, keep the complete metadata stack centered and lift it clear
+   of the fixed music panel when it expands. */
+@media (max-width: 640px) {
+  .hero-meta {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    row-gap: 7px;
+    padding-bottom: clamp(2.5rem, 8vh, 4rem);
+    text-align: center;
+  }
+
+  .hero-meta__tagline {
+    grid-column: auto;
+    width: min(100%, 336px);
+  }
+
+  .hero-meta__couple {
+    justify-self: center;
+  }
+
+  .hero-meta__date {
+    align-items: center;
+    justify-self: center;
   }
 }
 
