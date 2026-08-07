@@ -1706,3 +1706,89 @@ a:focus-visible {
     padding: 1.35rem;
   }
 }
+
+/* ── RSVP: focused, expandable form flow ─────────────────────── */
+#rsvp .rsvp-shell {
+  max-width: 44rem;
+}
+
+#rsvp .rsvp-form-panel {
+  border-color: hsl(var(--accent));
+  box-shadow: var(--shadow-md);
+}
+
+#rsvp .rsvp-primary-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 10rem;
+  gap: 1.25rem;
+}
+
+#rsvp .rsvp-guest-count {
+  width: 100%;
+}
+
+#rsvp .rsvp-attendance-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+#rsvp .rsvp-attendance-options .radio-card,
+#rsvp .rsvp-attendance-options .radio-card label {
+  width: 100%;
+}
+
+#rsvp .rsvp-attendance-options .radio-card label {
+  min-height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1rem;
+  line-height: 1.35;
+  letter-spacing: 0.1em;
+  text-align: center;
+}
+
+#rsvp .rsvp-message {
+  min-height: 9rem;
+  max-height: 24rem;
+  line-height: 1.65;
+}
+
+#rsvp .rsvp-submit-row {
+  display: flex;
+  justify-content: flex-end;
+}
+
+#rsvp-success {
+  max-width: 34rem;
+  margin-inline: auto;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+  #rsvp {
+    padding-block: clamp(4rem, 14vw, 5.5rem);
+  }
+
+  #rsvp .rsvp-primary-fields {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  #rsvp .rsvp-guest-count {
+    max-width: 12rem;
+  }
+
+  #rsvp .rsvp-attendance-options {
+    grid-template-columns: 1fr;
+  }
+
+  #rsvp .rsvp-submit-row,
+  #rsvp .btn-submit {
+    width: 100%;
+  }
+
+  #rsvp .rsvp-form-panel {
+    padding: 1.1rem;
+  }
+}

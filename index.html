@@ -493,7 +493,7 @@
 ================================================================ -->
       <section id="rsvp" class="py-20 sm:py-28 px-4 sm:px-6"
         style="background: linear-gradient(180deg, #FAF6EF 0%, #F0E8DA 100%);">
-        <div class="max-w-2xl mx-auto">
+        <div class="max-w-2xl mx-auto rsvp-shell">
 
           <!-- Section header -->
           <div class="text-center reveal stagger">
@@ -507,7 +507,7 @@
           </div>
 
           <!-- RSVP Form -->
-          <div class="panel mt-10 p-5 sm:p-8 reveal" style="transition-delay: 0.1s;">
+          <div class="panel mt-10 p-5 sm:p-8 reveal rsvp-form-panel" style="transition-delay: 0.1s;">
 
             <!-- Success message (hidden by default) -->
             <div id="rsvp-success">
@@ -517,24 +517,26 @@
             </div>
 
             <!-- Form -->
-            <form id="rsvp-form" class="space-y-5" onsubmit="handleRsvp(event)">
+            <form id="rsvp-form" class="space-y-5 rsvp-form" onsubmit="handleRsvp(event)">
 
-              <!-- Name -->
-              <div>
-                <label class="section-label block mb-2" data-i18n="fullName">Full Name</label>
-                <input type="text" name="name" required data-i18n-placeholder="yourFullName" placeholder="Your full name" class="form-input" />
-              </div>
+              <div class="rsvp-primary-fields">
+                <!-- Name -->
+                <div>
+                  <label for="rsvp-name" class="section-label block mb-2" data-i18n="fullName">Full Name</label>
+                  <input id="rsvp-name" type="text" name="name" required data-i18n-placeholder="yourFullName" placeholder="Your full name" class="form-input" />
+                </div>
 
-              <!-- Number of guests -->
-              <div>
-                <label class="section-label block mb-2" data-i18n="numberOfGuests">Number of Guests</label>
-                <input type="number" name="guests" min="1" max="4" value="1" class="form-input w-28" />
+                <!-- Number of guests -->
+                <div>
+                  <label for="rsvp-guests" class="section-label block mb-2" data-i18n="numberOfGuests">Number of Guests</label>
+                  <input id="rsvp-guests" type="number" name="guests" min="1" max="4" value="1" class="form-input rsvp-guest-count" />
+                </div>
               </div>
 
               <!-- Attendance -->
               <div>
                 <label class="section-label block mb-3" data-i18n="attendance">Attendance</label>
-                <div class="flex gap-3 flex-wrap">
+                <div class="flex gap-3 flex-wrap rsvp-attendance-options">
                   <div class="radio-card">
                     <input type="radio" id="att-yes" name="attendance" value="yes" checked />
                     <label for="att-yes" data-i18n="joyfullyAccepts">Joyfully Accepts</label>
@@ -548,14 +550,14 @@
 
               <!-- Message -->
               <div>
-                <label class="section-label block mb-2"><span data-i18n="messageForCouple">Message for the Couple</span> <span
+                <label for="rsvp-message" class="section-label block mb-2"><span data-i18n="messageForCouple">Message for the Couple</span> <span
                     class="opacity-50" data-i18n="optional">(optional)</span></label>
-                <textarea name="message" rows="3" data-i18n-placeholder="warmWish" placeholder="Leave a warm wish or message…"
-                  class="form-input resize-none"></textarea>
+                <textarea id="rsvp-message" name="message" rows="4" maxlength="600" data-i18n-placeholder="warmWish" placeholder="Leave a warm wish or message…"
+                  class="form-input rsvp-message resize-y"></textarea>
               </div>
 
               <!-- Submit -->
-              <div class="pt-2">
+              <div class="pt-2 rsvp-submit-row">
                 <button type="submit" class="btn-submit">
                   <span data-i18n="sendRsvp">Send RSVP</span>
                 </button>
