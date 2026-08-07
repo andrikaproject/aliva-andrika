@@ -211,54 +211,57 @@
 
           <!-- Section header -->
           <div class="couple-heading text-center reveal stagger">
-            <p class="section-label mb-3" data-i18n="theCouple">The Couple</p>
             <h2 class="font-display text-4xl md:text-5xl font-light text-ink" data-i18n="twoHearts">Two Hearts, One Story</h2>
             <div class="gold-divider mt-5 w-32 mx-auto"><span class="diamond"></span></div>
+            <p class="couple-intro" data-i18n="coupleIntro">Meet the two people at the heart of this celebration.</p>
           </div>
 
-          <!-- Bride & Groom cards -->
-          <div class="couple-cards mt-14 grid md:grid-cols-2 gap-8">
+          <!-- Bride & Groom profiles -->
+          <div class="couple-cards mt-12 grid md:grid-cols-2 gap-6">
 
-            <!-- Groom Card -->
-            <div class="couple-card couple-card--groom panel p-5 sm:p-8 text-center reveal">
-              <!-- Avatar placeholder — replace src with actual photo -->
-              <div class="w-24 h-24 rounded-full mx-auto mb-5 overflow-hidden border-2 border-gold-light">
+            <!-- Groom Profile -->
+            <article class="couple-card couple-card--groom reveal">
+              <div class="couple-card__portrait">
                 <img src="Andrika-Thegroom.jpeg" alt="Andrika" class="w-full h-full object-cover"
                   style="transform: scale(2.2); transform-origin: center 18%;" />
               </div>
-              <p class="section-label mb-2 text-text-rose" data-i18n="theGroom">The Groom</p>
-              <h3 class="font-display text-2xl font-light text-ink mb-3">Andrika Zainal Ibrahim</h3>
-              <div class="w-8 h-px bg-gold-light mx-auto mb-3"></div>
-              <p class="text-sm leading-relaxed text-ink opacity-70 font-body">
+              <div class="couple-card__content">
+                <p class="couple-card__role text-text-rose" data-i18n="theGroom">The Groom</p>
+                <h3 class="font-display text-2xl font-light text-ink">Andrika Zainal Ibrahim</h3>
+                <div class="couple-card__rule bg-gold-light"></div>
+                <p class="couple-card__bio">
                 <span data-i18n="groomBio">Son of Mr. Dodi Suwardi &amp; Mrs. Sari Yagustia Rini.<br />
                 A dreamer, a builder, and above all — a devoted partner.</span>
-              </p>
-            </div>
+                </p>
+              </div>
+            </article>
 
-            <!-- Bride Card -->
-            <div class="couple-card couple-card--bride panel p-5 sm:p-8 text-center reveal"
+            <!-- Bride Profile -->
+            <article class="couple-card couple-card--bride reveal"
               style="transition-delay: 0.15s;">
-              <div class="w-24 h-24 rounded-full mx-auto mb-5 overflow-hidden border-2 border-gold-light">
+              <div class="couple-card__portrait">
                 <img src="Aliva-thebride.jpeg" alt="Aliva" class="w-full h-full object-cover"
                   style="transform: scale(1.6); transform-origin: center 15%;" />
               </div>
-              <p class="section-label mb-2 text-text-sage" data-i18n="theBride">The Bride</p>
-              <h3 class="font-display text-2xl font-light text-ink mb-3">Nur Aliva Ike Purwati</h3>
-              <div class="w-8 h-px bg-gold-light mx-auto mb-3"></div>
-              <p class="text-sm leading-relaxed text-ink opacity-70">
+              <div class="couple-card__content">
+                <p class="couple-card__role text-text-sage" data-i18n="theBride">The Bride</p>
+                <h3 class="font-display text-2xl font-light text-ink">Nur Aliva Ike Purwati</h3>
+                <div class="couple-card__rule bg-gold-light"></div>
+                <p class="couple-card__bio">
                 <span data-i18n="brideBio">Daughter of Mr. Triyono &amp; Mrs. Rinarsih <br />
                 Full of grace, laughter, and an unwavering spirit of love.</span>
-              </p>
-            </div>
+                </p>
+              </div>
+            </article>
 
           </div>
 
           <!-- Love story note -->
-          <div class="couple-quote mt-12 text-center reveal" style="transition-delay: 0.25s;">
+          <blockquote class="couple-quote mt-10 text-center reveal" style="transition-delay: 0.25s;">
             <p class="font-display italic text-xl text-text-rose max-w-md mx-auto leading-relaxed">
               <span data-i18n="coupleQuote">"They found in each other not just a partner, but a home."</span>
             </p>
-          </div>
+          </blockquote>
 
         </div>
       </section>

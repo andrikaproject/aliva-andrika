@@ -352,7 +352,7 @@ html[lang="id"] .hero-line--names>span {
 @media (min-width: 768px) and (min-height: 700px) {
   .motion-enhanced #couple {
     display: flex;
-    min-height: 100svh;
+    min-height: auto;
     align-items: center;
     padding-top: 0;
     padding-bottom: 0;
@@ -361,11 +361,114 @@ html[lang="id"] .hero-line--names>span {
   .motion-enhanced .couple-stage {
     display: flex;
     width: 100%;
-    min-height: 100svh;
+    min-height: auto;
     flex-direction: column;
     justify-content: center;
-    padding-top: clamp(3rem, 7vh, 5rem);
-    padding-bottom: clamp(3rem, 7vh, 5rem);
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
+/* ── Couple profiles: compact editorial layout ───────────────── */
+.couple-heading h2 {
+  margin-inline: auto;
+  max-width: 28rem;
+}
+
+.couple-intro {
+  max-width: 30rem;
+  margin: 1rem auto 0;
+  color: hsl(var(--foreground) / 0.68);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.couple-cards {
+  align-items: stretch;
+}
+
+.couple-card {
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1fr);
+  align-items: center;
+  gap: 1.25rem;
+  min-width: 0;
+  padding: 1.5rem;
+  border: 1px solid hsl(var(--accent) / 0.58);
+  border-radius: 1rem;
+  background: hsl(var(--card) / 0.72);
+}
+
+.couple-card__portrait {
+  width: 7rem;
+  height: 7rem;
+  overflow: hidden;
+  border: 2px solid hsl(var(--accent) / 0.78);
+  border-radius: 50%;
+  background: hsl(var(--muted));
+}
+
+.couple-card__portrait img {
+  display: block;
+}
+
+.couple-card__content {
+  min-width: 0;
+}
+
+.couple-card__role {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.couple-card__content h3 {
+  margin: 0;
+  line-height: 1.12;
+}
+
+.couple-card__rule {
+  width: 2rem;
+  height: 1px;
+  margin: 0.85rem 0;
+}
+
+.couple-card__bio {
+  margin: 0;
+  color: hsl(var(--foreground) / 0.68);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  line-height: 1.65;
+}
+
+.couple-quote {
+  margin-inline: auto;
+  padding-top: 0.25rem;
+}
+
+@media (max-width: 520px) {
+  .couple-card {
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    gap: 1rem;
+    padding: 1.15rem;
+  }
+
+  .couple-card__portrait {
+    width: 5.5rem;
+    height: 5.5rem;
+  }
+
+  .couple-card__content h3 {
+    font-size: 1.55rem;
+  }
+
+  .couple-card__bio {
+    font-size: 0.78rem;
   }
 }
 
