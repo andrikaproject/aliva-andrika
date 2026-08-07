@@ -1,3 +1,178 @@
+// ── Language switching ─────────────────────────────────────────
+const TRANSLATIONS = {
+  id: {
+    coverTitle: 'Pernikahan',
+    saveTheDate: 'Simpan Tanggalnya!',
+    coverDate: '17 Oktober 2026',
+    openInvitation: 'Buka Undangan',
+    weddingCelebration: 'PERAYAAN PERNIKAHAN / 2026',
+    celebrating: 'MERAYAKAN',
+    theWedding: 'PERNIKAHAN',
+    ofAndrikaAnd: 'ANDRIKA DAN',
+    scrollForMore: 'GULIR UNTUK INFORMASI LEBIH LANJUT',
+    heroTagline: 'Merayakan babak baru bersama orang-orang yang kami cintai.',
+    saveTheDateUpper: 'SIMPAN TANGGALNYA',
+    verseTranslation: '“Dan di antara tanda-tanda kebesaran-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri, agar kamu cenderung dan merasa tenteram kepadanya, dan Dia menjadikan di antaramu rasa kasih dan sayang. Sungguh, pada yang demikian itu benar-benar terdapat tanda-tanda bagi kaum yang berpikir.”',
+    theCouple: 'Mempelai',
+    twoHearts: 'Dua Hati, Satu Cerita',
+    theGroom: 'Mempelai Pria',
+    groomBio: 'Putra Bapak Dodi Suwardi &amp; Ibu Sari Yagustia Rini.<br />Seorang pemimpi, pembangun, dan terutama — pasangan yang setia.',
+    theBride: 'Mempelai Wanita',
+    brideBio: 'Putri Bapak Triyono &amp; Ibu Rinarsih.<br />Penuh kelembutan, tawa, dan cinta yang tak tergoyahkan.',
+    coupleQuote: '“Mereka menemukan satu sama lain bukan hanya sebagai pasangan, tetapi juga sebagai rumah.”',
+    ourStory: 'Kisah Kami',
+    storyInFrames: 'Kisah kami dalam bingkai',
+    comingSoon: 'segera hadir',
+    theDate: 'Tanggal',
+    saveTheDateHeading: 'Simpan Tanggalnya!!',
+    friday: 'Jumat',
+    saturday: 'Sabtu',
+    sunday: 'Minggu',
+    oct2026: 'Okt 2026',
+    countingDays: 'Menghitung Hari',
+    days: 'Hari',
+    hours: 'Jam',
+    minutes: 'Menit',
+    seconds: 'Detik',
+    saturdayDate: 'Sabtu, 17 Oktober 2026',
+    venue: 'Lokasi',
+    whereWeCelebrate: 'Tempat Kami Merayakan',
+    mainVenue: 'Lokasi Utama',
+    openInMaps: 'Buka di Maps',
+    scheduleOfEvents: 'Rangkaian Acara',
+    guestArrival: 'Kedatangan Tamu',
+    lobbyWelcome: 'Lobi &amp; Penyambutan',
+    sacredVows: 'Ijab Qabul',
+    luncheonCelebration: 'Santap Siang &amp; Perayaan',
+    photoSession: 'Sesi Foto',
+    withFamilyGuests: 'Bersama Keluarga &amp; Tamu',
+    farewell: 'Perpisahan',
+    untilMeetAgain: 'Terima kasih, sampai bertemu kembali',
+    willYouJoin: 'Maukah Hadir Bersama Kami?',
+    rsvpIntro: 'Mohon konfirmasi kehadiran sebelum <strong class="font-medium text-text-rose">1 Oktober 2026</strong>.<br />Kami tak sabar merayakannya bersama Anda.',
+    thankYou: 'Terima Kasih!',
+    rsvpReceived: 'RSVP Anda telah diterima. Kami menantikan kehadiran Anda.',
+    fullName: 'Nama Lengkap',
+    yourFullName: 'Nama lengkap Anda',
+    numberOfGuests: 'Jumlah Tamu',
+    attendance: 'Kehadiran',
+    joyfullyAccepts: 'Dengan Senang Hati Hadir',
+    regretfullyDeclines: 'Dengan Menyesal Tidak Dapat Hadir',
+    messageForCouple: 'Pesan untuk Mempelai',
+    optional: '(opsional)',
+    warmWish: 'Tulis doa atau pesan hangat…',
+    sendRsvp: 'Kirim RSVP',
+    nowPlaying: 'Sedang Diputar',
+    footerQuote: '“Hal terbaik untuk dipertahankan dalam hidup adalah satu sama lain.”',
+    guestGreeting: 'Kepada {name} &amp; Pasangan'
+  },
+  en: {
+    coverTitle: 'The Wedding Of',
+    saveTheDate: 'Save The Date!',
+    coverDate: '17 October 2026',
+    openInvitation: 'Open Invitation',
+    weddingCelebration: 'WEDDING CELEBRATION / 2026',
+    celebrating: 'CELEBRATING',
+    theWedding: 'THE WEDDING',
+    ofAndrikaAnd: 'OF ANDRIKA AND',
+    scrollForMore: 'SCROLL FOR MORE INFORMATION',
+    heroTagline: 'Celebrating a new chapter with the people we love.',
+    saveTheDateUpper: 'SAVE THE DATE',
+    verseTranslation: '“And among His signs is that He created for you mates from among yourselves, that you may find tranquility in them; and He placed between you affection and mercy. Indeed in that are signs for a people who give thought.”',
+    theCouple: 'The Couple',
+    twoHearts: 'Two Hearts, One Story',
+    theGroom: 'The Groom',
+    groomBio: 'Son of Mr. Dodi Suwardi &amp; Mrs. Sari Yagustia Rini.<br />A dreamer, a builder, and above all — a devoted partner.',
+    theBride: 'The Bride',
+    brideBio: 'Daughter of Mr. Triyono &amp; Mrs. Rinarsih.<br />Full of grace, laughter, and an unwavering spirit of love.',
+    coupleQuote: '“They found in each other not just a partner, but a home.”',
+    ourStory: 'Our Story',
+    storyInFrames: 'Our story in frames',
+    comingSoon: 'coming soon',
+    theDate: 'The Date',
+    saveTheDateHeading: 'Save the Date!!',
+    friday: 'Friday',
+    saturday: 'Saturday',
+    sunday: 'Sunday',
+    oct2026: 'Oct 2026',
+    countingDays: 'Counting the Days',
+    days: 'Days',
+    hours: 'Hours',
+    minutes: 'Minutes',
+    seconds: 'Seconds',
+    saturdayDate: 'Saturday, 17 October 2026',
+    venue: 'Venue',
+    whereWeCelebrate: 'Where We Celebrate',
+    mainVenue: 'Main Venue',
+    openInMaps: 'Open in Maps',
+    scheduleOfEvents: 'Schedule of Events',
+    guestArrival: 'Guest Arrival',
+    lobbyWelcome: 'Lobby &amp; Welcome',
+    sacredVows: 'The Sacred Vows',
+    luncheonCelebration: 'Luncheon &amp; Celebration',
+    photoSession: 'Photo Session',
+    withFamilyGuests: 'With Family &amp; Guests',
+    farewell: 'Farewell',
+    untilMeetAgain: 'Thank you, until we meet again',
+    willYouJoin: 'Will You Join Us?',
+    rsvpIntro: 'Kindly confirm your attendance by <strong class="font-medium text-text-rose">1 October 2026</strong>.<br />We can’t wait to celebrate with you.',
+    thankYou: 'Thank You!',
+    rsvpReceived: 'Your RSVP has been received. We look forward to seeing you.',
+    fullName: 'Full Name',
+    yourFullName: 'Your full name',
+    numberOfGuests: 'Number of Guests',
+    attendance: 'Attendance',
+    joyfullyAccepts: 'Joyfully Accepts',
+    regretfullyDeclines: 'Regretfully Declines',
+    messageForCouple: 'Message for the Couple',
+    optional: '(optional)',
+    warmWish: 'Leave a warm wish or message…',
+    sendRsvp: 'Send RSVP',
+    nowPlaying: 'Now Playing',
+    footerQuote: '“The best thing to hold onto in life is each other.”',
+    guestGreeting: 'Dear {name} &amp; Partner'
+  }
+};
+
+let currentLocale = 'id';
+
+function getTranslation(key, values = {}) {
+  const template = TRANSLATIONS[currentLocale][key] || TRANSLATIONS.en[key] || key;
+  return Object.entries(values).reduce((result, [name, value]) => result.replace(`{${name}}`, value), template);
+}
+
+function applyLocale(locale) {
+  currentLocale = TRANSLATIONS[locale] ? locale : 'id';
+  document.documentElement.lang = currentLocale;
+
+  document.querySelectorAll('[data-i18n]').forEach((element) => {
+    element.innerHTML = getTranslation(element.dataset.i18n);
+  });
+
+  document.querySelectorAll('[data-i18n-placeholder]').forEach((element) => {
+    element.setAttribute('placeholder', getTranslation(element.dataset.i18nPlaceholder));
+  });
+
+  document.querySelectorAll('.language-btn').forEach((button) => {
+    const isActive = button.dataset.locale === currentLocale;
+    button.classList.toggle('is-active', isActive);
+    button.setAttribute('aria-pressed', String(isActive));
+  });
+
+  const switcher = document.getElementById('language-switcher');
+  if (switcher) switcher.setAttribute('aria-label', currentLocale === 'id' ? 'Pilih bahasa' : 'Choose language');
+  localStorage.setItem('wedding-locale', currentLocale);
+  document.dispatchEvent(new CustomEvent('localechange', { detail: currentLocale }));
+}
+
+(function initLanguage() {
+  const savedLocale = localStorage.getItem('wedding-locale');
+  document.querySelectorAll('.language-btn').forEach((button) => {
+    button.addEventListener('click', () => applyLocale(button.dataset.locale));
+  });
+  applyLocale(savedLocale || 'id');
+})();
+
 // ── Motion preference (shared) ─────────────────────────────────
 const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const MUSIC_START_SECONDS = 12;
@@ -79,8 +254,12 @@ function playMusicSmoothly(audio) {
   // Show guest name if ?to= param exists
   const name = new URLSearchParams(window.location.search).get('to');
   if (name) {
-    guestEl.textContent = 'Dear ' + name + ' & Partner';
+    const renderGuest = () => {
+      guestEl.innerHTML = getTranslation('guestGreeting', { name: name.replace(/[&<>]/g, '') });
+    };
+    renderGuest();
     guestEl.classList.remove('hidden');
+    document.addEventListener('localechange', renderGuest);
   }
 
   function makeTicketClone(modifier) {

@@ -1362,3 +1362,58 @@ a:focus-visible {
     animation: none !important;
   }
 }
+/* ── Language toggle ─────────────────────────────────────────── */
+.language-switcher {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 80;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid rgba(201, 169, 110, 0.55);
+  border-radius: 999px;
+  background: rgba(250, 246, 239, 0.86);
+  color: #7e5922;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 18px rgba(44, 36, 32, 0.08);
+}
+
+.language-btn {
+  padding: 0.1rem 0.2rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  letter-spacing: inherit;
+  opacity: 0.48;
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+
+.language-btn:hover,
+.language-btn:focus-visible,
+.language-btn.is-active {
+  opacity: 1;
+}
+
+.language-btn:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 3px;
+}
+
+.language-btn:active {
+  transform: scale(0.94);
+}
+
+@media (max-width: 30rem) {
+  .language-switcher {
+    top: 0.8rem;
+    right: 0.8rem;
+  }
+}
