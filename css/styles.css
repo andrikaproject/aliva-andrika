@@ -451,7 +451,23 @@ html[lang="id"] .hero-line--names>span {
   padding-top: 0.25rem;
 }
 
+/* Keep the chapter breathable without making the pinned sequence feel
+   detached from the sections before and after it. */
+.couple-story {
+  padding-block: clamp(3.75rem, 7vw, 6rem);
+}
+
+@media (min-width: 768px) and (min-height: 700px) {
+  .motion-enhanced #couple {
+    padding-block: clamp(3.5rem, 7vh, 5.5rem);
+  }
+}
+
 @media (max-width: 520px) {
+  .couple-story {
+    padding-block: clamp(3.5rem, 11vw, 4.5rem);
+  }
+
   .couple-card {
     grid-template-columns: 5.5rem minmax(0, 1fr);
     gap: 1rem;

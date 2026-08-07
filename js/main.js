@@ -804,14 +804,16 @@ function initScrollStory() {
         compact: '(max-width: 767px), (max-height: 699px)',
       }, (context) => {
         const isDesktop = context.conditions.desktop;
-        const distance = isDesktop ? 1700 : 0;
+        const distance = isDesktop
+          ? Math.round(Math.min(1100, Math.max(780, window.innerHeight * 0.95)))
+          : 0;
         const sideOffset = isDesktop ? 140 : 42;
 
         const timeline = gsap.timeline({
           defaults: { ease: 'none' },
           scrollTrigger: {
             trigger: couple,
-            start: isDesktop ? 'top top' : 'top 78%',
+            start: isDesktop ? 'top 10%' : 'top 78%',
             end: isDesktop ? `+=${distance}` : 'bottom 24%',
             scrub: isDesktop ? 0.85 : 0.55,
             pin: isDesktop ? coupleStage : false,
