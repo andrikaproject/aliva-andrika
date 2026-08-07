@@ -1667,12 +1667,11 @@ a:focus-visible {
   }
 
   #when .when-countdown > .flex {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.65rem;
-    padding: 0;
-    background: transparent;
-    box-shadow: none;
+    display: flex;
+    gap: 0.25rem;
+    padding: 0.55rem;
+    background: hsl(var(--primary));
+    box-shadow: var(--shadow-md);
   }
 
   #when .when-countdown > .section-label {
@@ -1681,24 +1680,26 @@ a:focus-visible {
   }
 
   #when .when-countdown .cd-box {
-    padding: 1rem 0.75rem 0.85rem;
-    border: 1px solid hsl(var(--accent));
-    border-radius: 0.75rem;
-    background: hsl(var(--card));
-    box-shadow: var(--shadow-sm);
+    min-width: 0;
+    padding: 0.8rem 0.2rem 0.65rem;
+    border: 0;
+    border-radius: 0.5rem;
+    background: transparent;
+    box-shadow: none;
   }
 
   #when .when-countdown .cd-num {
-    color: hsl(var(--foreground));
-    font-size: clamp(2.6rem, 12vw, 3.35rem);
+    color: hsl(var(--primary-foreground));
+    font-size: clamp(1.8rem, 10vw, 2.4rem);
   }
 
   #when .when-countdown .cd-label {
     margin-top: 0.55rem;
-    color: var(--text-gold);
-    font-size: 0.68rem;
-    letter-spacing: 0.14em;
-    opacity: 1;
+    color: hsl(var(--primary-foreground));
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    opacity: 0.86;
+    white-space: nowrap;
   }
 
   #when .when-event {
