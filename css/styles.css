@@ -1574,19 +1574,19 @@ a:focus-visible {
 }
 
 #when .when-calendar__day--active {
-  background: hsl(var(--primary));
-  color: hsl(var(--primary-foreground));
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
   opacity: 1;
 }
 
 #when .when-calendar__day--active .section-label,
 #when .when-calendar__day--active > span {
-  color: hsl(var(--primary-foreground));
+  color: var(--text-gold);
 }
 
 #when .when-calendar__day--active > div {
-  border-color: hsl(var(--primary-foreground)) !important;
-  box-shadow: 0 0 0 4px hsl(var(--primary-foreground) / 0.16) !important;
+  border-color: hsl(var(--destructive)) !important;
+  box-shadow: 0 0 0 4px hsl(var(--destructive) / 0.12) !important;
 }
 
 #when .when-countdown > .flex {
