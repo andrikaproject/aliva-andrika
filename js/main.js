@@ -2,7 +2,7 @@
 const TRANSLATIONS = {
   id: {
     coverTitle: 'Pernikahan',
-    saveTheDate: 'Simpan Tanggalnya!',
+    saveTheDate: 'Tandai Tanggal Bahagia Kami',
     coverDate: '17 Oktober 2026',
     openInvitation: 'Buka Undangan',
     weddingCelebration: 'PERAYAAN PERNIKAHAN / 2026',
@@ -24,7 +24,7 @@ const TRANSLATIONS = {
     storyInFrames: 'Kisah kami dalam bingkai',
     comingSoon: 'segera hadir',
     theDate: 'Tanggal',
-    saveTheDateHeading: 'Simpan Tanggalnya!!',
+    saveTheDateHeading: 'Menuju Hari Bahagia Kami!!',
     friday: 'Jumat',
     saturday: 'Sabtu',
     sunday: 'Minggu',
@@ -175,7 +175,8 @@ function applyLocale(locale) {
 
 // ── Motion preference (shared) ─────────────────────────────────
 const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const MUSIC_START_SECONDS = 12;
+const MUSIC_START_SECONDS = 14;
+const MUSIC_LOOP_END_SECONDS = 107;
 const MUSIC_FADE_IN_MS = 1800;
 
 function primeMusicStart(audio) {
@@ -624,10 +625,34 @@ function initFallbackPhotoBand() {
     if (isPlaying) stopPlay(); else startPlay();
   });
 
-  // Progress bar (track loops naturally via the `loop` attribute)
-  audio.addEventListener('timeupdate', () => {
-    if (!audio.duration) return;
-    progress.style.width = (audio.currentTime / audio.duration * 100) + '%';
+  function getMusicLoopBounds() {
+    if (!Number.isFinite(audio.duration) || audio.duration <= 0) return null;
+
+    const start = Math.min(MUSIC_START_SECONDS, Math.max(0, audio.duration - 0.1));
+    const end = Math.min(MUSIC_LOOP_END_SECONDS, audio.duration);
+    return { start, end: Math.max(start + 0.1, end) };
+  }
+
+  function syncMusicLoopAndProgress() {
+    const bounds = getMusicLoopBounds();
+    if (!bounds) return;
+
+    if (audio.currentTime >= bounds.end) {
+      audio.currentTime = bounds.start;
+    }
+
+    const position = Math.min(bounds.end, Math.max(bounds.start, audio.currentTime));
+    progress.style.width = (((position - bounds.start) / (bounds.end - bounds.start)) * 100) + '%';
+  }
+
+  // Keep playback inside the intentional 14s–1:47 segment.
+  audio.addEventListener('timeupdate', syncMusicLoopAndProgress);
+  audio.addEventListener('loadedmetadata', syncMusicLoopAndProgress);
+  audio.addEventListener('ended', () => {
+    const bounds = getMusicLoopBounds();
+    if (!bounds) return;
+    audio.currentTime = bounds.start;
+    if (isPlaying) audio.play().catch(() => { });
   });
 
   // Pause/resume on tab visibility change
