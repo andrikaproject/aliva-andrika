@@ -1549,3 +1549,129 @@ a:focus-visible {
     right: 0.8rem;
   }
 }
+
+/* ── Date chapter: decisive hierarchy ────────────────────────── */
+#when .when-shell {
+  max-width: 62rem;
+}
+
+#when h2 {
+  font-size: clamp(2.9rem, 6vw, 5rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+#when .when-calendar {
+  max-width: 34rem;
+  border: 1px solid hsl(var(--accent));
+  border-radius: 1rem;
+  box-shadow: var(--shadow-md);
+}
+
+#when .when-calendar__day {
+  min-height: 11rem;
+  transition: background-color var(--duration-base) var(--ease-default);
+}
+
+#when .when-calendar__day--active {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  opacity: 1;
+}
+
+#when .when-calendar__day--active .section-label,
+#when .when-calendar__day--active > span {
+  color: hsl(var(--primary-foreground));
+}
+
+#when .when-calendar__day--active > div {
+  border-color: hsl(var(--primary-foreground)) !important;
+  box-shadow: 0 0 0 4px hsl(var(--primary-foreground) / 0.16) !important;
+}
+
+#when .when-countdown > .flex {
+  max-width: 34rem;
+  margin-inline: auto;
+  padding: 0.75rem;
+  border-radius: 1rem;
+  background: hsl(var(--primary));
+  box-shadow: var(--shadow-md);
+}
+
+#when .when-countdown .cd-box {
+  max-width: none;
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  box-shadow: none;
+}
+
+#when .when-countdown .cd-num,
+#when .when-countdown .cd-label {
+  color: hsl(var(--primary-foreground));
+}
+
+#when .when-countdown .cd-num {
+  font-size: clamp(2.35rem, 5vw, 3.5rem);
+  font-weight: 500;
+}
+
+#when .when-countdown .cd-label {
+  opacity: 0.84;
+}
+
+#when .when-event {
+  border: 1px solid hsl(var(--accent));
+  border-radius: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+#when .when-event__title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+}
+
+#when .when-event__date {
+  font-size: 1.35rem;
+  font-weight: 500;
+}
+
+#when .when-event__time {
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+
+#when .when-event__venue {
+  font-size: 0.9rem;
+  opacity: 0.82;
+}
+
+@media (max-width: 640px) {
+  #when {
+    padding-block: clamp(4rem, 14vw, 5.5rem);
+  }
+
+  #when .when-calendar {
+    max-width: 100%;
+  }
+
+  #when .when-calendar__day {
+    min-height: 9.5rem;
+    padding-inline: 0.5rem;
+  }
+
+  #when .when-countdown > .flex {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem;
+  }
+
+  #when .when-countdown .cd-box {
+    min-width: 0;
+  }
+
+  #when .when-event {
+    padding: 1.35rem;
+  }
+}

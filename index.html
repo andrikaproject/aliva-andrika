@@ -294,7 +294,7 @@
 ================================================================ -->
       <section id="when" class="py-20 sm:py-28 px-4 sm:px-6"
         style="background: linear-gradient(180deg, #F0E8DA 0%, #FAF6EF 100%);">
-        <div class="max-w-3xl mx-auto text-center">
+        <div class="max-w-3xl mx-auto text-center when-shell">
 
           <!-- Section header -->
           <div class="reveal stagger">
@@ -305,17 +305,17 @@
 
           <!-- Mini Calendar Strip -->
           <div class="mt-12 reveal">
-            <div class="panel inline-flex items-stretch w-full max-w-xs mx-auto overflow-hidden">
+            <div class="panel inline-flex items-stretch w-full max-w-xs mx-auto overflow-hidden when-calendar">
               <!-- Friday 16 -->
-              <div class="flex-1 flex flex-col items-center justify-center py-6 px-3 opacity-45"
+              <div class="flex-1 flex flex-col items-center justify-center py-6 px-3 opacity-45 when-calendar__day"
                 style="border-right: 1px solid hsl(var(--border));">
                 <p class="section-label mb-3" style="font-size:0.55rem;" data-i18n="friday">Friday</p>
                 <span class="font-display text-4xl font-light text-ink leading-none">16</span>
               </div>
 
               <!-- Saturday 17 — circled -->
-              <div class="flex-1 flex flex-col items-center justify-center py-6 px-3"
-                style="background: hsl(var(--accent) / 0.06); border-right: 1px solid hsl(var(--border));">
+              <div class="flex-1 flex flex-col items-center justify-center py-6 px-3 when-calendar__day when-calendar__day--active"
+                style="border-right: 1px solid hsl(var(--border));">
                 <p class="section-label mb-3 text-text-gold" style="font-size:0.55rem;" data-i18n="saturday">Saturday</p>
                 <div class="w-14 h-14 rounded-full flex items-center justify-center"
                   style="border: 2px solid hsl(var(--destructive)); box-shadow: 0 0 0 3px hsl(var(--destructive) / 0.12);">
@@ -325,7 +325,7 @@
               </div>
 
               <!-- Sunday 18 -->
-              <div class="flex-1 flex flex-col items-center justify-center py-6 px-3 opacity-45">
+              <div class="flex-1 flex flex-col items-center justify-center py-6 px-3 opacity-45 when-calendar__day">
                 <p class="section-label mb-3" style="font-size:0.55rem;" data-i18n="sunday">Sunday</p>
                 <span class="font-display text-4xl font-light text-ink leading-none">18</span>
               </div>
@@ -334,7 +334,7 @@
           </div>
 
           <!-- Countdown Timer -->
-          <div class="mt-10 reveal" style="transition-delay: 0.1s;">
+          <div class="mt-10 reveal when-countdown" style="transition-delay: 0.1s;">
             <p class="section-label mb-5 tracking-widest2" data-i18n="countingDays">Counting the Days</p>
             <div class="flex justify-center gap-2 sm:gap-4 w-full max-w-sm mx-auto">
               <div class="cd-box panel">
@@ -357,24 +357,24 @@
           </div>
 
           <!-- Event Blocks -->
-          <div class="mt-12 grid sm:grid-cols-2 gap-5 text-left reveal" style="transition-delay: 0.2s;">
+          <div class="mt-12 grid sm:grid-cols-2 gap-5 text-left reveal when-events" style="transition-delay: 0.2s;">
 
             <!-- Akad Nikah -->
-            <div class="panel px-6 py-6">
-              <p class="section-label mb-4 text-text-rose">Akad Nikah</p>
-              <p class="font-display text-lg font-light text-ink leading-snug" data-i18n="saturdayDate">Saturday, 17 October 2026</p>
-              <p class="font-display italic text-text-gold text-base mt-1">08:30 – 10:00 WIB</p>
-              <div class="w-8 h-px bg-gold-light my-4"></div>
-              <p class="text-sm text-ink opacity-70 leading-relaxed">Ballroom<br />V Hotel &amp; Residence, Bandung</p>
+            <div class="panel px-6 py-6 when-event">
+              <p class="section-label mb-4 text-text-rose when-event__title">Akad Nikah</p>
+              <p class="font-display text-lg font-light text-ink leading-snug when-event__date" data-i18n="saturdayDate">Saturday, 17 October 2026</p>
+              <p class="font-display italic text-text-gold text-base mt-1 when-event__time">08:30 – 10:00 WIB</p>
+              <div class="w-8 h-px bg-gold-light my-4 when-event__rule"></div>
+              <p class="text-sm text-ink opacity-70 leading-relaxed when-event__venue">Ballroom<br />V Hotel &amp; Residence, Bandung</p>
             </div>
 
             <!-- Resepsi -->
-            <div class="panel px-6 py-6" style="transition-delay: 0.1s;">
-              <p class="section-label mb-4 text-text-gold">Resepsi</p>
-              <p class="font-display text-lg font-light text-ink leading-snug" data-i18n="saturdayDate">Saturday, 17 October 2026</p>
-              <p class="font-display italic text-text-gold text-base mt-1">11:00 – 13:30 WIB</p>
-              <div class="w-8 h-px bg-gold-light my-4"></div>
-              <p class="text-sm text-ink opacity-70 leading-relaxed">Ballroom<br />V Hotel &amp; Residence, Bandung</p>
+            <div class="panel px-6 py-6 when-event" style="transition-delay: 0.1s;">
+              <p class="section-label mb-4 text-text-gold when-event__title">Resepsi</p>
+              <p class="font-display text-lg font-light text-ink leading-snug when-event__date" data-i18n="saturdayDate">Saturday, 17 October 2026</p>
+              <p class="font-display italic text-text-gold text-base mt-1 when-event__time">11:00 – 13:30 WIB</p>
+              <div class="w-8 h-px bg-gold-light my-4 when-event__rule"></div>
+              <p class="text-sm text-ink opacity-70 leading-relaxed when-event__venue">Ballroom<br />V Hotel &amp; Residence, Bandung</p>
             </div>
 
           </div>
