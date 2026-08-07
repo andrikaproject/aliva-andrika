@@ -177,6 +177,7 @@ function applyLocale(locale) {
 const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const MUSIC_START_SECONDS = 14;
 const MUSIC_LOOP_END_SECONDS = 107;
+const MUSIC_CROSSFADE_MS = 1800;
 const MUSIC_FADE_IN_MS = 1800;
 
 function primeMusicStart(audio) {
@@ -613,6 +614,7 @@ function initFallbackPhotoBand() {
   }
 
   function stopPlay() {
+    cancelMusicLoopFade();
     cancelAnimationFrame(audio.__musicFadeFrame || 0);
     audio.__musicFadeFrame = 0;
     audio.pause();
@@ -624,6 +626,66 @@ function initFallbackPhotoBand() {
   btn.addEventListener('click', () => {
     if (isPlaying) stopPlay(); else startPlay();
   });
+
+  function cancelMusicLoopFade() {
+    cancelAnimationFrame(audio.__musicLoopFadeFrame || 0);
+    audio.__musicLoopFadeFrame = 0;
+    audio.__musicLoopTransitioning = false;
+  }
+
+  function fadeInFromLoopStart(bounds) {
+    audio.currentTime = bounds.start;
+    audio.volume = 0;
+
+    const startedAt = performance.now();
+    const fadeIn = (now) => {
+      if (audio.paused || !isPlaying) {
+        cancelMusicLoopFade();
+        return;
+      }
+
+      const progressRatio = Math.min(1, (now - startedAt) / MUSIC_CROSSFADE_MS);
+      audio.volume = progressRatio;
+
+      if (progressRatio < 1) {
+        audio.__musicLoopFadeFrame = requestAnimationFrame(fadeIn);
+      } else {
+        audio.volume = 1;
+        audio.__musicLoopFadeFrame = 0;
+        audio.__musicLoopTransitioning = false;
+      }
+    };
+
+    audio.__musicLoopFadeFrame = requestAnimationFrame(fadeIn);
+  }
+
+  function startMusicLoopTransition(bounds) {
+    if (audio.__musicLoopTransitioning || audio.paused || !isPlaying) return;
+
+    audio.__musicLoopTransitioning = true;
+    const startingVolume = audio.volume;
+    const remainingAudioMs = Math.max(160, (bounds.end - audio.currentTime) * 1000);
+    const startedAt = performance.now();
+
+    const fadeOut = (now) => {
+      if (audio.paused || !isPlaying) {
+        cancelMusicLoopFade();
+        return;
+      }
+
+      const progressRatio = Math.min(1, (now - startedAt) / remainingAudioMs);
+      audio.volume = startingVolume * (1 - progressRatio);
+
+      if (progressRatio < 1) {
+        audio.__musicLoopFadeFrame = requestAnimationFrame(fadeOut);
+        return;
+      }
+
+      fadeInFromLoopStart(bounds);
+    };
+
+    audio.__musicLoopFadeFrame = requestAnimationFrame(fadeOut);
+  }
 
   function getMusicLoopBounds() {
     if (!Number.isFinite(audio.duration) || audio.duration <= 0) return null;
@@ -637,8 +699,8 @@ function initFallbackPhotoBand() {
     const bounds = getMusicLoopBounds();
     if (!bounds) return;
 
-    if (audio.currentTime >= bounds.end) {
-      audio.currentTime = bounds.start;
+    if (audio.currentTime >= bounds.end - MUSIC_CROSSFADE_MS / 1000) {
+      startMusicLoopTransition(bounds);
     }
 
     const position = Math.min(bounds.end, Math.max(bounds.start, audio.currentTime));
@@ -651,8 +713,11 @@ function initFallbackPhotoBand() {
   audio.addEventListener('ended', () => {
     const bounds = getMusicLoopBounds();
     if (!bounds) return;
-    audio.currentTime = bounds.start;
-    if (isPlaying) audio.play().catch(() => { });
+    if (isPlaying) {
+      audio.play().then(() => fadeInFromLoopStart(bounds)).catch(() => { });
+    } else {
+      audio.currentTime = bounds.start;
+    }
   });
 
   // Pause/resume on tab visibility change
