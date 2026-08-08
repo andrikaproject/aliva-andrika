@@ -22,7 +22,28 @@ const TRANSLATIONS = {
     coupleQuote: '“Mereka menemukan satu sama lain bukan hanya sebagai pasangan, tetapi juga sebagai rumah.”',
     ourStory: 'Kisah Kami',
     storyInFrames: 'Kisah kami dalam bingkai',
-    comingSoon: 'segera hadir',
+    galleryIntro: 'Sekelumit perjalanan kami sebelum hari itu tiba — dari jalan-jalan berdua sampai potret di studio.',
+    galPhotoCount: '{count} foto',
+    galAll: 'Semua',
+    galJourney: 'Perjalanan',
+    galPortraits: 'Potret',
+    galUmbrella: 'Di bawah payung warna-warni',
+    galStudioFloor: 'Dekat dan hangat',
+    galRedArch: 'Tawa di gerbang merah',
+    galToriiWalk: 'Menyusuri seribu gerbang',
+    galStudioSeated: 'Duduk berdampingan',
+    galWisteria1: 'Di bawah kanopi bunga',
+    galOverlook: 'Sudut pandang terbaik',
+    galStudioCloseup: 'Tertawa lepas',
+    galToriiEmbrace: 'Berdua di lorong merah',
+    galCorridor: 'Lorong penuh warna',
+    galStudioStanding: 'Berdiri berdua',
+    galRide: 'Perjalanan kecil kami',
+    galWisteria2: 'Langkah pelan berdua',
+    galGazebo: 'Rehat di saung bambu',
+    galStudioPlay: 'Bercanda di studio',
+    galToriiSmile: 'Senyum di antara gerbang',
+    galTraditional: 'Balutan kebaya dan batik',
     theDate: 'Tanggal',
     saveTheDateHeading: 'Menuju Hari Bahagia Kami!!',
     friday: 'Jumat',
@@ -49,7 +70,7 @@ const TRANSLATIONS = {
     farewell: 'Perpisahan',
     untilMeetAgain: 'Terima kasih, sampai bertemu kembali',
     willYouJoin: 'Maukah Hadir Bersama Kami?',
-    rsvpIntro: 'Mohon konfirmasi kehadiran sebelum <strong class="font-medium text-text-rose">1 Oktober 2026</strong>.<br />Kami tak sabar merayakannya bersama Anda.',
+    rsvpIntro: 'Mohon konfirmasi kehadiran sebelum <strong class="font-medium text-text-rose">1 Oktober 2026</strong>.<br />Kami tak sabar merayakannya bersama Kalian.',
     thankYou: 'Terima Kasih!',
     rsvpReceived: 'RSVP Anda telah diterima. Kami menantikan kehadiran Anda.',
     fullName: 'Nama Lengkap',
@@ -88,7 +109,28 @@ const TRANSLATIONS = {
     coupleQuote: '“They found in each other not just a partner, but a home.”',
     ourStory: 'Our Story',
     storyInFrames: 'Our story in frames',
-    comingSoon: 'coming soon',
+    galleryIntro: 'A few moments from before the day itself — from wandering together to portraits in the studio.',
+    galPhotoCount: '{count} photos',
+    galAll: 'All',
+    galJourney: 'Journey',
+    galPortraits: 'Portraits',
+    galUmbrella: 'Beneath the parasols',
+    galStudioFloor: 'Close and warm',
+    galRedArch: 'Laughter at the red arch',
+    galToriiWalk: 'A thousand gates',
+    galStudioSeated: 'Side by side',
+    galWisteria1: 'Under the flower canopy',
+    galOverlook: 'The best vantage point',
+    galStudioCloseup: 'Unguarded laughter',
+    galToriiEmbrace: 'Together in the corridor',
+    galCorridor: 'A corridor full of colour',
+    galStudioStanding: 'Standing together',
+    galRide: 'Our little ride',
+    galWisteria2: 'Slow steps together',
+    galGazebo: 'Resting in the bamboo hut',
+    galStudioPlay: 'Playing around',
+    galToriiSmile: 'A smile among the gates',
+    galTraditional: 'In kebaya and batik',
     theDate: 'The Date',
     saveTheDateHeading: 'Save the Date!!',
     friday: 'Friday',
@@ -560,24 +602,89 @@ initFallbackReveals();
 })();
 
 
-// ── PHOTO BAND PARALLAX FALLBACK ───────────────────────────────
-// Used only when GSAP is unavailable. The enhanced version lives in
-// initScrollStory() so there is never more than one scroll listener.
-function initFallbackPhotoBand() {
-  if (REDUCED_MOTION || window.__photoBandFallbackStarted) return;
-  const band = document.querySelector('#photo-band .photo-band-inner');
-  if (!band) return;
-  window.__photoBandFallbackStarted = true;
+// ── GALLERY CATEGORY FILTER ────────────────────────────────────
+// User-driven navigation, so it runs regardless of GSAP. The grid is
+// CSS multi-column: hiding a card lets the columns rebalance on their
+// own, and the re-entry animation covers that reflow.
+(function initGalleryFilter() {
+  const grid = document.getElementById('galleryGrid');
+  const filters = Array.from(document.querySelectorAll('.gallery-filter'));
+  if (!grid || !filters.length) return;
 
-  function onScroll() {
-    const r = band.getBoundingClientRect();
-    const prog = (window.innerHeight - r.top) / (window.innerHeight + r.height);
-    const clamped = Math.max(0, Math.min(1, prog));
-    band.style.backgroundPositionY = (30 + clamped * 40) + '%';
+  const cards = Array.from(grid.querySelectorAll('.gallery-card'));
+  const countEl = document.getElementById('galleryCount');
+  let visibleCount = cards.length;
+
+  // Lives in the pinned context column, so it stays readable for the
+  // whole scroll and doubles as the filter's polite announcement.
+  function renderCount() {
+    if (countEl) countEl.textContent = getTranslation('galPhotoCount', { count: visibleCount });
   }
-  window.addEventListener('scroll', onScroll, { passive: true });
-  onScroll();
-}
+
+  // CSS columns pick a balanced column height first, then fill greedily —
+  // so a set with fewer than two cards per column leaves the last column
+  // empty and the grid looks left-weighted. Cap the count to keep every
+  // column occupied; --gallery-columns stays the breakpoint's ceiling.
+  function syncColumns() {
+    const declared = parseInt(getComputedStyle(grid).getPropertyValue('--gallery-columns'), 10) || 1;
+    const columns = Math.max(1, Math.min(declared, Math.ceil(visibleCount / 2)));
+    grid.style.columnCount = String(columns);
+  }
+
+  function apply(category) {
+    const shown = [];
+    cards.forEach((card) => {
+      const match = category === 'all' || card.dataset.category === category;
+      card.hidden = !match;
+      if (match) shown.push(card);
+    });
+
+    visibleCount = shown.length;
+    syncColumns();
+    renderCount();
+
+    if (!REDUCED_MOTION) {
+      shown.forEach((card, index) => {
+        card.animate(
+          [{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'none' }],
+          {
+            duration: 420,
+            delay: Math.min(index * 22, 260),
+            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+            fill: 'none',
+          }
+        );
+      });
+    }
+
+    // The section's height just changed — keep pinned/scrubbed triggers honest.
+    if (window.ScrollTrigger) window.ScrollTrigger.refresh();
+  }
+
+  filters.forEach((button) => {
+    button.addEventListener('click', () => {
+      if (button.classList.contains('is-active')) return;
+      filters.forEach((other) => {
+        const isActive = other === button;
+        other.classList.toggle('is-active', isActive);
+        other.setAttribute('aria-pressed', String(isActive));
+      });
+      apply(button.dataset.filter);
+    });
+  });
+
+  // The breakpoint's ceiling changes on resize, so re-derive the cap.
+  let resizeTimer = 0;
+  window.addEventListener('resize', () => {
+    window.clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(syncColumns, 160);
+  }, { passive: true });
+
+  document.addEventListener('localechange', renderCount);
+
+  syncColumns();
+  renderCount();
+})();
 
 
 // ── MUSIC PLAYER ───────────────────────────────────────────────
@@ -766,6 +873,7 @@ function initScrollStory() {
   const animatedTargets = new Set();
   let smoother = null;
   let coupleMedia = null;
+  let galleryMedia = null;
 
   function remember(targets) {
     gsap.utils.toArray(targets).forEach((target) => animatedTargets.add(target));
@@ -940,48 +1048,127 @@ function initScrollStory() {
       });
     }
 
-    // Photo band: a single scrubbed camera move replaces the old manual
-    // window-scroll listener and keeps all work inside ScrollTrigger.
-    const photoBand = document.querySelector('#photo-band .photo-band-inner');
-    const photoContent = document.querySelector('#photo-band .photo-band-content');
-    if (photoBand && photoContent) {
-      const photoTargets = remember(photoBand);
-      remember(photoContent);
+    // Photo band (Figma 312:74): the rounded panel expands to fill the
+    // screen on the way in and contracts on the way out, while the
+    // context column stays pinned beside the scrolling photographs.
+    // Only the empty .gallery-frame is animated — nothing that GSAP
+    // pins sits inside it, so the pin maths stays in untransformed space.
+    const band = document.getElementById('photo-band');
+    const frame = band && band.querySelector('.gallery-frame');
+    const galleryLayout = band && band.querySelector('.gallery-layout');
+    const galleryContext = band && band.querySelector('.gallery-context__inner');
+    const galleryGrid = document.getElementById('galleryGrid');
+    const galleryCards = galleryGrid ? Array.from(galleryGrid.querySelectorAll('.gallery-card')) : [];
 
-      gsap.timeline({
-        defaults: { ease: 'none' },
-        scrollTrigger: {
-          trigger: '#photo-band',
-          start: 'top bottom',
-          end: 'bottom top',
-          scrub: 0.7,
-          invalidateOnRefresh: true,
-          onToggle: (self) => setWillChange(photoTargets, self.isActive),
-        },
-      })
-        .fromTo(photoBand,
-          { backgroundPositionY: '38%' },
-          { backgroundPositionY: '68%', duration: 1 },
-          0
-        );
+    const FRAME_INSET = '6%';
+    const FRAME_RADIUS = 56;
 
-      gsap.fromTo(photoContent,
-        { autoAlpha: 0, y: 24, filter: 'blur(5px)' },
+    if (band && frame) {
+      remember(frame);
+
+      gsap.fromTo(frame,
+        { left: FRAME_INSET, right: FRAME_INSET, borderRadius: FRAME_RADIUS },
+        {
+          left: '0%',
+          right: '0%',
+          borderRadius: 0,
+          ease: 'none',
+          immediateRender: true,
+          scrollTrigger: {
+            trigger: band,
+            start: 'top bottom',
+            end: 'top top',
+            scrub: 0.6,
+            invalidateOnRefresh: true,
+            onToggle: (self) => setWillChange(frame, self.isActive),
+          },
+        }
+      );
+
+      // immediateRender stays off so this never stomps the entry state
+      // while the panel is still sitting full-bleed in the middle.
+      gsap.fromTo(frame,
+        { left: '0%', right: '0%', borderRadius: 0 },
+        {
+          left: FRAME_INSET,
+          right: FRAME_INSET,
+          borderRadius: FRAME_RADIUS,
+          ease: 'none',
+          immediateRender: false,
+          scrollTrigger: {
+            trigger: band,
+            start: 'bottom bottom',
+            end: 'bottom top',
+            scrub: 0.6,
+            invalidateOnRefresh: true,
+            onToggle: (self) => setWillChange(frame, self.isActive),
+          },
+        }
+      );
+    }
+
+    if (galleryContext) {
+      remember(galleryContext);
+      gsap.fromTo(galleryContext,
+        { autoAlpha: 0, y: 26, filter: 'blur(5px)' },
         {
           autoAlpha: 1,
           y: 0,
           filter: 'blur(0px)',
-          duration: 0.75,
+          duration: 0.8,
           ease: 'power3.out',
           scrollTrigger: {
-            trigger: '#photo-band',
-            start: 'top 82%',
+            trigger: band,
+            start: 'top 78%',
             toggleActions: 'play none none none',
-            onToggle: (self) => setWillChange(photoContent, self.isActive),
           },
-          onComplete: () => setWillChange(photoContent, false),
+          onComplete: () => setWillChange(galleryContext, false),
         }
       );
+    }
+
+    if (galleryGrid && galleryCards.length) {
+      const cardTargets = remember(galleryCards);
+      gsap.fromTo(cardTargets,
+        { autoAlpha: 0, y: 28 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.62,
+          stagger: 0.045,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: galleryGrid,
+            start: 'top 88%',
+            toggleActions: 'play none none none',
+            onToggle: (self) => setWillChange(cardTargets, self.isActive),
+          },
+          onComplete: () => {
+            setWillChange(cardTargets, false);
+            // Hand the cards back to CSS so the filter's re-entry
+            // animation isn't fighting leftover inline transforms.
+            gsap.set(cardTargets, { clearProps: 'transform,opacity,visibility' });
+          },
+        }
+      );
+    }
+
+    // Pin the context only where there is a second column to pin it
+    // beside; below that the layout stacks and it scrolls normally.
+    if (galleryLayout && galleryContext) {
+      galleryMedia = gsap.matchMedia();
+      galleryMedia.add('(min-width: 1024px)', () => {
+        const pin = ScrollTrigger.create({
+          trigger: galleryLayout,
+          start: 'top top+=88',
+          end: 'bottom bottom',
+          pin: galleryContext,
+          pinSpacing: false,
+          invalidateOnRefresh: true,
+        });
+
+        return () => pin.kill();
+      });
     }
 
     // Remaining sections keep their existing markup and gain restrained
@@ -1054,6 +1241,7 @@ function initScrollStory() {
     console.warn('Scroll story initialization failed; using native-scroll fallbacks.', error);
 
     if (coupleMedia) coupleMedia.revert();
+    if (galleryMedia) galleryMedia.revert();
     if (smoother) smoother.kill();
     ScrollTrigger.getAll().forEach((trigger) => trigger.kill(true));
     animatedTargets.forEach((target) => {
@@ -1068,4 +1256,4 @@ function initScrollStory() {
   }
 }
 
-if (!initScrollStory()) initFallbackPhotoBand();
+initScrollStory();

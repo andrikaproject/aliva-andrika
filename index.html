@@ -159,7 +159,7 @@
           <footer class="hero-meta" data-node-id="305:112">
             <p class="hero-meta__tagline" data-node-id="305:113">
               <span data-i18n="heroTagline">Celebrating a new chapter with the people we love.</span> </p>
-            <p class="hero-meta__couple" data-node-id="305:115">ANDRIKA ❤️‍🔥 ALIVA</p>
+            <p class="hero-meta__couple" data-node-id="305:115">ANDRIKA and ALIVA</p>
             <div class="hero-meta__date" data-node-id="305:117">
               <p data-node-id="305:114" data-i18n="saveTheDateUpper">SAVE THE DATE</p>
               <p data-node-id="305:116">17 • 10 • 2026</p>
@@ -268,21 +268,211 @@
 
 
       <!-- ================================================================
-     COMPONENT: PHOTO BAND (prewedding)
-     Full-width parallax strip. Swap the background-image on
-     #photo-band when the prewedding photos are ready.
+     COMPONENT: PHOTO BAND (prewedding gallery)
+     Figma 312:74 — a rounded panel that expands to fill the screen as
+     you reach it and contracts on the way out. Left column carries the
+     context and stays pinned; right column is the masonry of photos.
+     Add a photo by dropping a webp into assets/pict/gallery/ and
+     appending a .gallery-card below with its real width/height and a
+     data-category matching one of the filter pills.
 ================================================================ -->
       <section id="photo-band" aria-label="Our story in photos">
-        <div class="photo-band-inner">
-          <div class="photo-band-overlay"></div>
-          <div class="photo-band-content reveal">
-            <p class="section-label mb-3" style="color:#F3E7CF;" data-i18n="ourStory">Our Story</p>
-            <p class="font-display italic text-2xl sm:text-3xl font-light leading-snug" style="color:#FCF7EC;">
-              <span data-i18n="storyInFrames">Our story in frames</span>
-            </p>
-            <p class="section-label mt-4 tracking-widest2" style="font-size:0.55rem; color:#EBD9B4; opacity:0.9;">
-              <span data-i18n="comingSoon">coming soon</span>
-            </p>
+        <div class="gallery-frame" aria-hidden="true"></div>
+
+        <div class="gallery-layout">
+          <div class="gallery-context">
+            <div class="gallery-context__inner reveal">
+              <p class="section-label gallery-context__label" data-i18n="ourStory">Our Story</p>
+              <p class="gallery-context__heading font-display">
+                <span data-i18n="storyInFrames">Our story in frames</span>
+              </p>
+              <div class="gold-divider gallery-context__rule"><span class="diamond"></span></div>
+              <p class="gallery-context__intro" data-i18n="galleryIntro">A few moments from before the day itself.</p>
+
+              <div class="gallery-filters" id="galleryFilters" role="group" aria-label="Filter photos by category">
+                <button type="button" class="gallery-filter is-active" data-filter="all" aria-pressed="true"><span
+                    data-i18n="galAll">All</span></button>
+                <button type="button" class="gallery-filter" data-filter="journey" aria-pressed="false"><span
+                    data-i18n="galJourney">Journey</span></button>
+                <button type="button" class="gallery-filter" data-filter="portrait" aria-pressed="false"><span
+                    data-i18n="galPortraits">Portraits</span></button>
+              </div>
+
+              <p class="gallery-context__count" id="galleryCount" aria-live="polite"></p>
+            </div>
+          </div>
+
+          <div class="gallery-grid" id="galleryGrid">
+                <figure class="gallery-card" data-category="journey">
+                  <div class="gallery-card__media">
+                    <img src="assets/pict/gallery/umbrella.webp" alt="Aliva standing under a canopy of colourful parasols" loading="lazy" decoding="async" width="900"
+                      height="1200" />
+                  </div>
+                  <figcaption class="gallery-card__meta">
+                    <span class="gallery-card__title" data-i18n="galUmbrella">Beneath the parasols</span>
+                    <span class="gallery-card__tag" data-i18n="galJourney">Journey</span>
+                  </figcaption>
+                </figure>
+                <figure class="gallery-card" data-category="portrait">
+                  <div class="gallery-card__media">
+                    <img src="assets/pict/gallery/studio-floor.webp" alt="Andrika and Aliva seated on the floor, holding each other" loading="lazy" decoding="async" width="900"
+                      height="1350" />
+                  </div>
+                  <figcaption class="gallery-card__meta">
+                    <span class="gallery-card__title" data-i18n="galStudioFloor">Close and warm</span>
+                    <span class="gallery-card__tag" data-i18n="galPortraits">Portraits</span>
+                  </figcaption>
+                </figure>
+                <figure class="gallery-card" data-category="journey">
+                  <div class="gallery-card__media">
+                    <img src="assets/pict/gallery/red-bridge.webp" alt="Andrika and Aliva taking a selfie beneath a red arch" loading="lazy" decoding="async" width="1500"
+                      height="1125" />
+                  </div>
+                  <figcaption class="gallery-card__meta">
+                    <span class="gallery-card__title" data-i18n="galRedArch">Laughter at the red arch</span>
+                    <span class="gallery-card__tag" data-i18n="galJourney">Journey</span>
+                  </figcaption>
+                </figure>
+                <figure class="gallery-card" data-category="journey">
+                  <div class="gallery-card__media">
+                    <img src="assets/pict/gallery/torii-walk.webp" alt="Andrika walking through a long row of red gates" loading="lazy" decoding="async" width="900"
+                      height="1200" />
+                  </div>
+                  <figcaption class="gallery-card__meta">
+                    <span class="gallery-card__title" data-i18n="galToriiWalk">A thousand gates</span>
+                    <span class="gallery-card__tag" data-i18n="galJourney">Journey</span>
+                  </figcaption>
+                </figure>
+                <figure class="gallery-card" data-category="portrait">
+                  <div class="gallery-card__media">
+                    <img src="assets/pict/gallery/studio-seated.webp" alt="Andrika and Aliva seated side by side in the studio" loading="lazy" decoding="async" width="900"
+                      height="1350" />
+                  </div>
+                  <figcaption class="gallery-card__meta">
+                    <span class="gallery-card__title" data-i18n="galStudioSeated">Side by side</span>
+                    <span class="gallery-card__tag" data-i18n="galPortraits">Portraits</span>
+                  </figcaption>
+                </figure>
+                <figure class="gallery-card" data-category="journey">
+                  <div class="gallery-card__media">
+                    <img src="assets/pict/gallery/wisteria-1.webp" alt="Andrika and Aliva under a flowering archway" loading="lazy" decoding="async" width="900"
+                      height="1200" />
+                  </div>
+                  <figcaption class="gallery-card__meta">
+                    <span class="gallery-card__title" data-i18n="galWisteria1">Under the flower canopy</span>
+                    <span class="gallery-card__tag" data-i18n="galJourney">Journey</span>
+                  </figcaption>
+                </figure>
+                <figure class="gallery-card" data-category="journey">
+                  <div class="gallery-card__media">
+                    <img src="assets/pict/gallery/overlook.webp" alt="Andrika and Aliva on a walkway above a garden of red parasols" loading="lazy" decoding="async" width="1500"
+                      height="1125" />
+                  </div>
+                  <figcaption class="gallery-card__meta">
+                    <span class="gallery-card__title" data-i18n="galOverlook">The best vantage point</span>
+                    <span class="gallery-card__tag" data-i18n="galJourney">Journey</span>
+                  </figcaption>
+                </figure>
+                <figure class="gallery-card" data-category="portrait">
+                  <div class="gallery-card__media">
+                    <img src="assets/pict/gallery/studio-closeup.webp" alt="Andrika smiling closely at the camera with Aliva behind him" loading="lazy" decoding="async" width="900"
+                      height="1350" />
+                  </div>
+                  <figcaption class="gallery-card__meta">
+                    <span class="gallery-card__title" data-i18n="galStudioCloseup">Unguarded laughter</span>
+                    <span class="gallery-card__tag" data-i18n="galPortraits">Portraits</span>
+                  </figcaption>
+                </figure>
+                <figure class="gallery-card" data-category="journey">
+                  <div class="gallery-card__media">
+                    <img src="assets/pict/gallery/torii-embrace.webp" alt="Andrika and Aliva embracing among red gates" loading="lazy" decoding="async" width="900"
+                      height="1200" />
+                  </div>
+                  <figcaption class="gallery-card__meta">
+                    <span class="gallery-card__title" data-i18n="galToriiEmbrace">Together in the corridor</span>
+                    <span class="gallery-card__tag" data-i18n="galJourney">Journey</span>
+                  </figcaption>
+                </figure>
+                <figure class="gallery-card" data-category="journey">
+                  <div class="gallery-card__media">
+                    <img src="assets/pict/gallery/lantern-corridor.webp" alt="Andrika and Aliva in a brightly painted covered corridor" loading="lazy" decoding="async" width="900"
+                      height="1200" />
+                  </div>
+                  <figcaption class="gallery-card__meta">
+                    <span class="gallery-card__title" data-i18n="galCorridor">A corridor full of colour</span>
+                    <span class="gallery-card__tag" data-i18n="galJourney">Journey</span>
+                  </figcaption>
+                </figure>
+                <figure class="gallery-card" data-category="portrait">
+                  <div class="gallery-card__media">
+                    <img src="assets/pict/gallery/studio-standing.webp" alt="Andrika and Aliva standing together in the studio" loading="lazy" decoding="async" width="900"
+                      height="1350" />
+                  </div>
+                  <figcaption class="gallery-card__meta">
+                    <span class="gallery-card__title" data-i18n="galStudioStanding">Standing together</span>
+                    <span class="gallery-card__tag" data-i18n="galPortraits">Portraits</span>
+                  </figcaption>
+                </figure>
+                <figure class="gallery-card" data-category="journey">
+                  <div class="gallery-card__media">
+                    <img src="assets/pict/gallery/rickshaw.webp" alt="Andrika and Aliva laughing inside a red ride" loading="lazy" decoding="async" width="900"
+                      height="1349" />
+                  </div>
+                  <figcaption class="gallery-card__meta">
+                    <span class="gallery-card__title" data-i18n="galRide">Our little ride</span>
+                    <span class="gallery-card__tag" data-i18n="galJourney">Journey</span>
+                  </figcaption>
+                </figure>
+                <figure class="gallery-card" data-category="journey">
+                  <div class="gallery-card__media">
+                    <img src="assets/pict/gallery/wisteria-2.webp" alt="Andrika and Aliva walking beneath a flowering canopy" loading="lazy" decoding="async" width="900"
+                      height="1200" />
+                  </div>
+                  <figcaption class="gallery-card__meta">
+                    <span class="gallery-card__title" data-i18n="galWisteria2">Slow steps together</span>
+                    <span class="gallery-card__tag" data-i18n="galJourney">Journey</span>
+                  </figcaption>
+                </figure>
+                <figure class="gallery-card" data-category="journey">
+                  <div class="gallery-card__media">
+                    <img src="assets/pict/gallery/bamboo-gazebo.webp" alt="Aliva resting in a bamboo gazebo" loading="lazy" decoding="async" width="900"
+                      height="1200" />
+                  </div>
+                  <figcaption class="gallery-card__meta">
+                    <span class="gallery-card__title" data-i18n="galGazebo">Resting in the bamboo hut</span>
+                    <span class="gallery-card__tag" data-i18n="galJourney">Journey</span>
+                  </figcaption>
+                </figure>
+                <figure class="gallery-card" data-category="portrait">
+                  <div class="gallery-card__media">
+                    <img src="assets/pict/gallery/studio-lean.webp" alt="Aliva leaning playfully towards the camera with Andrika behind" loading="lazy" decoding="async" width="900"
+                      height="1350" />
+                  </div>
+                  <figcaption class="gallery-card__meta">
+                    <span class="gallery-card__title" data-i18n="galStudioPlay">Playing around</span>
+                    <span class="gallery-card__tag" data-i18n="galPortraits">Portraits</span>
+                  </figcaption>
+                </figure>
+                <figure class="gallery-card" data-category="journey">
+                  <div class="gallery-card__media">
+                    <img src="assets/pict/gallery/torii-closeup.webp" alt="Aliva smiling among tall red gates" loading="lazy" decoding="async" width="900"
+                      height="1200" />
+                  </div>
+                  <figcaption class="gallery-card__meta">
+                    <span class="gallery-card__title" data-i18n="galToriiSmile">A smile among the gates</span>
+                    <span class="gallery-card__tag" data-i18n="galJourney">Journey</span>
+                  </figcaption>
+                </figure>
+                <figure class="gallery-card" data-category="portrait">
+                  <div class="gallery-card__media">
+                    <img src="assets/pict/gallery/portrait-formal.webp" alt="Andrika and Aliva in traditional kebaya and batik, holding a parasol" loading="lazy" decoding="async" width="900"
+                      height="1125" />
+                  </div>
+                  <figcaption class="gallery-card__meta">
+                    <span class="gallery-card__title" data-i18n="galTraditional">In kebaya and batik</span>
+                    <span class="gallery-card__tag" data-i18n="galPortraits">Portraits</span>
+                  </figcaption>
+                </figure>
           </div>
         </div>
       </section>
