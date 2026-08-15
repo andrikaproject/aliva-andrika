@@ -83,6 +83,18 @@ const TRANSLATIONS = {
     optional: '(opsional)',
     warmWish: 'Tulis doa atau pesan hangat…',
     sendRsvp: 'Kirim RSVP',
+    giftLabel: 'Hadiah Pernikahan',
+    giftHeading: 'Memberi Hadiah',
+    giftIntro: 'Bagi Anda yang ingin berbagi tanda kasih, kami dengan penuh syukur menerimanya melalui rekening berikut.',
+    giftBank: 'BNI',
+    giftAccountNumber: 'Nomor Rekening',
+    giftAccountHolder: 'Atas Nama',
+    giftCopyAccount: 'Salin nomor rekening',
+    giftCopied: 'Tersalin',
+    giftCopyHint: 'Ketuk untuk menyalin nomor rekening',
+    giftCopiedStatus: 'Nomor rekening berhasil disalin',
+    giftAccountPending: 'Nomor rekening akan ditambahkan',
+    giftCopyError: 'Nomor rekening belum dapat disalin',
     nowPlaying: 'Sedang Diputar',
     footerQuote: '“Hal terbaik untuk dipertahankan dalam hidup adalah satu sama lain.”',
     guestGreeting: 'Kepada {name} &amp; Pasangan'
@@ -170,6 +182,18 @@ const TRANSLATIONS = {
     optional: '(optional)',
     warmWish: 'Leave a warm wish or message…',
     sendRsvp: 'Send RSVP',
+    giftLabel: 'Wedding Gift',
+    giftHeading: 'Sending a Gift',
+    giftIntro: 'For those who wish to share a gift, we gratefully receive it through the accounts below.',
+    giftBank: 'BNI',
+    giftAccountNumber: 'Account Number',
+    giftAccountHolder: 'Account Holder',
+    giftCopyAccount: 'Copy account number',
+    giftCopied: 'Copied',
+    giftCopyHint: 'Tap to copy the account number',
+    giftCopiedStatus: 'Account number copied',
+    giftAccountPending: 'Account number will be added soon',
+    giftCopyError: 'Unable to copy the account number',
     nowPlaying: 'Now Playing',
     footerQuote: '“The best thing to hold onto in life is each other.”',
     guestGreeting: 'Dear {name} &amp; Partner'
@@ -213,6 +237,97 @@ function applyLocale(locale) {
     button.addEventListener('click', () => applyLocale(button.dataset.locale));
   });
   applyLocale(savedLocale || 'id');
+})();
+
+// ── WEDDING GIFT ACCOUNT COPY ─────────────────────────────────
+(function initGiftAccounts() {
+  const cards = Array.from(document.querySelectorAll('[data-gift-account]'));
+  if (!cards.length) return;
+
+  const timers = new WeakMap();
+
+  function setTranslatedText(element, key) {
+    if (!element) return;
+    element.dataset.i18n = key;
+    element.textContent = getTranslation(key);
+  }
+
+  async function copyText(text) {
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      try {
+        await navigator.clipboard.writeText(text);
+        return;
+      } catch {
+        // Fall through to the older document.execCommand fallback.
+      }
+    }
+
+    const helper = document.createElement('textarea');
+    helper.value = text;
+    helper.setAttribute('readonly', '');
+    helper.style.position = 'fixed';
+    helper.style.top = '0';
+    helper.style.left = '-9999px';
+    helper.style.opacity = '0';
+    document.body.appendChild(helper);
+    helper.focus();
+    helper.select();
+    helper.setSelectionRange(0, helper.value.length);
+
+    const copied = document.execCommand('copy');
+    helper.remove();
+    if (!copied) throw new Error('Clipboard unavailable');
+  }
+
+  cards.forEach((card) => {
+    const account = (card.dataset.giftAccount || '').replace(/\s+/g, '').trim();
+    const number = card.querySelector('[data-gift-account-number]');
+    const button = card.querySelector('[data-gift-copy]');
+    const label = card.querySelector('[data-gift-copy-label]');
+    const status = card.querySelector('[data-gift-status]');
+
+    if (!button) return;
+
+    if (number) {
+      number.textContent = account || '—';
+      number.classList.toggle('is-empty', !account);
+    }
+
+    button.disabled = !account;
+    button.setAttribute('aria-disabled', String(!account));
+    setTranslatedText(status, account ? 'giftCopyHint' : 'giftAccountPending');
+    status?.classList.toggle('is-visible', !account);
+
+    button.addEventListener('click', async () => {
+      if (button.disabled) return;
+
+      button.disabled = true;
+      button.setAttribute('aria-busy', 'true');
+
+      try {
+        await copyText(account);
+        setTranslatedText(label, 'giftCopied');
+        setTranslatedText(status, 'giftCopiedStatus');
+        status?.classList.add('is-visible');
+        button.classList.add('is-copied');
+
+        window.clearTimeout(timers.get(card));
+        timers.set(card, window.setTimeout(() => {
+          setTranslatedText(label, 'giftCopyAccount');
+          setTranslatedText(status, 'giftCopyHint');
+          status?.classList.remove('is-visible');
+          button.classList.remove('is-copied');
+          button.disabled = false;
+          button.removeAttribute('aria-busy');
+        }, 2200));
+      } catch {
+        setTranslatedText(status, 'giftCopyError');
+        status?.classList.add('is-visible');
+        button.disabled = false;
+        button.removeAttribute('aria-busy');
+      }
+    });
+  });
 })();
 
 // ── Motion preference (shared) ─────────────────────────────────

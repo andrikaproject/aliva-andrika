@@ -81,7 +81,8 @@ body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
   font-family: var(--font-body);
-  font-weight: 300;
+  font-size: 1rem;
+  font-weight: 400;
   overflow-x: hidden;
 }
 
@@ -116,6 +117,7 @@ html.motion-enhanced {
   font-size: var(--text-xs);
   font-weight: 500;
   letter-spacing: var(--tracking-label);
+  line-height: 1.4;
   text-transform: uppercase;
   color: var(--text-gold);
   /* was hsl(var(--accent)) — 3.18:1 FAIL → now 5.83:1 PASS */
@@ -153,8 +155,9 @@ html.motion-enhanced {
 }
 
 .cd-label {
-  font-size: 0.6rem;
-  letter-spacing: 0.2em;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  line-height: 1.3;
   text-transform: uppercase;
   color: var(--text-gold);
   /* was hsl(var(--accent)) — 3.18:1 FAIL → now 5.83:1 PASS */
@@ -380,7 +383,7 @@ html[lang="id"] .hero-line--names>span {
   margin: 1rem auto 0;
   color: hsl(var(--foreground) / 0.68);
   font-family: var(--font-body);
-  font-size: 0.9rem;
+  font-size: 1rem;
   line-height: 1.6;
 }
 
@@ -420,7 +423,7 @@ html[lang="id"] .hero-line--names>span {
 .couple-card__role {
   margin: 0 0 0.35rem;
   font-family: var(--font-body);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.24em;
   line-height: 1.4;
@@ -442,7 +445,7 @@ html[lang="id"] .hero-line--names>span {
   margin: 0;
   color: hsl(var(--foreground) / 0.68);
   font-family: var(--font-body);
-  font-size: 0.82rem;
+  font-size: 0.875rem;
   line-height: 1.65;
 }
 
@@ -484,7 +487,7 @@ html[lang="id"] .hero-line--names>span {
   }
 
   .couple-card__bio {
-    font-size: 0.78rem;
+    font-size: 0.875rem;
   }
 }
 
@@ -502,8 +505,8 @@ html[lang="id"] .hero-line--names>span {
   align-items: center;
   justify-content: space-between;
   min-width: 0;
-  font-size: 12px;
-  line-height: 1.3334;
+  font-size: 0.875rem;
+  line-height: 1.4;
   letter-spacing: 0.04em;
 }
 
@@ -520,6 +523,12 @@ html[lang="id"] .hero-line--names>span {
   width: 336px;
 }
 
+.hero-meta__tagline {
+  font-size: 0.875rem;
+  line-height: 1.4;
+  opacity: 0.9;
+}
+
 .hero-scroll-cue {
   display: flex;
   align-items: center;
@@ -528,18 +537,19 @@ html[lang="id"] .hero-line--names>span {
   margin-top: clamp(12px, 2.2vh, 22px);
   color: #514741;
   font-family: "DM Mono", monospace;
-  font-size: 9px;
+  font-size: clamp(0.75rem, 1.4vw, 0.875rem);
   font-weight: 500;
-  line-height: 1.2;
-  letter-spacing: 0.06em;
-  opacity: 0.58;
-  white-space: nowrap;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  opacity: 0.78;
+  text-align: center;
+  white-space: normal;
 }
 
 .hero-scroll-cue span {
   display: inline-block;
-  font-size: 12px;
-  line-height: 1;
+  font-size: 1em;
+  line-height: 1.2;
   animation: scroll-cue-drop 1.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
 
@@ -547,7 +557,7 @@ html[lang="id"] .hero-line--names>span {
   0%,
   100% {
     transform: translateY(-1px);
-    opacity: 0.45;
+    opacity: 1;
   }
 
   50% {
@@ -577,7 +587,7 @@ html[lang="id"] .hero-line--names>span {
 
   .hero-masthead {
     gap: 16px;
-    font-size: clamp(9px, 2.65vw, 14px);
+    font-size: clamp(0.75rem, 2.65vw, 0.875rem);
   }
 
   .hero-masthead p:last-child {
@@ -592,7 +602,7 @@ html[lang="id"] .hero-line--names>span {
   .hero-meta {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 12px 16px;
-    font-size: clamp(9px, 2.4vw, 11px);
+    font-size: clamp(0.75rem, 2.4vw, 0.875rem);
   }
 
   .hero-meta__tagline {
@@ -610,7 +620,9 @@ html[lang="id"] .hero-line--names>span {
   .hero-scroll-cue {
     gap: 5px;
     margin-top: clamp(10px, 2vh, 16px);
-    font-size: clamp(7px, 1.9vw, 9px);
+    font-size: clamp(0.75rem, 2.2vw, 0.875rem);
+    line-height: 1.4;
+    opacity: 0.78;
   }
 }
 
@@ -718,8 +730,9 @@ section {
   border-radius: var(--radius);
   padding: 0.7rem 1rem;
   font-family: var(--font-body);
-  font-size: var(--text-sm);
-  font-weight: 300;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
   color: hsl(var(--foreground));
   outline: none;
   transition: border-color var(--duration-base) var(--ease-default),
@@ -733,7 +746,7 @@ section {
 
 .form-input::placeholder {
   color: hsl(var(--muted-foreground));
-  opacity: 0.65;
+  opacity: 1;
 }
 
 /* ── Submit button (page-specific; uses .btn-default under the hood) ── */
@@ -746,6 +759,7 @@ section {
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
   padding: 0.9rem 2.5rem;
+  min-height: 2.75rem;
   border: 1px solid hsl(var(--primary));
   border-radius: var(--radius);
   cursor: pointer;
@@ -1432,9 +1446,10 @@ section {
 
 .gallery-context__count {
   margin: 1.25rem 0 0;
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   font-weight: 500;
-  letter-spacing: var(--tracking-widest);
+  letter-spacing: 0.14em;
+  line-height: 1.4;
   text-transform: uppercase;
   color: #C9AF7E;
 }
@@ -1459,11 +1474,13 @@ section {
   border: 1px solid rgba(243, 231, 207, 0.30);
   border-radius: var(--radius-full);
   background: transparent;
+  min-height: 2.75rem;
   padding: 0.58rem 1.2rem;
   font-family: var(--font-body);
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   font-weight: 500;
-  letter-spacing: var(--tracking-widest);
+  letter-spacing: 0.14em;
+  line-height: 1.3;
   text-transform: uppercase;
   color: #EFE1C6;
   transition: background-color var(--duration-slow) var(--ease-out),
@@ -1573,9 +1590,10 @@ section {
 
 .gallery-card__tag {
   flex-shrink: 0;
-  font-size: 0.5rem;
+  font-size: 0.75rem;
   font-weight: 500;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.14em;
+  line-height: 1.3;
   text-transform: uppercase;
   color: #DFC79A;
 }
@@ -1592,12 +1610,12 @@ section {
   }
 
   .gallery-card__title {
-    font-size: 0.86rem;
+    font-size: 0.875rem;
   }
 
   .gallery-card__tag {
-    font-size: 0.45rem;
-    letter-spacing: 0.18em;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
   }
 }
 
@@ -1757,7 +1775,7 @@ a:focus-visible {
   background: rgba(250, 246, 239, 0.86);
   color: #7e5922;
   font-family: var(--font-body);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.12em;
   backdrop-filter: blur(10px);
@@ -1765,14 +1783,19 @@ a:focus-visible {
 }
 
 .language-btn {
-  padding: 0.1rem 0.2rem;
+  display: inline-flex;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.35rem;
   border: 0;
   background: transparent;
   color: inherit;
   cursor: pointer;
   font: inherit;
   letter-spacing: inherit;
-  opacity: 0.48;
+  opacity: 0.82;
   transition: opacity 150ms ease, transform 150ms ease;
 }
 
@@ -1835,6 +1858,11 @@ a:focus-visible {
 #when .when-calendar__day--active > div {
   border-color: hsl(var(--destructive)) !important;
   box-shadow: 0 0 0 4px hsl(var(--destructive) / 0.12) !important;
+}
+
+#when .when-calendar__day:not(.when-calendar__day--active) .section-label,
+#when .when-calendar__day:not(.when-calendar__day--active) > span {
+  color: hsl(var(--foreground) / 0.72);
 }
 
 #when .when-countdown > .flex {
@@ -2013,6 +2041,135 @@ a:focus-visible {
   overflow-wrap: anywhere;
 }
 
+/* ── Wedding gifts ───────────────────────────────────────────── */
+#gift .gift-shell {
+  max-width: 56rem;
+}
+
+#gift .gift-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+#gift .gift-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(1.5rem, 4vw, 2.25rem);
+  text-align: center;
+  border-color: hsl(var(--accent));
+  box-shadow: var(--shadow-md);
+}
+
+#gift .gift-card__ornament {
+  margin-bottom: 0.9rem;
+  font-size: 1.1rem;
+}
+
+#gift .gift-card__bank {
+  margin-bottom: 0.8rem;
+}
+
+#gift .gift-card__holder-label,
+#gift .gift-card__account-label {
+  color: var(--text-rose);
+  font-size: 0.75rem;
+}
+
+#gift .gift-card__holder-label {
+  margin-bottom: 0.25rem;
+}
+
+#gift .gift-card__name {
+  max-width: 18rem;
+  margin-inline: auto;
+}
+
+#gift .gift-card__rule {
+  width: 2rem;
+  height: 1px;
+  margin: 1.25rem auto 1rem;
+  background: hsl(var(--accent));
+}
+
+#gift .gift-card__account-label {
+  margin-bottom: 0;
+}
+
+#gift .gift-card__number {
+  max-width: 100%;
+  margin: 0.35rem 0 1.25rem;
+  overflow-wrap: anywhere;
+  color: hsl(var(--foreground));
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 4vw, 2.45rem);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  line-height: 1;
+}
+
+#gift .gift-card__number.is-empty {
+  color: hsl(var(--muted-foreground));
+  letter-spacing: 0.12em;
+}
+
+#gift .gift-copy-btn {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid hsl(var(--accent));
+  background: transparent;
+  color: hsl(var(--foreground));
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: background var(--duration-base) var(--ease-default), color var(--duration-base) var(--ease-default), opacity var(--duration-base) var(--ease-default);
+}
+
+#gift .gift-copy-btn svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+#gift .gift-copy-btn:hover:not(:disabled),
+#gift .gift-copy-btn.is-copied {
+  background: hsl(var(--accent));
+  color: hsl(var(--card));
+}
+
+#gift .gift-copy-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-gold);
+}
+
+#gift .gift-copy-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+#gift .gift-card__status {
+  min-height: 1.25rem;
+  margin-top: 0.75rem;
+  color: var(--text-gold);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--duration-base) var(--ease-default);
+}
+
+#gift .gift-card__status.is-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
 @media (max-width: 640px) {
   #rsvp {
     padding-block: clamp(4rem, 14vw, 5.5rem);
@@ -2038,5 +2195,13 @@ a:focus-visible {
 
   #rsvp .rsvp-form-panel {
     padding: 1.1rem;
+  }
+
+  #gift .gift-cards {
+    grid-template-columns: 1fr;
+  }
+
+  #gift .gift-card__number {
+    font-size: clamp(1.7rem, 8vw, 2.25rem);
   }
 }

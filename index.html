@@ -268,6 +268,343 @@
 
 
       <!-- ================================================================
+     COMPONENT: WHEN (Date + Countdown Timer)
+     Edit: WEDDING_DATE constant in JS below, and the display text
+================================================================ -->
+      <section id="when" class="py-20 sm:py-28 px-4 sm:px-6"
+        style="background: linear-gradient(180deg, #F0E8DA 0%, #FAF6EF 100%);">
+        <div class="max-w-3xl mx-auto text-center when-shell">
+
+          <!-- Section header -->
+          <div class="reveal stagger">
+            <p class="section-label mb-3" data-i18n="theDate">The Date</p>
+            <h2 class="font-display text-4xl md:text-5xl font-light text-ink italic" data-i18n="saveTheDateHeading">Save the Date!!</h2>
+            <div class="gold-divider mt-5 w-32 mx-auto"><span class="diamond"></span></div>
+          </div>
+
+          <!-- Mini Calendar Strip -->
+          <div class="mt-12 reveal">
+            <div class="panel inline-flex items-stretch w-full max-w-xs mx-auto overflow-hidden when-calendar">
+              <!-- Friday 16 -->
+              <div class="flex-1 flex flex-col items-center justify-center py-6 px-3 when-calendar__day"
+                style="border-right: 1px solid hsl(var(--border));">
+                <p class="section-label mb-3" style="font-size:0.75rem;" data-i18n="friday">Friday</p>
+                <span class="font-display text-4xl font-light text-ink leading-none">16</span>
+              </div>
+
+              <!-- Saturday 17 — circled -->
+              <div class="flex-1 flex flex-col items-center justify-center py-6 px-3 when-calendar__day when-calendar__day--active"
+                style="border-right: 1px solid hsl(var(--border));">
+                <p class="section-label mb-3 text-text-gold" style="font-size:0.75rem;" data-i18n="saturday">Saturday</p>
+                <div class="w-14 h-14 rounded-full flex items-center justify-center"
+                  style="border: 2px solid hsl(var(--destructive)); box-shadow: 0 0 0 3px hsl(var(--destructive) / 0.12);">
+                  <span class="font-display text-3xl font-light text-ink leading-none">17</span>
+                </div>
+                <p class="section-label mt-3 text-text-gold" style="font-size:0.75rem;" data-i18n="oct2026">Oct 2026</p>
+              </div>
+
+              <!-- Sunday 18 -->
+              <div class="flex-1 flex flex-col items-center justify-center py-6 px-3 when-calendar__day">
+                <p class="section-label mb-3" style="font-size:0.75rem;" data-i18n="sunday">Sunday</p>
+                <span class="font-display text-4xl font-light text-ink leading-none">18</span>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Countdown Timer -->
+          <div class="mt-10 reveal when-countdown" style="transition-delay: 0.1s;">
+            <p class="section-label mb-5 tracking-widest2" data-i18n="countingDays">Counting the Days</p>
+            <div class="flex justify-center gap-2 sm:gap-4 w-full max-w-sm mx-auto">
+              <div class="cd-box panel">
+                <span class="cd-num" id="cd-days">--</span>
+                <span class="cd-label" data-i18n="days">Days</span>
+              </div>
+              <div class="cd-box panel">
+                <span class="cd-num" id="cd-hours">--</span>
+                <span class="cd-label" data-i18n="hours">Hours</span>
+              </div>
+              <div class="cd-box panel">
+                <span class="cd-num" id="cd-minutes">--</span>
+                <span class="cd-label" data-i18n="minutes">Minutes</span>
+              </div>
+              <div class="cd-box panel">
+                <span class="cd-num" id="cd-seconds">--</span>
+                <span class="cd-label" data-i18n="seconds">Seconds</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Event Blocks -->
+          <div class="mt-12 grid sm:grid-cols-2 gap-5 text-left reveal when-events" style="transition-delay: 0.2s;">
+
+            <!-- Akad Nikah -->
+            <div class="panel px-6 py-6 when-event">
+              <p class="section-label mb-4 text-text-rose when-event__title">Akad Nikah</p>
+              <p class="font-display text-lg font-light text-ink leading-snug when-event__date" data-i18n="saturdayDate">Saturday, 17 October 2026</p>
+              <p class="font-display italic text-text-gold text-base mt-1 when-event__time">08:30 – 10:00 WIB</p>
+              <div class="w-8 h-px bg-gold-light my-4 when-event__rule"></div>
+              <p class="text-sm text-ink opacity-70 leading-relaxed when-event__venue">Ballroom<br />V Hotel &amp; Residence, Bandung</p>
+            </div>
+
+            <!-- Resepsi -->
+            <div class="panel px-6 py-6 when-event" style="transition-delay: 0.1s;">
+              <p class="section-label mb-4 text-text-gold when-event__title">Resepsi</p>
+              <p class="font-display text-lg font-light text-ink leading-snug when-event__date" data-i18n="saturdayDate">Saturday, 17 October 2026</p>
+              <p class="font-display italic text-text-gold text-base mt-1 when-event__time">10:30 – 14:00 WIB</p>
+              <div class="w-8 h-px bg-gold-light my-4 when-event__rule"></div>
+              <p class="text-sm text-ink opacity-70 leading-relaxed when-event__venue">Ballroom<br />V Hotel &amp; Residence, Bandung</p>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+
+      <!-- ================================================================
+     COMPONENT: WHERE (Venue)
+     Edit: venue name, address, maps URL, events list
+================================================================ -->
+      <section id="where" class="py-20 sm:py-28 px-4 sm:px-6">
+        <div class="max-w-4xl mx-auto">
+
+          <!-- Section header -->
+          <div class="text-center reveal stagger">
+            <p class="section-label mb-3" data-i18n="venue">Venue</p>
+            <h2 class="font-display text-4xl md:text-5xl font-light text-ink" data-i18n="whereWeCelebrate">Where We Celebrate</h2>
+            <div class="gold-divider mt-5 w-32 mx-auto"><span class="diamond"></span></div>
+          </div>
+
+          <!-- Venue details + Events -->
+          <div class="mt-14 grid md:grid-cols-2 gap-8 items-start">
+
+            <!-- Venue Card -->
+            <div class="panel p-5 sm:p-8 reveal">
+              <p class="section-label mb-4 text-text-rose" data-i18n="mainVenue">Main Venue</p>
+              <h3 class="font-display text-2xl font-light text-ink mb-1">Ballroom</h3>
+              <p class="font-display italic text-text-gold text-lg mb-5">V Hotel &amp; Residence</p>
+              <div class="space-y-1 text-sm text-ink opacity-75 leading-relaxed">
+                <p>Jl. Setrawangi, Sukagalih</p>
+                <p>Kec. Sukajadi, Kota Bandung</p>
+                <p>Jawa Barat 40163</p>
+              </div>
+              <div class="w-full h-px bg-gold-light my-6"></div>
+              <a href="https://maps.app.goo.gl/2s4H3gJi14MV8KGx7" target="_blank" rel="noopener"
+                class="inline-flex items-center gap-2 section-label text-text-gold border border-gold-mid px-5 py-2.5 hover:bg-gold-mid hover:text-white transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span data-i18n="openInMaps">Open in Maps</span>
+              </a>
+            </div>
+
+            <!-- Events Timeline -->
+            <div class="reveal" style="transition-delay: 0.15s;">
+              <p class="section-label text-text-rose mb-5 text-center md:text-left" data-i18n="scheduleOfEvents">Schedule of Events</p>
+
+              <div class="flex justify-center md:justify-start">
+                <div class="grid gap-y-5" style="grid-template-columns: 3.5rem 1px 1fr;">
+
+                  <!-- Continuous vertical line spanning all rows -->
+                  <div class="bg-gold-light" style="grid-column: 2; grid-row: 1 / -1;"></div>
+
+                  <!-- 08:00 -->
+                  <div class="text-right pr-4 pt-0.5" style="grid-column: 1; grid-row: 1;">
+                    <span class="font-display text-text-gold text-sm">07:00</span>
+                  </div>
+                  <div class="pl-4" style="grid-column: 3; grid-row: 1;">
+                    <p class="font-body text-sm font-medium text-ink" data-i18n="guestArrival">Guest Arrival</p>
+                    <p class="text-xs text-ink opacity-70 mt-0.5" data-i18n="lobbyWelcome">Lobby &amp; Welcome</p>
+                  </div>
+
+                  <!-- 08:30 -->
+                  <div class="text-right pr-4 pt-0.5" style="grid-column: 1; grid-row: 2;">
+                    <span class="font-display text-text-gold text-sm">08:00</span>
+                  </div>
+                  <div class="pl-4" style="grid-column: 3; grid-row: 2;">
+                    <p class="font-body text-sm font-medium text-ink">Akad Nikah</p>
+                    <p class="text-xs text-ink opacity-70 mt-0.5" data-i18n="sacredVows">The Sacred Vows</p>
+                  </div>
+
+                  <!-- 10:30–14:00 -->
+                  <div class="text-right pr-4 pt-0.5 flex flex-col items-end gap-1 leading-none" style="grid-column: 1; grid-row: 3;">
+                    <span class="font-display text-text-gold text-sm">10:30</span>
+                    <span class="font-display text-text-gold text-xs" aria-hidden="true">–</span>
+                    <span class="font-display text-text-gold text-sm">14:00</span>
+                  </div>
+                  <div class="pl-4" style="grid-column: 3; grid-row: 3;">
+                    <p class="font-body text-sm font-medium text-ink">Resepsi</p>
+                    <p class="text-xs text-ink opacity-70 mt-0.5" data-i18n="luncheonCelebration">Luncheon &amp; Celebration</p>
+                  </div>
+
+
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ================================================================
+     COMPONENT: RSVP
+     Edit: form action (or wire to your backend), guest limit note
+================================================================ -->
+      <section id="rsvp" class="py-20 sm:py-28 px-4 sm:px-6"
+        style="background: linear-gradient(180deg, #FAF6EF 0%, #F0E8DA 100%);">
+        <div class="max-w-2xl mx-auto rsvp-shell">
+
+          <!-- Section header -->
+          <div class="text-center reveal stagger">
+            <p class="section-label mb-3">RSVP</p>
+            <h2 class="font-display text-4xl md:text-5xl font-light text-ink" data-i18n="willYouJoin">Will You Join Us?</h2>
+            <div class="gold-divider mt-5 w-32 mx-auto"><span class="diamond"></span></div>
+            <p class="mt-5 text-sm text-ink opacity-65 leading-relaxed max-w-sm mx-auto">
+              <span data-i18n="rsvpIntro">Kindly confirm your attendance by <strong class="font-medium text-text-rose">1 October 2026</strong>.
+              We can't wait to celebrate with you.</span>
+            </p>
+          </div>
+
+          <!-- RSVP Form -->
+          <div class="panel mt-10 p-5 sm:p-8 reveal rsvp-form-panel" style="transition-delay: 0.1s;">
+
+            <!-- Success message (hidden by default) -->
+            <div id="rsvp-success">
+              <div class="floral-accent text-2xl mb-4">✦ &nbsp; ✦ &nbsp; ✦</div>
+              <h3 class="font-display text-2xl font-light text-ink mb-2" data-i18n="thankYou">Thank You!</h3>
+              <p class="text-sm text-ink opacity-70" data-i18n="rsvpReceived">Your RSVP has been received. We look forward to seeing you.</p>
+            </div>
+
+            <!-- Form -->
+            <form id="rsvp-form" class="space-y-5 rsvp-form" onsubmit="handleRsvp(event)">
+
+              <div class="rsvp-primary-fields">
+                <!-- Name -->
+                <div>
+                  <label for="rsvp-name" class="section-label block mb-2" data-i18n="fullName">Full Name</label>
+                  <input id="rsvp-name" type="text" name="name" required data-i18n-placeholder="yourFullName" placeholder="Your full name" class="form-input" />
+                </div>
+
+                <!-- Number of guests -->
+                <div>
+                  <label for="rsvp-guests" class="section-label block mb-2" data-i18n="numberOfGuests">Number of Guests</label>
+                  <input id="rsvp-guests" type="number" name="guests" min="1" max="4" value="1" class="form-input rsvp-guest-count" />
+                </div>
+              </div>
+
+              <!-- Attendance -->
+              <div>
+                <label class="section-label block mb-3" data-i18n="attendance">Attendance</label>
+                <div class="flex gap-3 flex-wrap rsvp-attendance-options">
+                  <div class="radio-card">
+                    <input type="radio" id="att-yes" name="attendance" value="yes" checked />
+                    <label for="att-yes" data-i18n="joyfullyAccepts">Joyfully Accepts</label>
+                  </div>
+                  <div class="radio-card">
+                    <input type="radio" id="att-no" name="attendance" value="no" />
+                    <label for="att-no" data-i18n="regretfullyDeclines">Regretfully Declines</label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Message -->
+              <div>
+                <label for="rsvp-message" class="section-label block mb-2"><span data-i18n="messageForCouple">Message for the Couple</span> <span
+                    class="opacity-70" data-i18n="optional">(optional)</span></label>
+                <textarea id="rsvp-message" name="message" rows="4" maxlength="600" data-i18n-placeholder="warmWish" placeholder="Leave a warm wish or message…"
+                  class="form-input rsvp-message resize-y"></textarea>
+              </div>
+
+              <!-- Submit -->
+              <div class="pt-2 rsvp-submit-row">
+                <button type="submit" class="btn-submit">
+                  <span data-i18n="sendRsvp">Send RSVP</span>
+                </button>
+              </div>
+
+            </form>
+          </div>
+
+        </div>
+      </section>
+
+
+      <!-- ================================================================
+     COMPONENT: WEDDING GIFT
+     Add an account by replacing the empty data-gift-account value.
+================================================================ -->
+      <section id="gift" class="py-20 sm:py-28 px-4 sm:px-6"
+        style="background: linear-gradient(180deg, #F0E8DA 0%, #FAF6EF 100%);">
+        <div class="max-w-4xl mx-auto gift-shell">
+
+          <!-- Section header -->
+          <div class="text-center reveal stagger">
+            <p class="section-label mb-3" data-i18n="giftLabel">Hadiah Pernikahan</p>
+            <h2 class="font-display text-4xl md:text-5xl font-light text-ink" data-i18n="giftHeading">Memberi Hadiah</h2>
+            <div class="gold-divider mt-5 w-32 mx-auto"><span class="diamond"></span></div>
+            <p class="mt-5 text-sm text-ink opacity-65 leading-relaxed max-w-lg mx-auto" data-i18n="giftIntro">
+              Bagi Anda yang ingin berbagi tanda kasih, kami dengan penuh syukur menerimanya melalui rekening berikut.
+            </p>
+          </div>
+
+          <!-- Account cards -->
+          <div class="gift-cards mt-10">
+
+            <!-- Andrika's account — fill data-gift-account when ready -->
+            <article class="gift-card panel reveal" data-gift-account="">
+              <div class="floral-accent gift-card__ornament" aria-hidden="true">✦</div>
+              <p class="section-label gift-card__bank" data-i18n="giftBank">BNI</p>
+              <p class="section-label gift-card__holder-label" data-i18n="giftAccountHolder">Atas Nama</p>
+              <h3 class="font-display text-2xl sm:text-3xl font-light text-ink gift-card__name">Andrika Zainal Ibrahim</h3>
+              <div class="gift-card__rule" aria-hidden="true"></div>
+              <p class="section-label gift-card__account-label" data-i18n="giftAccountNumber">Nomor Rekening</p>
+              <p class="gift-card__number" data-gift-account-number>—</p>
+              <button type="button" class="gift-copy-btn" data-gift-copy disabled>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="9" y="9" width="10" height="10" rx="1.5" />
+                  <path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1" />
+                </svg>
+                <span data-gift-copy-label data-i18n="giftCopyAccount">Salin nomor rekening</span>
+              </button>
+              <p class="gift-card__status is-visible" data-gift-status data-i18n="giftAccountPending" role="status">
+                Nomor rekening akan ditambahkan
+              </p>
+            </article>
+
+            <!-- Aliva's account -->
+            <article class="gift-card panel reveal" data-gift-account="0727960012" style="transition-delay: 0.1s;">
+              <div class="floral-accent gift-card__ornament" aria-hidden="true">✦</div>
+              <p class="section-label gift-card__bank" data-i18n="giftBank">BNI</p>
+              <p class="section-label gift-card__holder-label" data-i18n="giftAccountHolder">Atas Nama</p>
+              <h3 class="font-display text-2xl sm:text-3xl font-light text-ink gift-card__name">Nur Aliva Ike Purwati</h3>
+              <div class="gift-card__rule" aria-hidden="true"></div>
+              <p class="section-label gift-card__account-label" data-i18n="giftAccountNumber">Nomor Rekening</p>
+              <p class="gift-card__number" data-gift-account-number>0727960012</p>
+              <button type="button" class="gift-copy-btn" data-gift-copy>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="9" y="9" width="10" height="10" rx="1.5" />
+                  <path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1" />
+                </svg>
+                <span data-gift-copy-label data-i18n="giftCopyAccount">Salin nomor rekening</span>
+              </button>
+              <p class="gift-card__status" data-gift-status data-i18n="giftCopyHint" role="status">
+                Ketuk untuk menyalin nomor rekening
+              </p>
+            </article>
+
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ================================================================
      COMPONENT: PHOTO BAND (prewedding gallery)
      Figma 312:74 — a rounded panel that expands to fill the screen as
      you reach it and contracts on the way out. Left column carries the
@@ -479,288 +816,6 @@
 
 
       <!-- ================================================================
-     COMPONENT: WHEN (Date + Countdown Timer)
-     Edit: WEDDING_DATE constant in JS below, and the display text
-================================================================ -->
-      <section id="when" class="py-20 sm:py-28 px-4 sm:px-6"
-        style="background: linear-gradient(180deg, #F0E8DA 0%, #FAF6EF 100%);">
-        <div class="max-w-3xl mx-auto text-center when-shell">
-
-          <!-- Section header -->
-          <div class="reveal stagger">
-            <p class="section-label mb-3" data-i18n="theDate">The Date</p>
-            <h2 class="font-display text-4xl md:text-5xl font-light text-ink italic" data-i18n="saveTheDateHeading">Save the Date!!</h2>
-            <div class="gold-divider mt-5 w-32 mx-auto"><span class="diamond"></span></div>
-          </div>
-
-          <!-- Mini Calendar Strip -->
-          <div class="mt-12 reveal">
-            <div class="panel inline-flex items-stretch w-full max-w-xs mx-auto overflow-hidden when-calendar">
-              <!-- Friday 16 -->
-              <div class="flex-1 flex flex-col items-center justify-center py-6 px-3 opacity-45 when-calendar__day"
-                style="border-right: 1px solid hsl(var(--border));">
-                <p class="section-label mb-3" style="font-size:0.55rem;" data-i18n="friday">Friday</p>
-                <span class="font-display text-4xl font-light text-ink leading-none">16</span>
-              </div>
-
-              <!-- Saturday 17 — circled -->
-              <div class="flex-1 flex flex-col items-center justify-center py-6 px-3 when-calendar__day when-calendar__day--active"
-                style="border-right: 1px solid hsl(var(--border));">
-                <p class="section-label mb-3 text-text-gold" style="font-size:0.55rem;" data-i18n="saturday">Saturday</p>
-                <div class="w-14 h-14 rounded-full flex items-center justify-center"
-                  style="border: 2px solid hsl(var(--destructive)); box-shadow: 0 0 0 3px hsl(var(--destructive) / 0.12);">
-                  <span class="font-display text-3xl font-light text-ink leading-none">17</span>
-                </div>
-                <p class="section-label mt-3 text-text-gold" style="font-size:0.5rem;" data-i18n="oct2026">Oct 2026</p>
-              </div>
-
-              <!-- Sunday 18 -->
-              <div class="flex-1 flex flex-col items-center justify-center py-6 px-3 opacity-45 when-calendar__day">
-                <p class="section-label mb-3" style="font-size:0.55rem;" data-i18n="sunday">Sunday</p>
-                <span class="font-display text-4xl font-light text-ink leading-none">18</span>
-              </div>
-
-            </div>
-          </div>
-
-          <!-- Countdown Timer -->
-          <div class="mt-10 reveal when-countdown" style="transition-delay: 0.1s;">
-            <p class="section-label mb-5 tracking-widest2" data-i18n="countingDays">Counting the Days</p>
-            <div class="flex justify-center gap-2 sm:gap-4 w-full max-w-sm mx-auto">
-              <div class="cd-box panel">
-                <span class="cd-num" id="cd-days">--</span>
-                <span class="cd-label" data-i18n="days">Days</span>
-              </div>
-              <div class="cd-box panel">
-                <span class="cd-num" id="cd-hours">--</span>
-                <span class="cd-label" data-i18n="hours">Hours</span>
-              </div>
-              <div class="cd-box panel">
-                <span class="cd-num" id="cd-minutes">--</span>
-                <span class="cd-label" data-i18n="minutes">Minutes</span>
-              </div>
-              <div class="cd-box panel">
-                <span class="cd-num" id="cd-seconds">--</span>
-                <span class="cd-label" data-i18n="seconds">Seconds</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Event Blocks -->
-          <div class="mt-12 grid sm:grid-cols-2 gap-5 text-left reveal when-events" style="transition-delay: 0.2s;">
-
-            <!-- Akad Nikah -->
-            <div class="panel px-6 py-6 when-event">
-              <p class="section-label mb-4 text-text-rose when-event__title">Akad Nikah</p>
-              <p class="font-display text-lg font-light text-ink leading-snug when-event__date" data-i18n="saturdayDate">Saturday, 17 October 2026</p>
-              <p class="font-display italic text-text-gold text-base mt-1 when-event__time">08:30 – 10:00 WIB</p>
-              <div class="w-8 h-px bg-gold-light my-4 when-event__rule"></div>
-              <p class="text-sm text-ink opacity-70 leading-relaxed when-event__venue">Ballroom<br />V Hotel &amp; Residence, Bandung</p>
-            </div>
-
-            <!-- Resepsi -->
-            <div class="panel px-6 py-6 when-event" style="transition-delay: 0.1s;">
-              <p class="section-label mb-4 text-text-gold when-event__title">Resepsi</p>
-              <p class="font-display text-lg font-light text-ink leading-snug when-event__date" data-i18n="saturdayDate">Saturday, 17 October 2026</p>
-              <p class="font-display italic text-text-gold text-base mt-1 when-event__time">11:00 – 13:30 WIB</p>
-              <div class="w-8 h-px bg-gold-light my-4 when-event__rule"></div>
-              <p class="text-sm text-ink opacity-70 leading-relaxed when-event__venue">Ballroom<br />V Hotel &amp; Residence, Bandung</p>
-            </div>
-
-          </div>
-
-        </div>
-      </section>
-
-
-      <!-- ================================================================
-     COMPONENT: WHERE (Venue)
-     Edit: venue name, address, maps URL, events list
-================================================================ -->
-      <section id="where" class="py-20 sm:py-28 px-4 sm:px-6">
-        <div class="max-w-4xl mx-auto">
-
-          <!-- Section header -->
-          <div class="text-center reveal stagger">
-            <p class="section-label mb-3" data-i18n="venue">Venue</p>
-            <h2 class="font-display text-4xl md:text-5xl font-light text-ink" data-i18n="whereWeCelebrate">Where We Celebrate</h2>
-            <div class="gold-divider mt-5 w-32 mx-auto"><span class="diamond"></span></div>
-          </div>
-
-          <!-- Venue details + Events -->
-          <div class="mt-14 grid md:grid-cols-2 gap-8 items-start">
-
-            <!-- Venue Card -->
-            <div class="panel p-5 sm:p-8 reveal">
-              <p class="section-label mb-4 text-text-rose" data-i18n="mainVenue">Main Venue</p>
-              <h3 class="font-display text-2xl font-light text-ink mb-1">Ballroom</h3>
-              <p class="font-display italic text-text-gold text-lg mb-5">V Hotel &amp; Residence</p>
-              <div class="space-y-1 text-sm text-ink opacity-75 leading-relaxed">
-                <p>Jl. Setrawangi, Sukagalih</p>
-                <p>Kec. Sukajadi, Kota Bandung</p>
-                <p>Jawa Barat 40163</p>
-              </div>
-              <div class="w-full h-px bg-gold-light my-6"></div>
-              <a href="https://maps.app.goo.gl/2s4H3gJi14MV8KGx7" target="_blank" rel="noopener"
-                class="inline-flex items-center gap-2 section-label text-text-gold border border-gold-mid px-5 py-2.5 hover:bg-gold-mid hover:text-white transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span data-i18n="openInMaps">Open in Maps</span>
-              </a>
-            </div>
-
-            <!-- Events Timeline -->
-            <div class="reveal" style="transition-delay: 0.15s;">
-              <p class="section-label text-text-rose mb-5 text-center md:text-left" data-i18n="scheduleOfEvents">Schedule of Events</p>
-
-              <div class="flex justify-center md:justify-start">
-                <div class="grid gap-y-5" style="grid-template-columns: 3.5rem 1px 1fr;">
-
-                  <!-- Continuous vertical line spanning all rows -->
-                  <div class="bg-gold-light" style="grid-column: 2; grid-row: 1 / -1;"></div>
-
-                  <!-- 08:00 -->
-                  <div class="text-right pr-4 pt-0.5" style="grid-column: 1; grid-row: 1;">
-                    <span class="font-display text-text-gold text-sm">08:00</span>
-                  </div>
-                  <div class="pl-4" style="grid-column: 3; grid-row: 1;">
-                    <p class="font-body text-sm font-medium text-ink" data-i18n="guestArrival">Guest Arrival</p>
-                    <p class="text-xs text-ink opacity-70 mt-0.5" data-i18n="lobbyWelcome">Lobby &amp; Welcome</p>
-                  </div>
-
-                  <!-- 08:30 -->
-                  <div class="text-right pr-4 pt-0.5" style="grid-column: 1; grid-row: 2;">
-                    <span class="font-display text-text-gold text-sm">07:30</span>
-                  </div>
-                  <div class="pl-4" style="grid-column: 3; grid-row: 2;">
-                    <p class="font-body text-sm font-medium text-ink">Akad Nikah</p>
-                    <p class="text-xs text-ink opacity-70 mt-0.5" data-i18n="sacredVows">The Sacred Vows</p>
-                  </div>
-
-                  <!-- 10:30 -->
-                  <div class="text-right pr-4 pt-0.5" style="grid-column: 1; grid-row: 3;">
-                    <span class="font-display text-text-gold text-sm">09:30</span>
-                  </div>
-                  <div class="pl-4" style="grid-column: 3; grid-row: 3;">
-                    <p class="font-body text-sm font-medium text-ink">Resepsi</p>
-                    <p class="text-xs text-ink opacity-70 mt-0.5" data-i18n="luncheonCelebration">Luncheon &amp; Celebration</p>
-                  </div>
-
-                  <!-- 12:00 -->
-                  <div class="text-right pr-4 pt-0.5" style="grid-column: 1; grid-row: 4;">
-                    <span class="font-display text-text-gold text-sm">12:00</span>
-                  </div>
-                  <div class="pl-4" style="grid-column: 3; grid-row: 4;">
-                    <p class="font-body text-sm font-medium text-ink" data-i18n="photoSession">Photo Session</p>
-                    <p class="text-xs text-ink opacity-70 mt-0.5" data-i18n="withFamilyGuests">With Family &amp; Guests</p>
-                  </div>
-
-                  <!-- 13:30 -->
-                  <div class="text-right pr-4 pt-0.5" style="grid-column: 1; grid-row: 5;">
-                    <span class="font-display text-text-gold text-sm">13:30</span>
-                  </div>
-                  <div class="pl-4" style="grid-column: 3; grid-row: 5;">
-                    <p class="font-body text-sm font-medium text-ink" data-i18n="farewell">Farewell</p>
-                    <p class="text-xs text-ink opacity-70 mt-0.5" data-i18n="untilMeetAgain">Thank you, until we meet again</p>
-                  </div>
-
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-
-      <!-- ================================================================
-     COMPONENT: RSVP
-     Edit: form action (or wire to your backend), guest limit note
-================================================================ -->
-      <section id="rsvp" class="py-20 sm:py-28 px-4 sm:px-6"
-        style="background: linear-gradient(180deg, #FAF6EF 0%, #F0E8DA 100%);">
-        <div class="max-w-2xl mx-auto rsvp-shell">
-
-          <!-- Section header -->
-          <div class="text-center reveal stagger">
-            <p class="section-label mb-3">RSVP</p>
-            <h2 class="font-display text-4xl md:text-5xl font-light text-ink" data-i18n="willYouJoin">Will You Join Us?</h2>
-            <div class="gold-divider mt-5 w-32 mx-auto"><span class="diamond"></span></div>
-            <p class="mt-5 text-sm text-ink opacity-65 leading-relaxed max-w-sm mx-auto">
-              <span data-i18n="rsvpIntro">Kindly confirm your attendance by <strong class="font-medium text-text-rose">1 October 2026</strong>.
-              We can't wait to celebrate with you.</span>
-            </p>
-          </div>
-
-          <!-- RSVP Form -->
-          <div class="panel mt-10 p-5 sm:p-8 reveal rsvp-form-panel" style="transition-delay: 0.1s;">
-
-            <!-- Success message (hidden by default) -->
-            <div id="rsvp-success">
-              <div class="floral-accent text-2xl mb-4">✦ &nbsp; ✦ &nbsp; ✦</div>
-              <h3 class="font-display text-2xl font-light text-ink mb-2" data-i18n="thankYou">Thank You!</h3>
-              <p class="text-sm text-ink opacity-70" data-i18n="rsvpReceived">Your RSVP has been received. We look forward to seeing you.</p>
-            </div>
-
-            <!-- Form -->
-            <form id="rsvp-form" class="space-y-5 rsvp-form" onsubmit="handleRsvp(event)">
-
-              <div class="rsvp-primary-fields">
-                <!-- Name -->
-                <div>
-                  <label for="rsvp-name" class="section-label block mb-2" data-i18n="fullName">Full Name</label>
-                  <input id="rsvp-name" type="text" name="name" required data-i18n-placeholder="yourFullName" placeholder="Your full name" class="form-input" />
-                </div>
-
-                <!-- Number of guests -->
-                <div>
-                  <label for="rsvp-guests" class="section-label block mb-2" data-i18n="numberOfGuests">Number of Guests</label>
-                  <input id="rsvp-guests" type="number" name="guests" min="1" max="4" value="1" class="form-input rsvp-guest-count" />
-                </div>
-              </div>
-
-              <!-- Attendance -->
-              <div>
-                <label class="section-label block mb-3" data-i18n="attendance">Attendance</label>
-                <div class="flex gap-3 flex-wrap rsvp-attendance-options">
-                  <div class="radio-card">
-                    <input type="radio" id="att-yes" name="attendance" value="yes" checked />
-                    <label for="att-yes" data-i18n="joyfullyAccepts">Joyfully Accepts</label>
-                  </div>
-                  <div class="radio-card">
-                    <input type="radio" id="att-no" name="attendance" value="no" />
-                    <label for="att-no" data-i18n="regretfullyDeclines">Regretfully Declines</label>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Message -->
-              <div>
-                <label for="rsvp-message" class="section-label block mb-2"><span data-i18n="messageForCouple">Message for the Couple</span> <span
-                    class="opacity-50" data-i18n="optional">(optional)</span></label>
-                <textarea id="rsvp-message" name="message" rows="4" maxlength="600" data-i18n-placeholder="warmWish" placeholder="Leave a warm wish or message…"
-                  class="form-input rsvp-message resize-y"></textarea>
-              </div>
-
-              <!-- Submit -->
-              <div class="pt-2 rsvp-submit-row">
-                <button type="submit" class="btn-submit">
-                  <span data-i18n="sendRsvp">Send RSVP</span>
-                </button>
-              </div>
-
-            </form>
-          </div>
-
-        </div>
-      </section>
-
-
-      <!-- ================================================================
      COMPONENT: FOOTER
      Edit: couple names, social handles, closing note
 ================================================================ -->
@@ -778,10 +833,10 @@
 
           <p class="font-display italic text-text-rose text-base leading-relaxed">
             <span data-i18n="footerQuote">"The best thing to hold onto in life is each other."</span><br />
-            <span class="text-xs font-body not-italic opacity-50 block mt-1">— Audrey Hepburn</span>
+            <span class="text-xs font-body not-italic opacity-70 block mt-1">— Audrey Hepburn</span>
           </p>
 
-          <p class="text-xs text-ink opacity-50 mt-10 tracking-wider">
+          <p class="text-xs text-ink opacity-70 mt-10 tracking-wider">
             Made with love &nbsp;·&nbsp; 2026
           </p>
 
@@ -807,10 +862,10 @@
 
     <!-- Now-playing panel (visible when open) -->
     <div id="music-panel" class="music-panel panel px-4 py-3 w-56">
-      <p class="section-label text-gold-deep mb-1" style="font-size:0.55rem;" data-i18n="nowPlaying">Now Playing</p>
+      <p class="section-label text-gold-deep mb-1" style="font-size:0.75rem;" data-i18n="nowPlaying">Now Playing</p>
       <p class="font-display text-sm font-light text-ink leading-snug mb-2">
         끝나지 않을 이야기<br />
-        <span class="text-xs text-ink opacity-50 font-body not-italic">An Endless Story</span>
+        <span class="text-xs text-ink opacity-70 font-body not-italic">An Endless Story</span>
       </p>
       <!-- Progress bar -->
       <div class="w-full h-px bg-gold-light rounded-full overflow-hidden">
