@@ -87,6 +87,7 @@ const TRANSLATIONS = {
     giftAccountPending: 'Nomor rekening akan ditambahkan',
     giftCopyError: 'Nomor rekening belum dapat disalin',
     nowPlaying: 'Sedang Diputar',
+    weddingBacksound: 'Musik Pernikahan',
     footerQuote: '“Hal terbaik untuk dipertahankan dalam hidup adalah satu sama lain.”',
     guestGreeting: 'Kepada {name} &amp; Pasangan'
   },
@@ -177,6 +178,7 @@ const TRANSLATIONS = {
     giftAccountPending: 'Account number will be added soon',
     giftCopyError: 'Unable to copy the account number',
     nowPlaying: 'Now Playing',
+    weddingBacksound: 'Wedding Backsound',
     footerQuote: '“The best thing to hold onto in life is each other.”',
     guestGreeting: 'Dear {name} &amp; Partner'
   }
@@ -314,8 +316,7 @@ function applyLocale(locale) {
 
 // ── Motion preference (shared) ─────────────────────────────────
 const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const MUSIC_START_SECONDS = 14;
-const MUSIC_LOOP_END_SECONDS = 107;
+const MUSIC_START_SECONDS = 0;
 const MUSIC_CROSSFADE_MS = 1800;
 const MUSIC_FADE_IN_MS = 1800;
 
@@ -957,7 +958,7 @@ initFallbackReveals();
     if (!Number.isFinite(audio.duration) || audio.duration <= 0) return null;
 
     const start = Math.min(MUSIC_START_SECONDS, Math.max(0, audio.duration - 0.1));
-    const end = Math.min(MUSIC_LOOP_END_SECONDS, audio.duration);
+    const end = audio.duration;
     return { start, end: Math.max(start + 0.1, end) };
   }
 
@@ -973,7 +974,7 @@ initFallbackReveals();
     progress.style.width = (((position - bounds.start) / (bounds.end - bounds.start)) * 100) + '%';
   }
 
-  // Keep playback inside the intentional 14s–1:47 segment.
+  // Keep playback across the full track, with a soft crossfade at the end.
   audio.addEventListener('timeupdate', syncMusicLoopAndProgress);
   audio.addEventListener('loadedmetadata', syncMusicLoopAndProgress);
   audio.addEventListener('ended', () => {
