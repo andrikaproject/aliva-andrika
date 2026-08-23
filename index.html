@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="color-scheme" content="light" />
+  <meta name="color-scheme" content="only light" />
   <meta name="theme-color" content="#F5EFE4" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title>Andrika & Aliva — Wedding Invitation</title>
@@ -51,6 +51,11 @@
       --duration-base: 200ms;
       --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
       --ease-out: cubic-bezier(0, 0, 0.2, 1);
+    }
+
+    html,
+    body {
+      color-scheme: only light !important;
     }
 
     @font-face {
@@ -433,9 +438,9 @@
   <!-- ============================================================
        GLOBAL STYLES
   ============================================================ -->
-  <link rel="preload" href="css/design-system.css" as="style"
+  <link rel="preload" href="css/design-system.css?v=20260823-light-theme" as="style"
     onload="this.onload=null;this.rel='stylesheet'" />
-  <noscript><link rel="stylesheet" href="css/design-system.css" /></noscript>
+  <noscript><link rel="stylesheet" href="css/design-system.css?v=20260823-light-theme" /></noscript>
   <link rel="preload" href="css/styles.css?v=20260823-render-blocking" as="style"
     onload="this.onload=null;this.rel='stylesheet'" />
   <noscript><link rel="stylesheet" href="css/styles.css?v=20260823-render-blocking" /></noscript>

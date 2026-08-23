@@ -167,6 +167,11 @@
   --color-sage-mid: hsl(112 11% 64%);
 }
 
+html,
+body {
+  color-scheme: only light !important;
+}
+
 
 /* ================================================================
    2. BUTTON
