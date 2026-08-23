@@ -9,14 +9,14 @@ const TRANSLATIONS = {
     celebrating: 'MERAYAKAN',
     theWedding: 'PERNIKAHAN',
     ofAndrikaAnd: 'ANDRIKA DAN',
-    scrollForMore: 'GULIR UNTUK INFORMASI LEBIH LANJUT',
+    scrollForMore: 'SCROOL UNTUK INFORMASI LEBIH LANJUT',
     heroTagline: 'Merayakan babak baru bersama orang-orang yang kami cintai.',
     saveTheDateUpper: 'SIMPAN TANGGALNYA',
     verseTranslation: '“Dan di antara tanda-tanda kebesaran-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri, agar kamu cenderung dan merasa tenteram kepadanya, dan Dia menjadikan di antaramu rasa kasih dan sayang. Sungguh, pada yang demikian itu benar-benar terdapat tanda-tanda bagi kaum yang berpikir.”',
     twoHearts: 'Dua Hati, Satu Cerita',
     coupleIntro: 'Kenali dua insan di balik perayaan ini.',
     theGroom: 'Mempelai Pria',
-    groomBio: 'Putra Bapak Dodi Suwardi &amp; Ibu Sari Yagustia Rini.<br />Seorang pemimpi, pembangun, dan terutama — pasangan yang setia.',
+    groomBio: 'Putra Bapak Dodi Suwardi &amp; Ibu Sari Yagustiarini.<br />Seorang pemimpi, pembangun, dan terutama — pasangan yang setia.',
     theBride: 'Mempelai Wanita',
     brideBio: 'Putri Bapak Triyono &amp; Ibu Rinarsih.<br />Penuh kelembutan, tawa, dan cinta yang tak tergoyahkan.',
     coupleQuote: '“Mereka menemukan satu sama lain bukan hanya sebagai pasangan, tetapi juga sebagai rumah.”',
@@ -115,7 +115,7 @@ const TRANSLATIONS = {
     twoHearts: 'Two Hearts, One Story',
     coupleIntro: 'Meet the two people at the heart of this celebration.',
     theGroom: 'The Groom',
-    groomBio: 'Son of Mr. Dodi Suwardi &amp; Mrs. Sari Yagustia Rini.<br />A dreamer, a builder, and above all — a devoted partner.',
+    groomBio: 'Son of Mr. Dodi Suwardi &amp; Mrs. Sari Yagustiarini.<br />A dreamer, a builder, and above all — a devoted partner.',
     theBride: 'The Bride',
     brideBio: 'Daughter of Mr. Triyono &amp; Mrs. Rinarsih.<br />Full of grace, laughter, and an unwavering spirit of love.',
     coupleQuote: '“They found in each other not just a partner, but a home.”',
@@ -716,6 +716,100 @@ initFallbackReveals();
   else requestAnimationFrame(frame);
 })();
 
+
+// ── GALLERY FOLDER SOURCE ─────────────────────────────────────
+// The gallery folder is discovered at runtime so every image added there is
+// included without having to duplicate the filename list in the markup.
+(function initGalleryFolderSource() {
+  const grid = document.getElementById('galleryGrid');
+  if (!grid) return;
+
+  const folder = 'assets/pict/Pre-wedd-Gredding/';
+  const imagePattern = /\.(?:avif|gif|jpe?g|png|webp)$/i;
+
+  const extractImageNames = (html) => {
+    const listing = new DOMParser().parseFromString(html, 'text/html');
+
+    return Array.from(listing.querySelectorAll('a[href]'))
+      .map((link) => link.getAttribute('href'))
+      .filter((href) => href && !href.endsWith('/'))
+      .map((href) => href.split(/[?#]/)[0].split('/').pop())
+      .filter((filename) => filename && imagePattern.test(filename))
+      .map((filename) => {
+        try {
+          return decodeURIComponent(filename);
+        } catch {
+          return filename;
+        }
+      });
+  };
+
+  const createCard = (filename) => {
+    const title = 'Aliva & Andrika';
+    const isPortrait = /bride|close|couple|formal|groom|portrait|studio/i.test(filename);
+
+    const card = document.createElement('figure');
+    card.className = 'gallery-card';
+    card.dataset.category = isPortrait ? 'portrait' : 'journey';
+
+    const media = document.createElement('div');
+    media.className = 'gallery-card__media';
+
+    const image = document.createElement('img');
+    image.src = `${folder}${encodeURIComponent(filename)}`;
+    image.alt = title;
+    image.loading = 'lazy';
+    image.decoding = 'async';
+    media.appendChild(image);
+
+    const meta = document.createElement('figcaption');
+    meta.className = 'gallery-card__meta';
+
+    const cardTitle = document.createElement('span');
+    cardTitle.className = 'gallery-card__title';
+    cardTitle.textContent = title;
+
+    meta.appendChild(cardTitle);
+    card.append(media, meta);
+    return card;
+  };
+
+  const syncVisibleCards = () => {
+    const activeFilter = document.querySelector('.gallery-filter.is-active');
+    const filter = activeFilter ? activeFilter.dataset.filter : 'all';
+    const cards = Array.from(grid.querySelectorAll('.gallery-card'));
+    const visibleCards = cards.filter((card) => filter === 'all' || card.dataset.category === filter);
+
+    cards.forEach((card) => {
+      card.hidden = filter !== 'all' && card.dataset.category !== filter;
+    });
+
+    const count = document.getElementById('galleryCount');
+    if (count) {
+      count.textContent = `${visibleCards.length} ${visibleCards.length === 1 ? 'photo' : 'photos'}`;
+    }
+  };
+
+  document.querySelectorAll('.gallery-filter').forEach((button) => {
+    button.addEventListener('click', () => requestAnimationFrame(syncVisibleCards));
+  });
+
+  fetch(folder, { cache: 'no-store' })
+    .then((response) => {
+      if (!response.ok) throw new Error(`Unable to read ${folder}`);
+      return response.text();
+    })
+    .then((html) => {
+      const filenames = extractImageNames(html);
+      if (!filenames.length) return;
+
+      grid.replaceChildren(...filenames.map(createCard));
+      syncVisibleCards();
+    })
+    .catch(() => {
+      // Keep the existing cards when the page is opened without directory-listing support.
+    });
+})();
 
 // ── GALLERY CATEGORY FILTER ────────────────────────────────────
 // User-driven navigation, so it runs regardless of GSAP. The grid is

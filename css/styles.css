@@ -1589,6 +1589,7 @@ section {
 }
 
 .gallery-card__tag {
+  display: none;
   flex-shrink: 0;
   font-size: 0.75rem;
   font-weight: 500;
