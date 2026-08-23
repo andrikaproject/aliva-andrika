@@ -944,7 +944,7 @@ section {
       hsl(var(--foreground) / 0.2) 44%,
       hsl(var(--secondary) / 0.72) 68%,
       var(--cover-surface) 84%),
-    url("../assets/cover/first-photo.webp") center / cover no-repeat;
+    url("../assets/cover/first-photo-01.webp") center / cover no-repeat;
 }
 
 .cover-ticket {
