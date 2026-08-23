@@ -610,8 +610,7 @@
      you reach it and contracts on the way out. Left column carries the
      context and stays pinned; right column is the masonry of photos.
      Add a photo by dropping an image into assets/pict/Pre-wedd-Gredding/ and
-     appending a .gallery-card below with its real width/height and a
-     data-category matching one of the filter pills.
+     appending a .gallery-card below with its real width/height.
 ================================================================ -->
       <section id="photo-band" aria-label="Our story in photos">
         <div class="gallery-frame" aria-hidden="true"></div>
@@ -626,190 +625,115 @@
               <div class="gold-divider gallery-context__rule"><span class="diamond"></span></div>
               <p class="gallery-context__intro" data-i18n="galleryIntro">A few moments from before the day itself.</p>
 
-              <div class="gallery-filters" id="galleryFilters" role="group" aria-label="Filter photos by category" hidden>
-                <button type="button" class="gallery-filter is-active" data-filter="all" aria-pressed="true"><span
-                    data-i18n="galAll">All</span></button>
-                <button type="button" class="gallery-filter" data-filter="journey" aria-pressed="false"><span
-                    data-i18n="galJourney">Journey</span></button>
-                <button type="button" class="gallery-filter" data-filter="portrait" aria-pressed="false"><span
-                    data-i18n="galPortraits">Portraits</span></button>
-              </div>
-
               <p class="gallery-context__count" id="galleryCount" aria-live="polite"></p>
             </div>
           </div>
 
           <div class="gallery-grid" id="galleryGrid">
-                <figure class="gallery-card" data-category="journey">
-                  <div class="gallery-card__media">
-                    <img src="assets/pict/gallery/umbrella.webp" alt="Aliva standing under a canopy of colourful parasols" loading="lazy" decoding="async" width="900"
-                      height="1200" />
-                  </div>
-                  <figcaption class="gallery-card__meta">
-                    <span class="gallery-card__title" data-i18n="galUmbrella">Beneath the parasols</span>
-                    <span class="gallery-card__tag" data-i18n="galJourney">Journey</span>
-                  </figcaption>
-                </figure>
-                <figure class="gallery-card" data-category="portrait">
-                  <div class="gallery-card__media">
-                    <img src="assets/pict/gallery/studio-floor.webp" alt="Andrika and Aliva seated on the floor, holding each other" loading="lazy" decoding="async" width="900"
-                      height="1350" />
-                  </div>
-                  <figcaption class="gallery-card__meta">
-                    <span class="gallery-card__title" data-i18n="galStudioFloor">Close and warm</span>
-                    <span class="gallery-card__tag" data-i18n="galPortraits">Portraits</span>
-                  </figcaption>
-                </figure>
-                <figure class="gallery-card" data-category="journey">
-                  <div class="gallery-card__media">
-                    <img src="assets/pict/gallery/red-bridge.webp" alt="Andrika and Aliva taking a selfie beneath a red arch" loading="lazy" decoding="async" width="1500"
-                      height="1125" />
-                  </div>
-                  <figcaption class="gallery-card__meta">
-                    <span class="gallery-card__title" data-i18n="galRedArch">Laughter at the red arch</span>
-                    <span class="gallery-card__tag" data-i18n="galJourney">Journey</span>
-                  </figcaption>
-                </figure>
-                <figure class="gallery-card" data-category="journey">
-                  <div class="gallery-card__media">
-                    <img src="assets/pict/gallery/torii-walk.webp" alt="Andrika walking through a long row of red gates" loading="lazy" decoding="async" width="900"
-                      height="1200" />
-                  </div>
-                  <figcaption class="gallery-card__meta">
-                    <span class="gallery-card__title" data-i18n="galToriiWalk">A thousand gates</span>
-                    <span class="gallery-card__tag" data-i18n="galJourney">Journey</span>
-                  </figcaption>
-                </figure>
-                <figure class="gallery-card" data-category="portrait">
-                  <div class="gallery-card__media">
-                    <img src="assets/pict/gallery/studio-seated.webp" alt="Andrika and Aliva seated side by side in the studio" loading="lazy" decoding="async" width="900"
-                      height="1350" />
-                  </div>
-                  <figcaption class="gallery-card__meta">
-                    <span class="gallery-card__title" data-i18n="galStudioSeated">Side by side</span>
-                    <span class="gallery-card__tag" data-i18n="galPortraits">Portraits</span>
-                  </figcaption>
-                </figure>
-                <figure class="gallery-card" data-category="journey">
-                  <div class="gallery-card__media">
-                    <img src="assets/pict/gallery/wisteria-1.webp" alt="Andrika and Aliva under a flowering archway" loading="lazy" decoding="async" width="900"
-                      height="1200" />
-                  </div>
-                  <figcaption class="gallery-card__meta">
-                    <span class="gallery-card__title" data-i18n="galWisteria1">Under the flower canopy</span>
-                    <span class="gallery-card__tag" data-i18n="galJourney">Journey</span>
-                  </figcaption>
-                </figure>
-                <figure class="gallery-card" data-category="journey">
-                  <div class="gallery-card__media">
-                    <img src="assets/pict/gallery/overlook.webp" alt="Andrika and Aliva on a walkway above a garden of red parasols" loading="lazy" decoding="async" width="1500"
-                      height="1125" />
-                  </div>
-                  <figcaption class="gallery-card__meta">
-                    <span class="gallery-card__title" data-i18n="galOverlook">The best vantage point</span>
-                    <span class="gallery-card__tag" data-i18n="galJourney">Journey</span>
-                  </figcaption>
-                </figure>
-                <figure class="gallery-card" data-category="portrait">
-                  <div class="gallery-card__media">
-                    <img src="assets/pict/gallery/studio-closeup.webp" alt="Andrika smiling closely at the camera with Aliva behind him" loading="lazy" decoding="async" width="900"
-                      height="1350" />
-                  </div>
-                  <figcaption class="gallery-card__meta">
-                    <span class="gallery-card__title" data-i18n="galStudioCloseup">Unguarded laughter</span>
-                    <span class="gallery-card__tag" data-i18n="galPortraits">Portraits</span>
-                  </figcaption>
-                </figure>
-                <figure class="gallery-card" data-category="journey">
-                  <div class="gallery-card__media">
-                    <img src="assets/pict/gallery/torii-embrace.webp" alt="Andrika and Aliva embracing among red gates" loading="lazy" decoding="async" width="900"
-                      height="1200" />
-                  </div>
-                  <figcaption class="gallery-card__meta">
-                    <span class="gallery-card__title" data-i18n="galToriiEmbrace">Together in the corridor</span>
-                    <span class="gallery-card__tag" data-i18n="galJourney">Journey</span>
-                  </figcaption>
-                </figure>
-                <figure class="gallery-card" data-category="journey">
-                  <div class="gallery-card__media">
-                    <img src="assets/pict/gallery/lantern-corridor.webp" alt="Andrika and Aliva in a brightly painted covered corridor" loading="lazy" decoding="async" width="900"
-                      height="1200" />
-                  </div>
-                  <figcaption class="gallery-card__meta">
-                    <span class="gallery-card__title" data-i18n="galCorridor">A corridor full of colour</span>
-                    <span class="gallery-card__tag" data-i18n="galJourney">Journey</span>
-                  </figcaption>
-                </figure>
-                <figure class="gallery-card" data-category="portrait">
-                  <div class="gallery-card__media">
-                    <img src="assets/pict/gallery/studio-standing.webp" alt="Andrika and Aliva standing together in the studio" loading="lazy" decoding="async" width="900"
-                      height="1350" />
-                  </div>
-                  <figcaption class="gallery-card__meta">
-                    <span class="gallery-card__title" data-i18n="galStudioStanding">Standing together</span>
-                    <span class="gallery-card__tag" data-i18n="galPortraits">Portraits</span>
-                  </figcaption>
-                </figure>
-                <figure class="gallery-card" data-category="journey">
-                  <div class="gallery-card__media">
-                    <img src="assets/pict/gallery/rickshaw.webp" alt="Andrika and Aliva laughing inside a red ride" loading="lazy" decoding="async" width="900"
-                      height="1349" />
-                  </div>
-                  <figcaption class="gallery-card__meta">
-                    <span class="gallery-card__title" data-i18n="galRide">Our little ride</span>
-                    <span class="gallery-card__tag" data-i18n="galJourney">Journey</span>
-                  </figcaption>
-                </figure>
-                <figure class="gallery-card" data-category="journey">
-                  <div class="gallery-card__media">
-                    <img src="assets/pict/gallery/wisteria-2.webp" alt="Andrika and Aliva walking beneath a flowering canopy" loading="lazy" decoding="async" width="900"
-                      height="1200" />
-                  </div>
-                  <figcaption class="gallery-card__meta">
-                    <span class="gallery-card__title" data-i18n="galWisteria2">Slow steps together</span>
-                    <span class="gallery-card__tag" data-i18n="galJourney">Journey</span>
-                  </figcaption>
-                </figure>
-                <figure class="gallery-card" data-category="journey">
-                  <div class="gallery-card__media">
-                    <img src="assets/pict/gallery/bamboo-gazebo.webp" alt="Aliva resting in a bamboo gazebo" loading="lazy" decoding="async" width="900"
-                      height="1200" />
-                  </div>
-                  <figcaption class="gallery-card__meta">
-                    <span class="gallery-card__title" data-i18n="galGazebo">Resting in the bamboo hut</span>
-                    <span class="gallery-card__tag" data-i18n="galJourney">Journey</span>
-                  </figcaption>
-                </figure>
-                <figure class="gallery-card" data-category="portrait">
-                  <div class="gallery-card__media">
-                    <img src="assets/pict/gallery/studio-lean.webp" alt="Aliva leaning playfully towards the camera with Andrika behind" loading="lazy" decoding="async" width="900"
-                      height="1350" />
-                  </div>
-                  <figcaption class="gallery-card__meta">
-                    <span class="gallery-card__title" data-i18n="galStudioPlay">Playing around</span>
-                    <span class="gallery-card__tag" data-i18n="galPortraits">Portraits</span>
-                  </figcaption>
-                </figure>
-                <figure class="gallery-card" data-category="journey">
-                  <div class="gallery-card__media">
-                    <img src="assets/pict/gallery/torii-closeup.webp" alt="Aliva smiling among tall red gates" loading="lazy" decoding="async" width="900"
-                      height="1200" />
-                  </div>
-                  <figcaption class="gallery-card__meta">
-                    <span class="gallery-card__title" data-i18n="galToriiSmile">A smile among the gates</span>
-                    <span class="gallery-card__tag" data-i18n="galJourney">Journey</span>
-                  </figcaption>
-                </figure>
-                <figure class="gallery-card" data-category="portrait">
-                  <div class="gallery-card__media">
-                    <img src="assets/pict/gallery/portrait-formal.webp" alt="Andrika and Aliva in traditional kebaya and batik, holding a parasol" loading="lazy" decoding="async" width="900"
-                      height="1125" />
-                  </div>
-                  <figcaption class="gallery-card__meta">
-                    <span class="gallery-card__title" data-i18n="galTraditional">In kebaya and batik</span>
-                    <span class="gallery-card__tag" data-i18n="galPortraits">Portraits</span>
-                  </figcaption>
-                </figure>
+            <figure class="gallery-card">
+              <div class="gallery-card__media">
+                <img src="assets/pict/Pre-wedd-Gredding/DSC00024.webp" alt="Pre-wedding photo DSC00024 of Aliva and Andrika" loading="lazy" decoding="async" width="6000" height="4000" />
+              </div>
+              <figcaption class="gallery-card__meta">
+                <span class="gallery-card__title">Aliva &amp; Andrika</span>
+              </figcaption>
+            </figure>
+            <figure class="gallery-card">
+              <div class="gallery-card__media">
+                <img src="assets/pict/Pre-wedd-Gredding/DSC00177.webp" alt="Pre-wedding photo DSC00177 of Aliva and Andrika" loading="lazy" decoding="async" width="4000" height="6000" />
+              </div>
+              <figcaption class="gallery-card__meta">
+                <span class="gallery-card__title">Aliva &amp; Andrika</span>
+              </figcaption>
+            </figure>
+            <figure class="gallery-card">
+              <div class="gallery-card__media">
+                <img src="assets/pict/Pre-wedd-Gredding/DSC00189.webp" alt="Pre-wedding photo DSC00189 of Aliva and Andrika" loading="lazy" decoding="async" width="4000" height="6000" />
+              </div>
+              <figcaption class="gallery-card__meta">
+                <span class="gallery-card__title">Aliva &amp; Andrika</span>
+              </figcaption>
+            </figure>
+            <figure class="gallery-card">
+              <div class="gallery-card__media">
+                <img src="assets/pict/Pre-wedd-Gredding/DSC00255.webp" alt="Pre-wedding photo DSC00255 of Aliva and Andrika" loading="lazy" decoding="async" width="4000" height="6000" />
+              </div>
+              <figcaption class="gallery-card__meta">
+                <span class="gallery-card__title">Aliva &amp; Andrika</span>
+              </figcaption>
+            </figure>
+            <figure class="gallery-card">
+              <div class="gallery-card__media">
+                <img src="assets/pict/Pre-wedd-Gredding/DSC00424.webp" alt="Pre-wedding photo DSC00424 of Aliva and Andrika" loading="lazy" decoding="async" width="6000" height="4000" />
+              </div>
+              <figcaption class="gallery-card__meta">
+                <span class="gallery-card__title">Aliva &amp; Andrika</span>
+              </figcaption>
+            </figure>
+            <figure class="gallery-card">
+              <div class="gallery-card__media">
+                <img src="assets/pict/Pre-wedd-Gredding/DSC00436.webp" alt="Pre-wedding photo DSC00436 of Aliva and Andrika" loading="lazy" decoding="async" width="4000" height="6000" />
+              </div>
+              <figcaption class="gallery-card__meta">
+                <span class="gallery-card__title">Aliva &amp; Andrika</span>
+              </figcaption>
+            </figure>
+            <figure class="gallery-card">
+              <div class="gallery-card__media">
+                <img src="assets/pict/Pre-wedd-Gredding/DSC00439.webp" alt="Pre-wedding photo DSC00439 of Aliva and Andrika" loading="lazy" decoding="async" width="4000" height="6000" />
+              </div>
+              <figcaption class="gallery-card__meta">
+                <span class="gallery-card__title">Aliva &amp; Andrika</span>
+              </figcaption>
+            </figure>
+            <figure class="gallery-card">
+              <div class="gallery-card__media">
+                <img src="assets/pict/Pre-wedd-Gredding/DSC00457.webp" alt="Pre-wedding photo DSC00457 of Aliva and Andrika" loading="lazy" decoding="async" width="4000" height="6000" />
+              </div>
+              <figcaption class="gallery-card__meta">
+                <span class="gallery-card__title">Aliva &amp; Andrika</span>
+              </figcaption>
+            </figure>
+            <figure class="gallery-card">
+              <div class="gallery-card__media">
+                <img src="assets/pict/Pre-wedd-Gredding/DSC00463.webp" alt="Pre-wedding photo DSC00463 of Aliva and Andrika" loading="lazy" decoding="async" width="4000" height="6000" />
+              </div>
+              <figcaption class="gallery-card__meta">
+                <span class="gallery-card__title">Aliva &amp; Andrika</span>
+              </figcaption>
+            </figure>
+            <figure class="gallery-card">
+              <div class="gallery-card__media">
+                <img src="assets/pict/Pre-wedd-Gredding/DSC00469.webp" alt="Pre-wedding photo DSC00469 of Aliva and Andrika" loading="lazy" decoding="async" width="4000" height="6000" />
+              </div>
+              <figcaption class="gallery-card__meta">
+                <span class="gallery-card__title">Aliva &amp; Andrika</span>
+              </figcaption>
+            </figure>
+            <figure class="gallery-card">
+              <div class="gallery-card__media">
+                <img src="assets/pict/Pre-wedd-Gredding/DSC00479.webp" alt="Pre-wedding photo DSC00479 of Aliva and Andrika" loading="lazy" decoding="async" width="4000" height="6000" />
+              </div>
+              <figcaption class="gallery-card__meta">
+                <span class="gallery-card__title">Aliva &amp; Andrika</span>
+              </figcaption>
+            </figure>
+            <figure class="gallery-card">
+              <div class="gallery-card__media">
+                <img src="assets/pict/Pre-wedd-Gredding/DSC00500.webp" alt="Pre-wedding photo DSC00500 of Aliva and Andrika" loading="lazy" decoding="async" width="6000" height="4000" />
+              </div>
+              <figcaption class="gallery-card__meta">
+                <span class="gallery-card__title">Aliva &amp; Andrika</span>
+              </figcaption>
+            </figure>
+            <figure class="gallery-card">
+              <div class="gallery-card__media">
+                <img src="assets/pict/Pre-wedd-Gredding/DSC00512.webp" alt="Pre-wedding photo DSC00512 of Aliva and Andrika" loading="lazy" decoding="async" width="4000" height="6000" />
+              </div>
+              <figcaption class="gallery-card__meta">
+                <span class="gallery-card__title">Aliva &amp; Andrika</span>
+              </figcaption>
+            </figure>
           </div>
         </div>
       </section>

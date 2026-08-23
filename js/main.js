@@ -24,26 +24,6 @@ const TRANSLATIONS = {
     storyInFrames: 'Kisah kami dalam bingkai',
     galleryIntro: 'Sekelumit perjalanan kami sebelum hari itu tiba — dari jalan-jalan berdua sampai potret di studio.',
     galPhotoCount: '{count} foto',
-    galAll: 'Semua',
-    galJourney: 'Perjalanan',
-    galPortraits: 'Potret',
-    galUmbrella: 'Di bawah payung warna-warni',
-    galStudioFloor: 'Dekat dan hangat',
-    galRedArch: 'Tawa di gerbang merah',
-    galToriiWalk: 'Menyusuri seribu gerbang',
-    galStudioSeated: 'Duduk berdampingan',
-    galWisteria1: 'Di bawah kanopi bunga',
-    galOverlook: 'Sudut pandang terbaik',
-    galStudioCloseup: 'Tertawa lepas',
-    galToriiEmbrace: 'Berdua di lorong merah',
-    galCorridor: 'Lorong penuh warna',
-    galStudioStanding: 'Berdiri berdua',
-    galRide: 'Perjalanan kecil kami',
-    galWisteria2: 'Langkah pelan berdua',
-    galGazebo: 'Rehat di saung bambu',
-    galStudioPlay: 'Bercanda di studio',
-    galToriiSmile: 'Senyum di antara gerbang',
-    galTraditional: 'Balutan kebaya dan batik',
     theDate: 'Tanggal',
     saveTheDateHeading: 'Menuju Hari Bahagia Kami!!',
     friday: 'Jumat',
@@ -123,26 +103,6 @@ const TRANSLATIONS = {
     storyInFrames: 'Our story in frames',
     galleryIntro: 'A few moments from before the day itself — from wandering together to portraits in the studio.',
     galPhotoCount: '{count} photos',
-    galAll: 'All',
-    galJourney: 'Journey',
-    galPortraits: 'Portraits',
-    galUmbrella: 'Beneath the parasols',
-    galStudioFloor: 'Close and warm',
-    galRedArch: 'Laughter at the red arch',
-    galToriiWalk: 'A thousand gates',
-    galStudioSeated: 'Side by side',
-    galWisteria1: 'Under the flower canopy',
-    galOverlook: 'The best vantage point',
-    galStudioCloseup: 'Unguarded laughter',
-    galToriiEmbrace: 'Together in the corridor',
-    galCorridor: 'A corridor full of colour',
-    galStudioStanding: 'Standing together',
-    galRide: 'Our little ride',
-    galWisteria2: 'Slow steps together',
-    galGazebo: 'Resting in the bamboo hut',
-    galStudioPlay: 'Playing around',
-    galToriiSmile: 'A smile among the gates',
-    galTraditional: 'In kebaya and batik',
     theDate: 'The Date',
     saveTheDateHeading: 'Save the Date!!',
     friday: 'Friday',
@@ -717,182 +677,21 @@ initFallbackReveals();
 })();
 
 
-// ── GALLERY FOLDER SOURCE ─────────────────────────────────────
-// The gallery folder is discovered at runtime so every image added there is
-// included without having to duplicate the filename list in the markup.
-(function initGalleryFolderSource() {
+// ── GALLERY COUNT ────────────────────────────────────────────
+// The gallery cards are declared in index.html so every hosting environment
+// renders the same explicit image set without relying on directory listings.
+(function initGalleryCount() {
   const grid = document.getElementById('galleryGrid');
-  if (!grid) return;
+  const count = document.getElementById('galleryCount');
+  if (!grid || !count) return;
 
-  const folder = 'assets/pict/Pre-wedd-Gredding/';
-  const imagePattern = /\.(?:avif|gif|jpe?g|png|webp)$/i;
-
-  const extractImageNames = (html) => {
-    const listing = new DOMParser().parseFromString(html, 'text/html');
-
-    return Array.from(listing.querySelectorAll('a[href]'))
-      .map((link) => link.getAttribute('href'))
-      .filter((href) => href && !href.endsWith('/'))
-      .map((href) => href.split(/[?#]/)[0].split('/').pop())
-      .filter((filename) => filename && imagePattern.test(filename))
-      .map((filename) => {
-        try {
-          return decodeURIComponent(filename);
-        } catch {
-          return filename;
-        }
-      });
+  const renderCount = () => {
+    const photoCount = grid.querySelectorAll('.gallery-card').length;
+    count.textContent = getTranslation('galPhotoCount', { count: photoCount });
   };
 
-  const createCard = (filename) => {
-    const title = 'Aliva & Andrika';
-    const isPortrait = /bride|close|couple|formal|groom|portrait|studio/i.test(filename);
-
-    const card = document.createElement('figure');
-    card.className = 'gallery-card';
-    card.dataset.category = isPortrait ? 'portrait' : 'journey';
-
-    const media = document.createElement('div');
-    media.className = 'gallery-card__media';
-
-    const image = document.createElement('img');
-    image.src = `${folder}${encodeURIComponent(filename)}`;
-    image.alt = title;
-    image.loading = 'lazy';
-    image.decoding = 'async';
-    media.appendChild(image);
-
-    const meta = document.createElement('figcaption');
-    meta.className = 'gallery-card__meta';
-
-    const cardTitle = document.createElement('span');
-    cardTitle.className = 'gallery-card__title';
-    cardTitle.textContent = title;
-
-    meta.appendChild(cardTitle);
-    card.append(media, meta);
-    return card;
-  };
-
-  const syncVisibleCards = () => {
-    const activeFilter = document.querySelector('.gallery-filter.is-active');
-    const filter = activeFilter ? activeFilter.dataset.filter : 'all';
-    const cards = Array.from(grid.querySelectorAll('.gallery-card'));
-    const visibleCards = cards.filter((card) => filter === 'all' || card.dataset.category === filter);
-
-    cards.forEach((card) => {
-      card.hidden = filter !== 'all' && card.dataset.category !== filter;
-    });
-
-    const count = document.getElementById('galleryCount');
-    if (count) {
-      count.textContent = `${visibleCards.length} ${visibleCards.length === 1 ? 'photo' : 'photos'}`;
-    }
-  };
-
-  document.querySelectorAll('.gallery-filter').forEach((button) => {
-    button.addEventListener('click', () => requestAnimationFrame(syncVisibleCards));
-  });
-
-  fetch(folder, { cache: 'no-store' })
-    .then((response) => {
-      if (!response.ok) throw new Error(`Unable to read ${folder}`);
-      return response.text();
-    })
-    .then((html) => {
-      const filenames = extractImageNames(html);
-      if (!filenames.length) return;
-
-      grid.replaceChildren(...filenames.map(createCard));
-      syncVisibleCards();
-    })
-    .catch(() => {
-      // Keep the existing cards when the page is opened without directory-listing support.
-    });
-})();
-
-// ── GALLERY CATEGORY FILTER ────────────────────────────────────
-// User-driven navigation, so it runs regardless of GSAP. The grid is
-// CSS multi-column: hiding a card lets the columns rebalance on their
-// own, and the re-entry animation covers that reflow.
-(function initGalleryFilter() {
-  const grid = document.getElementById('galleryGrid');
-  const filters = Array.from(document.querySelectorAll('.gallery-filter'));
-  if (!grid || !filters.length) return;
-
-  const cards = Array.from(grid.querySelectorAll('.gallery-card'));
-  const countEl = document.getElementById('galleryCount');
-  let visibleCount = cards.length;
-
-  // Lives in the pinned context column, so it stays readable for the
-  // whole scroll and doubles as the filter's polite announcement.
-  function renderCount() {
-    if (countEl) countEl.textContent = getTranslation('galPhotoCount', { count: visibleCount });
-  }
-
-  // CSS columns pick a balanced column height first, then fill greedily —
-  // so a set with fewer than two cards per column leaves the last column
-  // empty and the grid looks left-weighted. Cap the count to keep every
-  // column occupied; --gallery-columns stays the breakpoint's ceiling.
-  function syncColumns() {
-    const declared = parseInt(getComputedStyle(grid).getPropertyValue('--gallery-columns'), 10) || 1;
-    const columns = Math.max(1, Math.min(declared, Math.ceil(visibleCount / 2)));
-    grid.style.columnCount = String(columns);
-  }
-
-  function apply(category) {
-    const shown = [];
-    cards.forEach((card) => {
-      const match = category === 'all' || card.dataset.category === category;
-      card.hidden = !match;
-      if (match) shown.push(card);
-    });
-
-    visibleCount = shown.length;
-    syncColumns();
-    renderCount();
-
-    if (!REDUCED_MOTION) {
-      shown.forEach((card, index) => {
-        card.animate(
-          [{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'none' }],
-          {
-            duration: 420,
-            delay: Math.min(index * 22, 260),
-            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-            fill: 'none',
-          }
-        );
-      });
-    }
-
-    // The section's height just changed — keep pinned/scrubbed triggers honest.
-    if (window.ScrollTrigger) window.ScrollTrigger.refresh();
-  }
-
-  filters.forEach((button) => {
-    button.addEventListener('click', () => {
-      if (button.classList.contains('is-active')) return;
-      filters.forEach((other) => {
-        const isActive = other === button;
-        other.classList.toggle('is-active', isActive);
-        other.setAttribute('aria-pressed', String(isActive));
-      });
-      apply(button.dataset.filter);
-    });
-  });
-
-  // The breakpoint's ceiling changes on resize, so re-derive the cap.
-  let resizeTimer = 0;
-  window.addEventListener('resize', () => {
-    window.clearTimeout(resizeTimer);
-    resizeTimer = window.setTimeout(syncColumns, 160);
-  }, { passive: true });
-
-  document.addEventListener('localechange', renderCount);
-
-  syncColumns();
   renderCount();
+  document.addEventListener('localechange', renderCount);
 })();
 
 

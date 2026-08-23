@@ -1454,62 +1454,10 @@ section {
   color: #C9AF7E;
 }
 
-/* ── Category pills ── */
-.gallery-filters {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-@media (min-width: 1024px) {
-  .gallery-filters {
-    justify-content: flex-start;
-  }
-}
-
-.gallery-filter {
-  appearance: none;
-  cursor: pointer;
-  border: 1px solid rgba(243, 231, 207, 0.30);
-  border-radius: var(--radius-full);
-  background: transparent;
-  min-height: 2.75rem;
-  padding: 0.58rem 1.2rem;
-  font-family: var(--font-body);
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  line-height: 1.3;
-  text-transform: uppercase;
-  color: #EFE1C6;
-  transition: background-color var(--duration-slow) var(--ease-out),
-    border-color var(--duration-slow) var(--ease-out),
-    color var(--duration-slow) var(--ease-out);
-}
-
-.gallery-filter:hover {
-  border-color: rgba(243, 231, 207, 0.62);
-  color: #FFFDF9;
-}
-
-.gallery-filter.is-active {
-  background: #F3E7CF;
-  border-color: #F3E7CF;
-  color: var(--color-ink);
-}
-
-.gallery-filter:focus-visible {
-  outline: 2px solid #F3E7CF;
-  outline-offset: 3px;
-}
-
 /* ── Masonry grid ──
    CSS multi-column: every card keeps its own image ratio while the
    gutters stay mechanically even. Cards flow down each column.
-   --gallery-columns is the count this breakpoint wants; the filter
-   script reads it and may cap it lower so a small result set never
-   strands an empty trailing column. */
+   --gallery-columns is the count this breakpoint wants. */
 .gallery-grid {
   --gallery-columns: 2;
   column-count: var(--gallery-columns);
@@ -1540,10 +1488,6 @@ section {
 .gallery-card {
   break-inside: avoid;
   margin: 0 0 clamp(1.35rem, 2.4vw, 2rem);
-}
-
-.gallery-card[hidden] {
-  display: none;
 }
 
 .gallery-card__media {
@@ -1588,25 +1532,10 @@ section {
   color: #FBF4E6;
 }
 
-.gallery-card__tag {
-  display: none;
-  flex-shrink: 0;
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  line-height: 1.3;
-  text-transform: uppercase;
-  color: #DFC79A;
-}
-
-/* While the layout is stacked the columns are narrow enough that a
-   title and its tag cannot share a line — stack them instead of
-   letting the title crush down to a few characters. */
 @media (max-width: 1023px) {
   .gallery-card__meta {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.2rem;
     padding-top: 0.55rem;
   }
 
@@ -1614,10 +1543,6 @@ section {
     font-size: 0.875rem;
   }
 
-  .gallery-card__tag {
-    font-size: 0.75rem;
-    letter-spacing: 0.14em;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
