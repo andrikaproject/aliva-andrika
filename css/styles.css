@@ -1301,10 +1301,7 @@ section {
 
 /* ── Prewedding gallery ──
    Figma 312:74. The section is full-bleed and tall; .gallery-frame is
-   the rounded panel painted behind the content. GSAP scrubs the frame's
-   horizontal inset and radius so it expands to fill the screen on the
-   way in and contracts on the way out. Without GSAP it simply sits
-   full-bleed, which is a correct resting state on its own. */
+   the static panel painted behind the content. */
 #photo-band {
   position: relative;
   z-index: 1;
@@ -1315,8 +1312,7 @@ section {
   position: absolute;
   top: 0;
   bottom: 0;
-  /* Animated by GSAP. Content padding below always clears the largest
-     inset these reach, so the layout never escapes the panel. */
+  /* Full-bleed by default; gallery scroll effects animate content only. */
   left: 0;
   right: 0;
   border-radius: 0;

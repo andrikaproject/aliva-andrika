@@ -1208,64 +1208,14 @@ function initScrollStory() {
       });
     }
 
-    // Photo band (Figma 312:74): the rounded panel expands to fill the
-    // screen on the way in and contracts on the way out, while the
-    // context column stays pinned beside the scrolling photographs.
-    // Only the empty .gallery-frame is animated — nothing that GSAP
-    // pins sits inside it, so the pin maths stays in untransformed space.
+    // Photo band (Figma 312:74): the background frame stays full-bleed
+    // while the context column remains pinned beside the scrolling
+    // photographs.
     const band = document.getElementById('photo-band');
-    const frame = band && band.querySelector('.gallery-frame');
     const galleryLayout = band && band.querySelector('.gallery-layout');
     const galleryContext = band && band.querySelector('.gallery-context__inner');
     const galleryGrid = document.getElementById('galleryGrid');
     const galleryCards = galleryGrid ? Array.from(galleryGrid.querySelectorAll('.gallery-card')) : [];
-
-    const FRAME_INSET = '6%';
-    const FRAME_RADIUS = 56;
-
-    if (band && frame) {
-      remember(frame);
-
-      gsap.fromTo(frame,
-        { left: FRAME_INSET, right: FRAME_INSET, borderRadius: FRAME_RADIUS },
-        {
-          left: '0%',
-          right: '0%',
-          borderRadius: 0,
-          ease: 'none',
-          immediateRender: true,
-          scrollTrigger: {
-            trigger: band,
-            start: 'top bottom',
-            end: 'top top',
-            scrub: 0.6,
-            invalidateOnRefresh: true,
-            onToggle: (self) => setWillChange(frame, self.isActive),
-          },
-        }
-      );
-
-      // immediateRender stays off so this never stomps the entry state
-      // while the panel is still sitting full-bleed in the middle.
-      gsap.fromTo(frame,
-        { left: '0%', right: '0%', borderRadius: 0 },
-        {
-          left: FRAME_INSET,
-          right: FRAME_INSET,
-          borderRadius: FRAME_RADIUS,
-          ease: 'none',
-          immediateRender: false,
-          scrollTrigger: {
-            trigger: band,
-            start: 'bottom bottom',
-            end: 'bottom top',
-            scrub: 0.6,
-            invalidateOnRefresh: true,
-            onToggle: (self) => setWillChange(frame, self.isActive),
-          },
-        }
-      );
-    }
 
     if (galleryContext) {
       remember(galleryContext);
