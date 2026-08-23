@@ -316,7 +316,11 @@ function applyLocale(locale) {
 
 // ── Motion preference (shared) ─────────────────────────────────
 const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const NATIVE_SCROLL_MODE = window.matchMedia(
+  '(max-width: 767px), (max-height: 699px), (pointer: coarse)'
+).matches || navigator.maxTouchPoints > 0;
 const MUSIC_START_SECONDS = 0;
+const LIGHT_TEAR_DURATION_MS = 820;
 
 function primeMusicStart(audio) {
   if (!audio || audio.dataset.startPositionApplied === 'true') return;
@@ -425,7 +429,6 @@ function playMusicReliably(audio) {
   const cover = document.getElementById('cover-screen');
   const btn = document.getElementById('cover-btn');
   const guestEl = document.getElementById('cover-guest');
-  const bloom = document.getElementById('bloom');
   const hero = document.getElementById('hero');
   const ticket = cover.querySelector('.cover-ticket');
   const dash = cover.querySelector('.cover-ticket-dash');
@@ -455,7 +458,7 @@ function playMusicReliably(audio) {
   }
 
   function makeTearClipPaths(width, height, tearY) {
-    const segments = 14;
+    const segments = 10;
     const topEdge = [];
     const bottomEdge = [];
 
@@ -479,10 +482,7 @@ function playMusicReliably(audio) {
     const ticketRect = ticket.getBoundingClientRect();
     const dashRect = dash.getBoundingClientRect();
     const tearY = dashRect.top - ticketRect.top + dashRect.height / 2;
-    const zoomScale = Math.max(
-      window.innerWidth / ticketRect.width,
-      window.innerHeight / ticketRect.height
-    ) * 1.18;
+    const zoomScale = 1.03;
 
     const stage = document.createElement('div');
     stage.className = 'ticket-transition-stage';
@@ -512,32 +512,25 @@ function playMusicReliably(audio) {
 
     setTimeout(() => {
       if (hero) hero.classList.add('hero-emerge');
-    }, 1250);
-
-    setTimeout(() => cover.classList.add('dismissed'), 1450);
+      cover.classList.add('dismissed');
+    }, 360);
 
     setTimeout(() => {
       stage.remove();
       cover.remove();
-    }, 1750);
+    }, LIGHT_TEAR_DURATION_MS);
 
     return true;
   }
 
-  function runBloomFallback() {
-    const rect = btn.getBoundingClientRect();
-    bloom.style.left = (rect.left + rect.width / 2) + 'px';
-    bloom.style.top = (rect.top + rect.height / 2) + 'px';
-    bloom.classList.add('active');
-
-    setTimeout(() => cover.classList.add('dismissed'), 250);
+  function runFadeFallback() {
+    cover.classList.add('dismissed');
     setTimeout(() => {
       if (hero) hero.classList.add('hero-emerge');
-    }, 500);
+    }, 120);
     setTimeout(() => {
       cover.remove();
-      bloom.classList.remove('active');
-    }, 1400);
+    }, 650);
   }
 
   btn.addEventListener('click', () => {
@@ -556,16 +549,16 @@ function playMusicReliably(audio) {
     // Unlock scroll as soon as the journey begins
     document.body.style.overflow = '';
 
-    // Reduced motion → simple cross-fade, no bloom
+    // Reduced motion → simple cross-fade
     if (REDUCED_MOTION) {
       cover.classList.add('dismissed');
       cover.addEventListener('transitionend', () => cover.remove(), { once: true });
       return;
     }
 
-    // If cloning is unavailable for any reason, retain the original bloom
-    // transition rather than leaving the guest on a frozen cover.
-    if (!runTicketTransition()) runBloomFallback();
+    // If cloning is unavailable for any reason, use a simple fade rather
+    // than leaving the guest on a frozen cover.
+    if (!runTicketTransition()) runFadeFallback();
   });
 })();
 
@@ -1028,7 +1021,7 @@ initFallbackReveals();
 // inertial scrolling, scroll-scrubbed editorial layers, and a pinned
 // narrative chapter. Content and timing stay specific to this invitation.
 function initScrollStory() {
-  if (REDUCED_MOTION) return false;
+  if (REDUCED_MOTION || NATIVE_SCROLL_MODE) return false;
 
   const gsap = window.gsap;
   const ScrollTrigger = window.ScrollTrigger;
@@ -1083,12 +1076,10 @@ function initScrollStory() {
         requestAnimationFrame(() => {
           smoother.paused(false);
           smoother.scrollTo(0, false);
-          ScrollTrigger.refresh();
         });
 
-        // The torn-ticket transition changes fixed layers for 1.75s.
-        // Refresh once more after it leaves the DOM.
-        window.setTimeout(() => ScrollTrigger.refresh(), 1850);
+        // Refresh once after the light tear leaves the DOM.
+        window.setTimeout(() => ScrollTrigger.refresh(), LIGHT_TEAR_DURATION_MS + 80);
       }, { once: true });
     }
 

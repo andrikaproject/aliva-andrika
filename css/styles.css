@@ -1160,7 +1160,7 @@ section {
 }
 
 .ticket-transition-stage.is-active {
-  animation: ticket-stage-zoom 1.45s cubic-bezier(0.45, 0, 0.2, 1) forwards;
+  animation: ticket-stage-zoom 0.82s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .ticket-transition-clone {
@@ -1175,7 +1175,7 @@ section {
   box-shadow: none;
   pointer-events: none;
   filter: blur(0);
-  will-change: transform, filter;
+  will-change: transform;
 }
 
 .ticket-transition-clone--top {
@@ -1187,15 +1187,11 @@ section {
 }
 
 .ticket-transition-stage.is-active .ticket-transition-clone--top {
-  animation:
-    ticket-tear-top 1.45s cubic-bezier(0.22, 1, 0.36, 1) forwards,
-    ticket-motion-blur 1.45s linear forwards;
+  animation: ticket-tear-top 0.82s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .ticket-transition-stage.is-active .ticket-transition-clone--bottom {
-  animation:
-    ticket-tear-bottom 1.45s cubic-bezier(0.22, 1, 0.36, 1) forwards,
-    ticket-motion-blur 1.45s linear forwards;
+  animation: ticket-tear-bottom 0.82s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 @keyframes ticket-tear-top {
@@ -1203,20 +1199,16 @@ section {
     transform: translate3d(0, 0, 0) rotate(0);
   }
 
-  30% {
-    transform: translate3d(-3px, -16px, 0) rotate(-0.65deg);
+  38% {
+    transform: translate3d(-2px, -7px, 0) rotate(-0.3deg);
   }
 
-  46% {
-    transform: translate3d(-3px, -16px, 0) rotate(-0.65deg);
-  }
-
-  68% {
-    transform: translate3d(-1px, -7px, 0) rotate(-0.25deg);
+  62% {
+    transform: translate3d(-3px, -9px, 0) rotate(-0.4deg);
   }
 
   100% {
-    transform: translate3d(0, -2px, 0) rotate(0);
+    transform: translate3d(-4px, -10px, 0) rotate(-0.45deg);
   }
 }
 
@@ -1225,32 +1217,24 @@ section {
     transform: translate3d(0, 0, 0) rotate(0);
   }
 
-  30% {
-    transform: translate3d(3px, 20px, 0) rotate(0.7deg);
+  38% {
+    transform: translate3d(2px, 8px, 0) rotate(0.3deg);
   }
 
-  46% {
-    transform: translate3d(3px, 20px, 0) rotate(0.7deg);
-  }
-
-  68% {
-    transform: translate3d(1px, 9px, 0) rotate(0.28deg);
+  62% {
+    transform: translate3d(3px, 10px, 0) rotate(0.4deg);
   }
 
   100% {
-    transform: translate3d(0, 3px, 0) rotate(0);
+    transform: translate3d(4px, 12px, 0) rotate(0.45deg);
   }
 }
 
 @keyframes ticket-stage-zoom {
 
   0%,
-  46% {
+  50% {
     transform: translateZ(0) scale(1);
-  }
-
-  55% {
-    transform: translateZ(0) scale(0.985);
   }
 
   100% {
@@ -1258,98 +1242,27 @@ section {
   }
 }
 
-@keyframes ticket-motion-blur {
-
-  0%,
-  46% {
-    filter: blur(0);
-  }
-
-  62% {
-    filter: blur(0.35px);
-  }
-
-  78% {
-    filter: blur(1px);
-  }
-
-  90% {
-    filter: blur(2px);
-  }
-
-  100% {
-    filter: blur(3px);
-  }
-}
-
-/* Cover dissolves into the light rather than sliding away */
+/* Cover dissolves rather than sliding away */
 #cover-screen.dismissed {
-  transform: scale(1.06);
+  transform: scale(1.015);
   opacity: 0;
   pointer-events: none;
 }
 
-/* ── Light-bloom transition (cover → hero) ── */
-#bloom {
-  position: fixed;
-  left: 50%;
-  top: 50%;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  transform: translate(-50%, -50%) scale(0);
-  opacity: 0;
-  pointer-events: none;
-  z-index: 65;
-  /* above cover content, below nothing else during transition */
-  background: radial-gradient(circle,
-      #FFFBEF 0%,
-      #F8E9C4 32%,
-      #EBCB86 56%,
-      rgba(235, 203, 134, 0) 70%);
-}
-
-#bloom.active {
-  animation: bloom-flare 1.5s ease-out forwards;
-}
-
-@keyframes bloom-flare {
-  0% {
-    transform: translate(-50%, -50%) scale(0);
-    opacity: 0;
-  }
-
-  20% {
-    opacity: 1;
-  }
-
-  55% {
-    transform: translate(-50%, -50%) scale(120);
-    opacity: 1;
-  }
-
-  100% {
-    transform: translate(-50%, -50%) scale(150);
-    opacity: 0;
-  }
-}
-
-/* Hero emerges from the light after the cover is dismissed */
+/* Hero emerges after the cover is dismissed */
 .hero-emerge .hero-content {
-  animation: hero-emerge 1.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: hero-emerge 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes hero-emerge {
   from {
     opacity: 0;
     transform: translateY(12px) scale(0.98);
-    filter: blur(6px);
   }
 
   to {
     opacity: 1;
     transform: none;
-    filter: blur(0);
   }
 }
 
@@ -1767,12 +1680,6 @@ a:focus-visible {
     opacity: 1 !important;
     transform: none !important;
     filter: none !important;
-  }
-
-  #bloom,
-  #bloom.active {
-    animation: none !important;
-    opacity: 0 !important;
   }
 
   #cover-screen {
