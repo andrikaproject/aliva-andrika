@@ -25,6 +25,10 @@
 
 :root {
 
+  /* Keep native controls aligned with the project's warm light palette. */
+  color-scheme: light;
+  color-scheme: only light;
+
   /* ── Semantic palette ──────────────────────────────────────── */
 
   /* Surfaces */
