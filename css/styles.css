@@ -5,6 +5,39 @@
 ================================================================ */
 
 /* ── Reflow Sans — Hero display family ── */
+/* Self-hosted Google Fonts. These replace the old Google Fonts CSS request. */
+@font-face {
+  font-family: "Cormorant Garamond";
+  font-style: normal;
+  font-weight: 300 600;
+  font-display: swap;
+  src: url("../assets/fonts/CormorantGaramond-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Cormorant Garamond";
+  font-style: italic;
+  font-weight: 300 500;
+  font-display: swap;
+  src: url("../assets/fonts/CormorantGaramond-Italic.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "DM Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../assets/fonts/DMMono-Medium.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Jost";
+  font-style: normal;
+  font-weight: 300 500;
+  font-display: swap;
+  src: url("../assets/fonts/Jost-Latin.woff2") format("woff2");
+}
+
 @font-face {
   font-family: "Reflow Sans";
   src: url("../assets/fonts/ReflowSans-Thin.ttf") format("truetype");
