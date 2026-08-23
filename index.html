@@ -42,7 +42,7 @@
        GLOBAL STYLES
   ============================================================ -->
   <link rel="stylesheet" href="css/design-system.css" />
-  <link rel="stylesheet" href="css/styles.css?v=20260802-reflow-font" />
+  <link rel="stylesheet" href="css/styles.css?v=20260823-rsvp" />
 </head>
 
 <body class="antialiased">
@@ -502,11 +502,11 @@
                 <label class="section-label block mb-3" data-i18n="attendance">Attendance</label>
                 <div class="flex gap-3 flex-wrap rsvp-attendance-options">
                   <div class="radio-card">
-                    <input type="radio" id="att-yes" name="attendance" value="yes" checked />
+                    <input type="radio" id="att-yes" name="attendance" value="attending" checked />
                     <label for="att-yes" data-i18n="joyfullyAccepts">Joyfully Accepts</label>
                   </div>
                   <div class="radio-card">
-                    <input type="radio" id="att-no" name="attendance" value="no" />
+                    <input type="radio" id="att-no" name="attendance" value="not_attending" />
                     <label for="att-no" data-i18n="regretfullyDeclines">Regretfully Declines</label>
                   </div>
                 </div>
@@ -514,9 +514,8 @@
 
               <!-- Message -->
               <div>
-                <label for="rsvp-message" class="section-label block mb-2"><span data-i18n="messageForCouple">Message for the Couple</span> <span
-                    class="opacity-70" data-i18n="optional">(optional)</span></label>
-                <textarea id="rsvp-message" name="message" rows="4" maxlength="600" data-i18n-placeholder="warmWish" placeholder="Leave a warm wish or message…"
+                <label for="rsvp-message" class="section-label block mb-2"><span data-i18n="messageForCouple">Message for the Couple</span></label>
+                <textarea id="rsvp-message" name="message" rows="4" maxlength="500" required data-i18n-placeholder="warmWish" placeholder="Leave a warm wish or message…"
                   class="form-input rsvp-message resize-y"></textarea>
               </div>
 
@@ -527,7 +526,21 @@
                 </button>
               </div>
 
+              <p id="rsvp-feedback" class="rsvp-feedback" role="status" aria-live="polite"></p>
+
             </form>
+          </div>
+
+          <!-- Public guestbook -->
+          <div class="rsvp-guestbook mt-10 reveal" style="transition-delay: 0.18s;">
+            <div class="text-center mb-6">
+              <p class="section-label mb-3" data-i18n="guestbookLabel">Guestbook</p>
+              <h3 class="font-display text-3xl sm:text-4xl font-light text-ink" data-i18n="guestbookHeading">Messages from our guests</h3>
+              <div class="gold-divider mt-4 w-24 mx-auto"><span class="diamond"></span></div>
+            </div>
+
+            <p id="rsvp-guestbook-status" class="rsvp-guestbook-status" role="status" aria-live="polite" data-i18n="loadingGuestbook">Loading messages…</p>
+            <div id="rsvp-entries" class="rsvp-entries" aria-live="polite"></div>
           </div>
 
         </div>
@@ -556,7 +569,7 @@
           <div class="gift-cards mt-10">
 
             <!-- Andrika's account — fill data-gift-account when ready -->
-            <article class="gift-card panel reveal" data-gift-account="">
+            <article class="gift-card panel reveal" data-gift-account="459408723">
               <div class="floral-accent gift-card__ornament" aria-hidden="true">✦</div>
               <p class="section-label gift-card__bank" data-i18n="giftBank">BNI</p>
               <p class="section-label gift-card__holder-label" data-i18n="giftAccountHolder">Atas Nama</p>
@@ -599,6 +612,21 @@
               </p>
             </article>
 
+          </div>
+
+          <!-- Gift delivery address -->
+          <div class="gift-address panel reveal" style="transition-delay: 0.18s;">
+            <div class="floral-accent gift-address__ornament" aria-hidden="true">✦</div>
+            <p class="section-label gift-address__label" data-i18n="giftDeliveryLabel">Pengiriman Hadiah</p>
+            <h3 class="font-display text-2xl sm:text-3xl font-light text-ink" data-i18n="giftDeliveryHeading">Kirim hadiah ke alamat berikut</h3>
+            <div class="gift-address__rule" aria-hidden="true"></div>
+            <address class="gift-address__details">
+              <strong>Aliva Eka / Andrika</strong><br />
+              Jl. Gunung Batu Dalam No. 51<br />
+              RT 03 / RW 01, Kel. Pasirkaliki<br />
+              Kec. Cimahi Utara, Kota Cimahi<br />
+              Jawa Barat 40514
+            </address>
           </div>
         </div>
       </section>
@@ -819,7 +847,7 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollSmoother.min.js"></script>
-  <script src="js/main.js?v=20260802-music-fade"></script>
+  <script src="js/main.js?v=20260823-rsvp"></script>
 
 </body>
 

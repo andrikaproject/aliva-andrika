@@ -63,9 +63,20 @@ const TRANSLATIONS = {
     optional: '(opsional)',
     warmWish: 'Tulis doa atau pesan hangat…',
     sendRsvp: 'Kirim RSVP',
+    guestbookLabel: 'Ucapan',
+    guestbookHeading: 'Pesan dari para tamu',
+    loadingGuestbook: 'Memuat ucapan…',
+    guestbookEmpty: 'Belum ada ucapan. Jadilah yang pertama!',
+    guestbookError: 'Ucapan belum dapat dimuat saat ini.',
+    rsvpSubmitError: 'RSVP belum dapat dikirim. Silakan coba lagi.',
+    rsvpSubmitRateLimited: 'Mohon tunggu sebentar sebelum mengirim lagi.',
+    attendanceStatusYes: 'Hadir',
+    attendanceStatusNo: 'Tidak hadir',
     giftLabel: 'Hadiah Pernikahan',
     giftHeading: 'Memberi Hadiah',
     giftIntro: 'Bagi Anda yang ingin berbagi tanda kasih, kami dengan penuh syukur menerimanya melalui rekening berikut.',
+    giftDeliveryLabel: 'Pengiriman Hadiah',
+    giftDeliveryHeading: 'Kirim hadiah ke alamat berikut',
     giftBank: 'BNI',
     giftAccountNumber: 'Nomor Rekening',
     giftAccountHolder: 'Atas Nama',
@@ -142,9 +153,20 @@ const TRANSLATIONS = {
     optional: '(optional)',
     warmWish: 'Leave a warm wish or message…',
     sendRsvp: 'Send RSVP',
+    guestbookLabel: 'Guestbook',
+    guestbookHeading: 'Messages from our guests',
+    loadingGuestbook: 'Loading messages…',
+    guestbookEmpty: 'No messages yet. Be the first to leave one!',
+    guestbookError: 'Messages are not available right now.',
+    rsvpSubmitError: 'Your RSVP could not be sent. Please try again.',
+    rsvpSubmitRateLimited: 'Please wait a moment before sending another message.',
+    attendanceStatusYes: 'Attending',
+    attendanceStatusNo: 'Not attending',
     giftLabel: 'Wedding Gift',
     giftHeading: 'Sending a Gift',
     giftIntro: 'For those who wish to share a gift, we gratefully receive it through the accounts below.',
+    giftDeliveryLabel: 'Gift Delivery',
+    giftDeliveryHeading: 'Send a gift to this address',
     giftBank: 'BNI',
     giftAccountNumber: 'Account Number',
     giftAccountHolder: 'Account Holder',
@@ -539,16 +561,145 @@ updateCountdown();
 setInterval(updateCountdown, 1000);
 
 
-// ── RSVP FORM ──────────────────────────────────────────────────
-function handleRsvp(e) {
+// ── RSVP FORM + PUBLIC GUESTBOOK ───────────────────────────────
+let guestbookEntries = [];
+
+function setRsvpFeedback(message, type = '') {
+  const feedback = document.getElementById('rsvp-feedback');
+  if (!feedback) return;
+
+  feedback.textContent = message;
+  feedback.classList.toggle('is-error', type === 'error');
+  feedback.classList.toggle('is-success', type === 'success');
+}
+
+function getAttendanceLabel(attendance) {
+  return getTranslation(attendance === 'attending' ? 'attendanceStatusYes' : 'attendanceStatusNo');
+}
+
+function formatGuestbookTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+
+  return new Intl.DateTimeFormat(currentLocale === 'id' ? 'id-ID' : 'en-US', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(date);
+}
+
+function renderGuestbook() {
+  const status = document.getElementById('rsvp-guestbook-status');
+  const list = document.getElementById('rsvp-entries');
+  if (!status || !list) return;
+
+  list.replaceChildren();
+
+  if (!guestbookEntries.length) {
+    status.textContent = getTranslation('guestbookEmpty');
+    return;
+  }
+
+  status.textContent = '';
+
+  guestbookEntries.forEach((entry) => {
+    const card = document.createElement('article');
+    card.className = 'guestbook-entry panel';
+
+    const header = document.createElement('div');
+    header.className = 'guestbook-entry__header';
+
+    const name = document.createElement('h4');
+    name.className = 'guestbook-entry__name';
+    name.textContent = entry.name;
+
+    const attendance = document.createElement('span');
+    attendance.className = `guestbook-entry__attendance ${entry.attendance === 'attending' ? 'is-attending' : 'is-declining'}`;
+    attendance.textContent = getAttendanceLabel(entry.attendance);
+
+    const date = document.createElement('time');
+    date.className = 'guestbook-entry__date';
+    date.dateTime = entry.created_at;
+    date.textContent = formatGuestbookTime(entry.created_at);
+
+    const message = document.createElement('p');
+    message.className = 'guestbook-entry__message';
+    message.textContent = entry.message;
+
+    header.append(name, attendance, date);
+    card.append(header, message);
+    list.append(card);
+  });
+}
+
+async function loadGuestbook() {
+  const status = document.getElementById('rsvp-guestbook-status');
+  if (status) status.textContent = getTranslation('loadingGuestbook');
+
+  try {
+    const response = await fetch('/api/guestbook', { headers: { Accept: 'application/json' } });
+    if (!response.ok) throw new Error('Guestbook request failed');
+
+    const payload = await response.json();
+    guestbookEntries = Array.isArray(payload.entries) ? payload.entries : [];
+    renderGuestbook();
+  } catch (error) {
+    console.warn('Guestbook could not be loaded:', error);
+    if (status) status.textContent = getTranslation('guestbookError');
+  }
+}
+
+async function handleRsvp(e) {
   e.preventDefault();
+
   const form = document.getElementById('rsvp-form');
   const success = document.getElementById('rsvp-success');
-  // Here you can send form data to your backend or a service like Formspree
-  // For now, just show success UI
-  form.style.display = 'none';
-  success.style.display = 'block';
+  const submit = form?.querySelector('button[type="submit"]');
+  if (!form || !submit || submit.disabled) return;
+
+  const formData = new FormData(form);
+  const payload = {
+    name: String(formData.get('name') || ''),
+    guests: Number(formData.get('guests') || 1),
+    attendance: String(formData.get('attendance') || ''),
+    message: String(formData.get('message') || ''),
+  };
+
+  submit.disabled = true;
+  setRsvpFeedback('');
+
+  try {
+    const response = await fetch('/api/guestbook', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      const message = response.status === 429
+        ? getTranslation('rsvpSubmitRateLimited')
+        : getTranslation('rsvpSubmitError');
+      throw new Error(result.error || message);
+    }
+
+    guestbookEntries = [result.entry, ...guestbookEntries.filter((entry) => entry.id !== result.entry.id)].slice(0, 50);
+    renderGuestbook();
+    form.reset();
+    document.getElementById('att-yes').checked = true;
+    document.getElementById('rsvp-guests').value = '1';
+    if (success) success.style.display = 'block';
+    setRsvpFeedback(getTranslation('rsvpReceived'), 'success');
+  } catch (error) {
+    console.warn('RSVP submission failed:', error);
+    const fallback = error.message || getTranslation('rsvpSubmitError');
+    setRsvpFeedback(fallback, 'error');
+  } finally {
+    submit.disabled = false;
+  }
 }
+
+document.addEventListener('localechange', renderGuestbook);
+loadGuestbook();
 
 
 // ── REVEAL ON SCROLL ───────────────────────────────────────────

@@ -1560,6 +1560,108 @@ section {
   padding: 2rem;
 }
 
+/* ── Public RSVP guestbook ── */
+.rsvp-feedback {
+  min-height: 1.35rem;
+  margin-top: 0.8rem;
+  color: var(--text-ink);
+  font-size: 0.78rem;
+  text-align: right;
+}
+
+.rsvp-feedback.is-success {
+  color: #43735b;
+}
+
+.rsvp-feedback.is-error {
+  color: #a14f55;
+}
+
+.rsvp-guestbook-status {
+  min-height: 1.5rem;
+  color: var(--text-ink);
+  font-size: 0.82rem;
+  opacity: 0.72;
+  text-align: center;
+}
+
+.rsvp-entries {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.guestbook-entry {
+  padding: 1.15rem 1.25rem;
+  border-color: hsl(var(--accent));
+  box-shadow: var(--shadow-sm);
+}
+
+.guestbook-entry__header {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.guestbook-entry__name {
+  margin: 0;
+  color: var(--text-ink);
+  font-family: var(--font-display);
+  font-size: 1.18rem;
+  font-weight: 500;
+}
+
+.guestbook-entry__attendance {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  padding: 0.22rem 0.55rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.guestbook-entry__attendance.is-attending {
+  color: #43735b;
+}
+
+.guestbook-entry__attendance.is-declining {
+  color: #9a6260;
+}
+
+.guestbook-entry__date {
+  margin-left: auto;
+  color: var(--text-ink);
+  font-size: 0.68rem;
+  opacity: 0.58;
+}
+
+.guestbook-entry__message {
+  margin: 0.8rem 0 0;
+  color: var(--text-ink);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-style: italic;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 640px) {
+  .rsvp-feedback {
+    text-align: center;
+  }
+
+  .guestbook-entry__date {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
 /* ================================================================
    PREMIUM POLISH
    Small, on-brand refinements: texture, typographic finish,
@@ -2094,6 +2196,48 @@ a:focus-visible {
 #gift .gift-card__status.is-visible {
   opacity: 1;
   visibility: visible;
+}
+
+#gift .gift-address {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 1rem;
+  padding: clamp(1.5rem, 4vw, 2.25rem);
+  text-align: center;
+  border-color: hsl(var(--accent));
+  box-shadow: var(--shadow-md);
+}
+
+#gift .gift-address__ornament {
+  margin-bottom: 0.85rem;
+  font-size: 1.1rem;
+}
+
+#gift .gift-address__label {
+  margin-bottom: 0.5rem;
+  color: var(--text-rose);
+}
+
+#gift .gift-address__rule {
+  width: 2rem;
+  height: 1px;
+  margin: 1.1rem auto 1rem;
+  background: hsl(var(--accent));
+}
+
+#gift .gift-address__details {
+  color: var(--text-ink);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-style: normal;
+  line-height: 1.75;
+}
+
+#gift .gift-address__details strong {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 500;
 }
 
 @media (max-width: 640px) {
