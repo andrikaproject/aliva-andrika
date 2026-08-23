@@ -268,8 +268,8 @@ html.motion-enhanced {
 
 .hero-statement {
   display: grid;
-  grid-template-rows: repeat(4, 23.369565%);
-  gap: 2.173913% 0;
+  grid-template-rows: repeat(4, 24.4%);
+  gap: 0.8% 0;
   width: min(607px, calc(100vw - 32px));
   aspect-ratio: 607 / 368;
   font-family: "Reflow Sans", Arial, Helvetica, sans-serif;
@@ -303,7 +303,7 @@ html.motion-enhanced {
 }
 
 .hero-line--names {
-  grid-template-columns: minmax(0, 1fr) 18%;
+  grid-template-columns: minmax(0, 1fr) 23%;
 }
 
 .hero-line--names>span {
@@ -491,12 +491,20 @@ html[lang="id"] .hero-line--names>span {
   }
 }
 
+.hero-crop--stage,
+.hero-crop--hands,
+.hero-crop--portrait {
+  align-self: center;
+  aspect-ratio: 2.2 / 1;
+  height: auto;
+}
+
+.hero-crop--stage img {
+  object-position: center 63%;
+}
+
 .hero-crop--portrait img {
-  position: absolute;
-  top: -122.49%;
-  left: -56.65%;
-  width: 213.31%;
-  height: 483.61%;
+  object-position: center 40%;
 }
 
 .hero-meta {
@@ -920,7 +928,7 @@ section {
 .cover-photo {
   position: absolute;
   z-index: 0;
-  top: clamp(-10.2rem, -36vw, -8.45rem);
+  top: clamp(-2.2rem, -36vw, -8.45rem);
   left: 50%;
   width: min(100vw, 42rem);
   aspect-ratio: 2 / 3;
@@ -931,7 +939,7 @@ section {
       hsl(var(--foreground) / 0.2) 44%,
       hsl(var(--secondary) / 0.72) 68%,
       var(--cover-surface) 84%),
-    url("../assets/cover/andrika-aliva-curtain.jpeg") center / cover no-repeat;
+    url("../assets/cover/first-photo.webp") center / cover no-repeat;
 }
 
 .cover-ticket {

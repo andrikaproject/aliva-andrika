@@ -317,11 +317,16 @@ function applyLocale(locale) {
 // ── Motion preference (shared) ─────────────────────────────────
 const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const MUSIC_START_SECONDS = 0;
-const MUSIC_CROSSFADE_MS = 1800;
-const MUSIC_FADE_IN_MS = 1800;
 
 function primeMusicStart(audio) {
   if (!audio || audio.dataset.startPositionApplied === 'true') return;
+
+  // Starting at zero needs no seek. Avoid touching currentTime while the
+  // browser is still preparing its first playback request.
+  if (MUSIC_START_SECONDS <= 0) {
+    audio.dataset.startPositionApplied = 'true';
+    return;
+  }
 
   const seekToOpening = () => {
     if (audio.dataset.startPositionApplied === 'true') return;
@@ -342,40 +347,76 @@ function primeMusicStart(audio) {
 }
 
 function playMusicSmoothly(audio) {
-  if (!audio) return null;
+  if (!audio) return Promise.reject(new Error('Wedding audio element is missing'));
 
-  const shouldFadeIn = audio.paused;
-  if (shouldFadeIn) {
-    cancelAnimationFrame(audio.__musicFadeFrame || 0);
-    audio.volume = REDUCED_MOTION ? 1 : 0;
+  // Start at an audible level. Some mobile/in-app browsers can resolve
+  // play() while leaving a scripted fade-in at volume 0 indefinitely.
+  audio.defaultMuted = false;
+  audio.muted = false;
+  audio.volume = 1;
+
+  let playPromise;
+  try {
+    playPromise = audio.play();
+  } catch (error) {
+    audio.volume = 1;
+    return Promise.reject(error);
   }
 
-  const playPromise = audio.play();
-  if (shouldFadeIn && playPromise && typeof playPromise.then === 'function') {
-    playPromise.then(() => {
-      if (REDUCED_MOTION) {
-        audio.volume = 1;
-        return;
-      }
+  const normalizedPlayPromise = playPromise && typeof playPromise.then === 'function'
+    ? playPromise
+    : Promise.resolve();
 
-      const startedAt = performance.now();
-      const fadeStep = (now) => {
-        const progress = Math.min(1, (now - startedAt) / MUSIC_FADE_IN_MS);
-        audio.volume = progress;
-        if (progress < 1 && !audio.paused) {
-          audio.__musicFadeFrame = requestAnimationFrame(fadeStep);
-        } else {
-          audio.volume = 1;
-          audio.__musicFadeFrame = 0;
-        }
-      };
-      audio.__musicFadeFrame = requestAnimationFrame(fadeStep);
-    }).catch(() => {
-      audio.volume = 1;
-    });
-  }
+  return normalizedPlayPromise.then(() => {
+    audio.defaultMuted = false;
+    audio.muted = false;
+    audio.volume = 1;
+  });
+}
 
-  return playPromise;
+function waitForMusicReady(audio, timeoutMs = 5000) {
+  if (!audio) return Promise.reject(new Error('Wedding audio element is missing'));
+  if (audio.readyState >= 3) return Promise.resolve();
+
+  return new Promise((resolve, reject) => {
+    let timeoutId = 0;
+
+    const cleanup = () => {
+      window.clearTimeout(timeoutId);
+      audio.removeEventListener('canplay', handleCanPlay);
+      audio.removeEventListener('error', handleError);
+    };
+
+    const handleCanPlay = () => {
+      cleanup();
+      resolve();
+    };
+
+    const handleError = () => {
+      cleanup();
+      reject(audio.error || new Error('Wedding audio failed to load'));
+    };
+
+    audio.addEventListener('canplay', handleCanPlay, { once: true });
+    audio.addEventListener('error', handleError, { once: true });
+    timeoutId = window.setTimeout(() => {
+      cleanup();
+      reject(new Error('Wedding audio did not become playable in time'));
+    }, timeoutMs);
+  });
+}
+
+function playMusicReliably(audio) {
+  return playMusicSmoothly(audio).catch((error) => {
+    const nonRetryable = ['NotAllowedError', 'NotSupportedError', 'SecurityError'];
+    if (!audio || audio.error || nonRetryable.includes(error && error.name)) {
+      throw error;
+    }
+
+    // A cold mobile load can abort the first play request. Retry once after
+    // the browser confirms that enough audio data is available.
+    return waitForMusicReady(audio).then(() => playMusicSmoothly(audio));
+  });
 }
 
 
@@ -509,7 +550,7 @@ function playMusicSmoothly(audio) {
     // music player via a custom event so it can sync its UI to the outcome.
     const audio = document.getElementById('bg-audio');
     primeMusicStart(audio);
-    const playPromise = playMusicSmoothly(audio);
+    const playPromise = playMusicReliably(audio);
     window.dispatchEvent(new CustomEvent('invitation-opened', { detail: { playPromise } }));
 
     // Unlock scroll as soon as the journey begins
@@ -856,10 +897,9 @@ initFallbackReveals();
   const iconNote = document.getElementById('icon-note');
   const iconMute = document.getElementById('icon-mute');
 
-  let isPlaying = false;
+  let wantsMusic = false;
 
   function setUIPlaying(state) {
-    isPlaying = state;
     if (state) {
       panel.classList.add('open');
       btn.classList.add('is-playing');
@@ -873,17 +913,37 @@ initFallbackReveals();
     }
   }
 
+  function trackPlayback(playPromise) {
+    return Promise.resolve(playPromise)
+      .then(() => {
+        if (!wantsMusic || document.hidden) {
+          audio.pause();
+          setUIPlaying(false);
+          return false;
+        }
+
+        audio.defaultMuted = false;
+        audio.muted = false;
+        audio.volume = 1;
+        setUIPlaying(true);
+        return true;
+      })
+      .catch((error) => {
+        wantsMusic = false;
+        setUIPlaying(false);
+        console.warn('Wedding music could not start:', error);
+        return false;
+      });
+  }
+
   function startPlay() {
+    wantsMusic = true;
     primeMusicStart(audio);
-    playMusicSmoothly(audio).then(() => {
-      setUIPlaying(true);
-    }).catch(() => { });
+    return trackPlayback(playMusicReliably(audio));
   }
 
   function stopPlay() {
-    cancelMusicLoopFade();
-    cancelAnimationFrame(audio.__musicFadeFrame || 0);
-    audio.__musicFadeFrame = 0;
+    wantsMusic = false;
     audio.pause();
     audio.volume = 1;
     setUIPlaying(false);
@@ -891,68 +951,22 @@ initFallbackReveals();
 
   // Toggle button
   btn.addEventListener('click', () => {
-    if (isPlaying) stopPlay(); else startPlay();
+    if (wantsMusic) stopPlay(); else startPlay();
   });
 
-  function cancelMusicLoopFade() {
-    cancelAnimationFrame(audio.__musicLoopFadeFrame || 0);
-    audio.__musicLoopFadeFrame = 0;
-    audio.__musicLoopTransitioning = false;
-  }
-
-  function fadeInFromLoopStart(bounds) {
-    audio.currentTime = bounds.start;
-    audio.volume = 0;
-
-    const startedAt = performance.now();
-    const fadeIn = (now) => {
-      if (audio.paused || !isPlaying) {
-        cancelMusicLoopFade();
-        return;
-      }
-
-      const progressRatio = Math.min(1, (now - startedAt) / MUSIC_CROSSFADE_MS);
-      audio.volume = progressRatio;
-
-      if (progressRatio < 1) {
-        audio.__musicLoopFadeFrame = requestAnimationFrame(fadeIn);
-      } else {
-        audio.volume = 1;
-        audio.__musicLoopFadeFrame = 0;
-        audio.__musicLoopTransitioning = false;
-      }
-    };
-
-    audio.__musicLoopFadeFrame = requestAnimationFrame(fadeIn);
-  }
-
-  function startMusicLoopTransition(bounds) {
-    if (audio.__musicLoopTransitioning || audio.paused || !isPlaying) return;
-
-    audio.__musicLoopTransitioning = true;
-    const startingVolume = audio.volume;
-    const remainingAudioMs = Math.max(160, (bounds.end - audio.currentTime) * 1000);
-    const startedAt = performance.now();
-
-    const fadeOut = (now) => {
-      if (audio.paused || !isPlaying) {
-        cancelMusicLoopFade();
-        return;
-      }
-
-      const progressRatio = Math.min(1, (now - startedAt) / remainingAudioMs);
-      audio.volume = startingVolume * (1 - progressRatio);
-
-      if (progressRatio < 1) {
-        audio.__musicLoopFadeFrame = requestAnimationFrame(fadeOut);
-        return;
-      }
-
-      fadeInFromLoopStart(bounds);
-    };
-
-    audio.__musicLoopFadeFrame = requestAnimationFrame(fadeOut);
-  }
+  audio.addEventListener('playing', () => {
+    if (wantsMusic && !document.hidden) {
+      audio.defaultMuted = false;
+      audio.muted = false;
+      audio.volume = 1;
+      setUIPlaying(true);
+    }
+  });
+  audio.addEventListener('pause', () => setUIPlaying(false));
+  audio.addEventListener('error', () => {
+    wantsMusic = false;
+    setUIPlaying(false);
+  });
 
   function getMusicLoopBounds() {
     if (!Number.isFinite(audio.duration) || audio.duration <= 0) return null;
@@ -966,22 +980,19 @@ initFallbackReveals();
     const bounds = getMusicLoopBounds();
     if (!bounds) return;
 
-    if (audio.currentTime >= bounds.end - MUSIC_CROSSFADE_MS / 1000) {
-      startMusicLoopTransition(bounds);
-    }
-
     const position = Math.min(bounds.end, Math.max(bounds.start, audio.currentTime));
     progress.style.width = (((position - bounds.start) / (bounds.end - bounds.start)) * 100) + '%';
   }
 
-  // Keep playback across the full track, with a soft crossfade at the end.
+  // Native looping avoids scripted volume fades getting stuck at zero.
   audio.addEventListener('timeupdate', syncMusicLoopAndProgress);
   audio.addEventListener('loadedmetadata', syncMusicLoopAndProgress);
   audio.addEventListener('ended', () => {
     const bounds = getMusicLoopBounds();
     if (!bounds) return;
-    if (isPlaying) {
-      audio.play().then(() => fadeInFromLoopStart(bounds)).catch(() => { });
+    if (wantsMusic) {
+      audio.currentTime = bounds.start;
+      trackPlayback(playMusicReliably(audio));
     } else {
       audio.currentTime = bounds.start;
     }
@@ -989,10 +1000,10 @@ initFallbackReveals();
 
   // Pause/resume on tab visibility change
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden && isPlaying) {
+    if (document.hidden && wantsMusic && !audio.paused) {
       audio.pause();
-    } else if (!document.hidden && isPlaying) {
-      audio.play().catch(() => { });
+    } else if (!document.hidden && wantsMusic) {
+      trackPlayback(playMusicReliably(audio));
     }
   });
 
@@ -1001,14 +1012,12 @@ initFallbackReveals();
   // (the trusted user gesture iOS requires) and hands us the resulting
   // Promise. We only mirror the UI to whether playback actually started.
   window.addEventListener('invitation-opened', (e) => {
+    wantsMusic = true;
     const playPromise = e.detail && e.detail.playPromise;
     if (playPromise && typeof playPromise.then === 'function') {
-      playPromise
-        .then(() => setUIPlaying(true))
-        .catch(() => {/* blocked — widget stays available for a manual tap */ });
+      trackPlayback(playPromise);
     } else {
-      // No promise handed over (e.g. missing audio) — try once, ignore failure.
-      playMusicSmoothly(audio).then(() => setUIPlaying(true)).catch(() => { });
+      startPlay();
     }
   });
 })();
