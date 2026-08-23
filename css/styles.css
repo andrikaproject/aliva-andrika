@@ -492,8 +492,13 @@ html[lang="id"] .hero-line--names>span {
 }
 
 .hero-crop--stage,
-.hero-crop--hands,
 .hero-crop--portrait {
+  align-self: center;
+  aspect-ratio: 2.8 / 1;
+  height: auto;
+}
+
+.hero-crop--hands {
   align-self: center;
   aspect-ratio: 2.2 / 1;
   height: auto;
