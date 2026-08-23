@@ -15,6 +15,26 @@ Declare the project as light-only at the document and CSS levels:
 
 No JavaScript theme detection or runtime class toggling is needed.
 
+## Samsung Internet hardening
+
+Samsung Internet can apply its own dark transformation when its browser-level
+Force Dark behavior is enabled. The website can explicitly advertise that it
+supports only the light scheme, but a browser setting that forcibly transforms
+every website is outside the control of page code.
+
+The follow-up hardening keeps the same visual design while making the intent
+unambiguous at every page layer:
+
+- Change the document metadata to `color-scheme: only light`.
+- Enforce `color-scheme: only light !important` on `html` and `body` in both
+  critical and full CSS.
+- Bust the full stylesheet cache so existing visitors receive the updated
+  declaration.
+
+This targets normal system-theme inheritance and browser auto-dark behavior;
+it does not promise to override Samsung Internet's explicit Force Dark Only
+mode.
+
 ## Compatibility and accessibility
 
 - Older browsers that do not understand `only` still receive the preceding `color-scheme: light` declaration.
