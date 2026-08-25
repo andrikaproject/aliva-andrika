@@ -25,6 +25,10 @@
 
 :root {
 
+  /* Keep native controls aligned with the project's warm light palette. */
+  color-scheme: light;
+  color-scheme: only light;
+
   /* ── Semantic palette ──────────────────────────────────────── */
 
   /* Surfaces */
@@ -161,6 +165,11 @@
   /* sage-mid #9CAF98  → 1.94:1 FAIL → darken to 5.47:1 PASS      */
   --text-sage: hsl(110 18% 32%);  /* #486248  contrast 5.47:1     */
   --color-sage-mid: hsl(112 11% 64%);
+}
+
+html,
+body {
+  color-scheme: only light !important;
 }
 
 

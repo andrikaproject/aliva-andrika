@@ -1,5 +1,9 @@
 /* ================================================================
    TAILWIND CONFIG
+   Shared by the static Tailwind build. The runtime CDN is intentionally
+   not used in production so the page can render without a third-party
+   JavaScript compilation step.
+
    Extends Tailwind with shadcn-style CSS variable references
    so all tokens are available as Tailwind utilities:
 
@@ -16,7 +20,11 @@
      text-gold-mid     bg-rose-soft     text-sage-mid  …
 ================================================================ */
 
-tailwind.config = {
+module.exports = {
+  content: [
+    './index.html',
+    './js/**/*.js',
+  ],
   theme: {
     extend: {
 

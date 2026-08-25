@@ -5,6 +5,39 @@
 ================================================================ */
 
 /* ── Reflow Sans — Hero display family ── */
+/* Self-hosted Google Fonts. These replace the old Google Fonts CSS request. */
+@font-face {
+  font-family: "Cormorant Garamond";
+  font-style: normal;
+  font-weight: 300 600;
+  font-display: swap;
+  src: url("../assets/fonts/CormorantGaramond-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Cormorant Garamond";
+  font-style: italic;
+  font-weight: 300 500;
+  font-display: swap;
+  src: url("../assets/fonts/CormorantGaramond-Italic.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "DM Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../assets/fonts/DMMono-Medium.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Jost";
+  font-style: normal;
+  font-weight: 300 500;
+  font-display: swap;
+  src: url("../assets/fonts/Jost-Latin.woff2") format("woff2");
+}
+
 @font-face {
   font-family: "Reflow Sans";
   src: url("../assets/fonts/ReflowSans-Thin.ttf") format("truetype");
@@ -268,8 +301,8 @@ html.motion-enhanced {
 
 .hero-statement {
   display: grid;
-  grid-template-rows: repeat(4, 23.369565%);
-  gap: 2.173913% 0;
+  grid-template-rows: repeat(4, 24.4%);
+  gap: 0.8% 0;
   width: min(607px, calc(100vw - 32px));
   aspect-ratio: 607 / 368;
   font-family: "Reflow Sans", Arial, Helvetica, sans-serif;
@@ -303,7 +336,7 @@ html.motion-enhanced {
 }
 
 .hero-line--names {
-  grid-template-columns: minmax(0, 1fr) 18%;
+  grid-template-columns: minmax(0, 1fr) 23%;
 }
 
 .hero-line--names>span {
@@ -491,12 +524,25 @@ html[lang="id"] .hero-line--names>span {
   }
 }
 
+.hero-crop--stage,
+.hero-crop--portrait {
+  align-self: center;
+  aspect-ratio: 2.8 / 1;
+  height: auto;
+}
+
+.hero-crop--hands {
+  align-self: center;
+  aspect-ratio: 2.2 / 1;
+  height: auto;
+}
+
+.hero-crop--stage img {
+  object-position: center 63%;
+}
+
 .hero-crop--portrait img {
-  position: absolute;
-  top: -122.49%;
-  left: -56.65%;
-  width: 213.31%;
-  height: 483.61%;
+  object-position: center 40%;
 }
 
 .hero-meta {
@@ -920,7 +966,7 @@ section {
 .cover-photo {
   position: absolute;
   z-index: 0;
-  top: clamp(-10.2rem, -36vw, -8.45rem);
+  top: clamp(-2.2rem, -36vw, -8.45rem);
   left: 50%;
   width: min(100vw, 42rem);
   aspect-ratio: 2 / 3;
@@ -931,7 +977,7 @@ section {
       hsl(var(--foreground) / 0.2) 44%,
       hsl(var(--secondary) / 0.72) 68%,
       var(--cover-surface) 84%),
-    url("../assets/cover/andrika-aliva-curtain.jpeg") center / cover no-repeat;
+    url("../assets/cover/first-photo-01.webp") center / cover no-repeat;
 }
 
 .cover-ticket {
@@ -1117,6 +1163,12 @@ section {
   }
 }
 
+@media (max-width: 47.99rem) {
+  .cover-ticket {
+    transform: translateX(-50%) translateY(-5.625rem);
+  }
+}
+
 @media (min-width: 48rem) {
   .cover-photo {
     width: 32rem;
@@ -1147,7 +1199,7 @@ section {
 }
 
 .ticket-transition-stage.is-active {
-  animation: ticket-stage-zoom 1.45s cubic-bezier(0.45, 0, 0.2, 1) forwards;
+  animation: ticket-stage-zoom 0.82s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .ticket-transition-clone {
@@ -1162,7 +1214,7 @@ section {
   box-shadow: none;
   pointer-events: none;
   filter: blur(0);
-  will-change: transform, filter;
+  will-change: transform;
 }
 
 .ticket-transition-clone--top {
@@ -1174,15 +1226,11 @@ section {
 }
 
 .ticket-transition-stage.is-active .ticket-transition-clone--top {
-  animation:
-    ticket-tear-top 1.45s cubic-bezier(0.22, 1, 0.36, 1) forwards,
-    ticket-motion-blur 1.45s linear forwards;
+  animation: ticket-tear-top 0.82s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .ticket-transition-stage.is-active .ticket-transition-clone--bottom {
-  animation:
-    ticket-tear-bottom 1.45s cubic-bezier(0.22, 1, 0.36, 1) forwards,
-    ticket-motion-blur 1.45s linear forwards;
+  animation: ticket-tear-bottom 0.82s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 @keyframes ticket-tear-top {
@@ -1190,20 +1238,16 @@ section {
     transform: translate3d(0, 0, 0) rotate(0);
   }
 
-  30% {
-    transform: translate3d(-3px, -16px, 0) rotate(-0.65deg);
+  38% {
+    transform: translate3d(-2px, -7px, 0) rotate(-0.3deg);
   }
 
-  46% {
-    transform: translate3d(-3px, -16px, 0) rotate(-0.65deg);
-  }
-
-  68% {
-    transform: translate3d(-1px, -7px, 0) rotate(-0.25deg);
+  62% {
+    transform: translate3d(-3px, -9px, 0) rotate(-0.4deg);
   }
 
   100% {
-    transform: translate3d(0, -2px, 0) rotate(0);
+    transform: translate3d(-4px, -10px, 0) rotate(-0.45deg);
   }
 }
 
@@ -1212,32 +1256,24 @@ section {
     transform: translate3d(0, 0, 0) rotate(0);
   }
 
-  30% {
-    transform: translate3d(3px, 20px, 0) rotate(0.7deg);
+  38% {
+    transform: translate3d(2px, 8px, 0) rotate(0.3deg);
   }
 
-  46% {
-    transform: translate3d(3px, 20px, 0) rotate(0.7deg);
-  }
-
-  68% {
-    transform: translate3d(1px, 9px, 0) rotate(0.28deg);
+  62% {
+    transform: translate3d(3px, 10px, 0) rotate(0.4deg);
   }
 
   100% {
-    transform: translate3d(0, 3px, 0) rotate(0);
+    transform: translate3d(4px, 12px, 0) rotate(0.45deg);
   }
 }
 
 @keyframes ticket-stage-zoom {
 
   0%,
-  46% {
+  50% {
     transform: translateZ(0) scale(1);
-  }
-
-  55% {
-    transform: translateZ(0) scale(0.985);
   }
 
   100% {
@@ -1245,107 +1281,33 @@ section {
   }
 }
 
-@keyframes ticket-motion-blur {
-
-  0%,
-  46% {
-    filter: blur(0);
-  }
-
-  62% {
-    filter: blur(0.35px);
-  }
-
-  78% {
-    filter: blur(1px);
-  }
-
-  90% {
-    filter: blur(2px);
-  }
-
-  100% {
-    filter: blur(3px);
-  }
-}
-
-/* Cover dissolves into the light rather than sliding away */
+/* Cover dissolves rather than sliding away */
 #cover-screen.dismissed {
-  transform: scale(1.06);
+  transform: scale(1.015);
   opacity: 0;
   pointer-events: none;
 }
 
-/* ── Light-bloom transition (cover → hero) ── */
-#bloom {
-  position: fixed;
-  left: 50%;
-  top: 50%;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  transform: translate(-50%, -50%) scale(0);
-  opacity: 0;
-  pointer-events: none;
-  z-index: 65;
-  /* above cover content, below nothing else during transition */
-  background: radial-gradient(circle,
-      #FFFBEF 0%,
-      #F8E9C4 32%,
-      #EBCB86 56%,
-      rgba(235, 203, 134, 0) 70%);
-}
-
-#bloom.active {
-  animation: bloom-flare 1.5s ease-out forwards;
-}
-
-@keyframes bloom-flare {
-  0% {
-    transform: translate(-50%, -50%) scale(0);
-    opacity: 0;
-  }
-
-  20% {
-    opacity: 1;
-  }
-
-  55% {
-    transform: translate(-50%, -50%) scale(120);
-    opacity: 1;
-  }
-
-  100% {
-    transform: translate(-50%, -50%) scale(150);
-    opacity: 0;
-  }
-}
-
-/* Hero emerges from the light after the cover is dismissed */
+/* Hero emerges after the cover is dismissed */
 .hero-emerge .hero-content {
-  animation: hero-emerge 1.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: hero-emerge 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes hero-emerge {
   from {
     opacity: 0;
     transform: translateY(12px) scale(0.98);
-    filter: blur(6px);
   }
 
   to {
     opacity: 1;
     transform: none;
-    filter: blur(0);
   }
 }
 
 /* ── Prewedding gallery ──
    Figma 312:74. The section is full-bleed and tall; .gallery-frame is
-   the rounded panel painted behind the content. GSAP scrubs the frame's
-   horizontal inset and radius so it expands to fill the screen on the
-   way in and contracts on the way out. Without GSAP it simply sits
-   full-bleed, which is a correct resting state on its own. */
+   the static panel painted behind the content. */
 #photo-band {
   position: relative;
   z-index: 1;
@@ -1356,8 +1318,7 @@ section {
   position: absolute;
   top: 0;
   bottom: 0;
-  /* Animated by GSAP. Content padding below always clears the largest
-     inset these reach, so the layout never escapes the panel. */
+  /* Full-bleed by default; gallery scroll effects animate content only. */
   left: 0;
   right: 0;
   border-radius: 0;
@@ -1560,6 +1521,163 @@ section {
   padding: 2rem;
 }
 
+/* ── Public RSVP guestbook ── */
+.rsvp-feedback {
+  min-height: 1.35rem;
+  margin-top: 0.8rem;
+  color: var(--text-ink);
+  font-size: 0.78rem;
+  text-align: right;
+}
+
+.rsvp-feedback.is-success {
+  color: #43735b;
+}
+
+.rsvp-feedback.is-error {
+  color: #a14f55;
+}
+
+.rsvp-guestbook-status {
+  min-height: 1.5rem;
+  color: var(--text-ink);
+  font-size: 0.82rem;
+  opacity: 0.72;
+  text-align: center;
+}
+
+.rsvp-entries {
+  display: grid;
+  gap: 0.9rem;
+  max-height: var(--guestbook-viewport-height, 27rem);
+  overflow-y: auto;
+  padding: 0.15rem 0.25rem 2.75rem;
+  overscroll-behavior: contain;
+  scrollbar-color: hsl(var(--accent) / 0.8) transparent;
+  scrollbar-width: thin;
+}
+
+.rsvp-entries-viewport {
+  position: relative;
+  max-height: var(--guestbook-viewport-height, 27rem);
+  overflow: hidden;
+}
+
+.rsvp-entries-viewport::after {
+  position: absolute;
+  right: 0.25rem;
+  bottom: 0;
+  left: 0.25rem;
+  height: 3.25rem;
+  border-radius: 0 0 var(--radius) var(--radius);
+  background: linear-gradient(
+    to bottom,
+    hsl(var(--secondary) / 0),
+    hsl(var(--secondary) / 0.9) 72%,
+    hsl(var(--secondary) / 0.98)
+  );
+  content: '';
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-base) var(--ease-default);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+
+.rsvp-entries-viewport.is-scrollable:not(.is-at-end)::after {
+  opacity: 1;
+}
+
+.guestbook-entry {
+  padding: 1rem 1.15rem 1.05rem;
+  border-color: hsl(var(--accent));
+  box-shadow: var(--shadow-sm);
+}
+
+.guestbook-entry__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.guestbook-entry__guest-info {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.guestbook-entry__name {
+  margin: 0;
+  color: var(--text-ink);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.guestbook-entry__attendance {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  padding: 0.22rem 0.55rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.guestbook-entry__attendance.is-attending {
+  color: #43735b;
+}
+
+.guestbook-entry__attendance.is-declining {
+  color: #9a6260;
+}
+
+.guestbook-entry__date {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.68rem;
+  line-height: 1.3;
+  opacity: 0.78;
+}
+
+.guestbook-entry__divider {
+  width: 100%;
+  height: 1px;
+  margin-top: 0.75rem;
+  background: hsl(var(--border) / 0.72);
+}
+
+.guestbook-entry__message {
+  margin: 0.75rem 0 0;
+  color: hsl(var(--muted-foreground));
+  font-family: var(--font-display);
+  font-size: 0.98rem;
+  font-style: italic;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 640px) {
+  .rsvp-feedback {
+    text-align: center;
+  }
+
+  .rsvp-entries-viewport {
+    --guestbook-viewport-height: 26rem;
+  }
+}
+
 /* ================================================================
    PREMIUM POLISH
    Small, on-brand refinements: texture, typographic finish,
@@ -1652,12 +1770,6 @@ a:focus-visible {
     opacity: 1 !important;
     transform: none !important;
     filter: none !important;
-  }
-
-  #bloom,
-  #bloom.active {
-    animation: none !important;
-    opacity: 0 !important;
   }
 
   #cover-screen {
@@ -2094,6 +2206,48 @@ a:focus-visible {
 #gift .gift-card__status.is-visible {
   opacity: 1;
   visibility: visible;
+}
+
+#gift .gift-address {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 1rem;
+  padding: clamp(1.5rem, 4vw, 2.25rem);
+  text-align: center;
+  border-color: hsl(var(--accent));
+  box-shadow: var(--shadow-md);
+}
+
+#gift .gift-address__ornament {
+  margin-bottom: 0.85rem;
+  font-size: 1.1rem;
+}
+
+#gift .gift-address__label {
+  margin-bottom: 0.5rem;
+  color: var(--text-rose);
+}
+
+#gift .gift-address__rule {
+  width: 2rem;
+  height: 1px;
+  margin: 1.1rem auto 1rem;
+  background: hsl(var(--accent));
+}
+
+#gift .gift-address__details {
+  color: var(--text-ink);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-style: normal;
+  line-height: 1.75;
+}
+
+#gift .gift-address__details strong {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 500;
 }
 
 @media (max-width: 640px) {

@@ -63,9 +63,20 @@ const TRANSLATIONS = {
     optional: '(opsional)',
     warmWish: 'Tulis doa atau pesan hangat…',
     sendRsvp: 'Kirim RSVP',
+    guestbookLabel: 'Ucapan',
+    guestbookHeading: 'Pesan dari para tamu',
+    loadingGuestbook: 'Memuat ucapan…',
+    guestbookEmpty: 'Belum ada ucapan. Jadilah yang pertama!',
+    guestbookError: 'Ucapan belum dapat dimuat saat ini.',
+    rsvpSubmitError: 'RSVP belum dapat dikirim. Silakan coba lagi.',
+    rsvpSubmitRateLimited: 'Mohon tunggu sebentar sebelum mengirim lagi.',
+    attendanceStatusYes: 'Hadir',
+    attendanceStatusNo: 'Tidak hadir',
     giftLabel: 'Hadiah Pernikahan',
     giftHeading: 'Memberi Hadiah',
     giftIntro: 'Bagi Anda yang ingin berbagi tanda kasih, kami dengan penuh syukur menerimanya melalui rekening berikut.',
+    giftDeliveryLabel: 'Pengiriman Hadiah',
+    giftDeliveryHeading: 'Kirim hadiah ke alamat berikut',
     giftBank: 'BNI',
     giftAccountNumber: 'Nomor Rekening',
     giftAccountHolder: 'Atas Nama',
@@ -76,8 +87,10 @@ const TRANSLATIONS = {
     giftAccountPending: 'Nomor rekening akan ditambahkan',
     giftCopyError: 'Nomor rekening belum dapat disalin',
     nowPlaying: 'Sedang Diputar',
+    weddingBacksound: 'Musik Pernikahan',
     footerQuote: '“Hal terbaik untuk dipertahankan dalam hidup adalah satu sama lain.”',
-    guestGreeting: 'Kepada {name} &amp; Pasangan'
+    guestGreeting: 'Kepada {name} &amp; Pasangan',
+    groupGuestGreeting: 'Kepada Yth. {name}'
   },
   en: {
     coverTitle: 'The Wedding Of',
@@ -142,9 +155,20 @@ const TRANSLATIONS = {
     optional: '(optional)',
     warmWish: 'Leave a warm wish or message…',
     sendRsvp: 'Send RSVP',
+    guestbookLabel: 'Guestbook',
+    guestbookHeading: 'Messages from our guests',
+    loadingGuestbook: 'Loading messages…',
+    guestbookEmpty: 'No messages yet. Be the first to leave one!',
+    guestbookError: 'Messages are not available right now.',
+    rsvpSubmitError: 'Your RSVP could not be sent. Please try again.',
+    rsvpSubmitRateLimited: 'Please wait a moment before sending another message.',
+    attendanceStatusYes: 'Attending',
+    attendanceStatusNo: 'Not attending',
     giftLabel: 'Wedding Gift',
     giftHeading: 'Sending a Gift',
     giftIntro: 'For those who wish to share a gift, we gratefully receive it through the accounts below.',
+    giftDeliveryLabel: 'Gift Delivery',
+    giftDeliveryHeading: 'Send a gift to this address',
     giftBank: 'BNI',
     giftAccountNumber: 'Account Number',
     giftAccountHolder: 'Account Holder',
@@ -155,8 +179,10 @@ const TRANSLATIONS = {
     giftAccountPending: 'Account number will be added soon',
     giftCopyError: 'Unable to copy the account number',
     nowPlaying: 'Now Playing',
+    weddingBacksound: 'Wedding Backsound',
     footerQuote: '“The best thing to hold onto in life is each other.”',
-    guestGreeting: 'Dear {name} &amp; Partner'
+    guestGreeting: 'Dear {name} &amp; Partner',
+    groupGuestGreeting: 'Dear {name}'
   }
 };
 
@@ -292,13 +318,21 @@ function applyLocale(locale) {
 
 // ── Motion preference (shared) ─────────────────────────────────
 const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const MUSIC_START_SECONDS = 14;
-const MUSIC_LOOP_END_SECONDS = 107;
-const MUSIC_CROSSFADE_MS = 1800;
-const MUSIC_FADE_IN_MS = 1800;
+const NATIVE_SCROLL_MODE = window.matchMedia(
+  '(max-width: 767px), (max-height: 699px), (pointer: coarse)'
+).matches || navigator.maxTouchPoints > 0;
+const MUSIC_START_SECONDS = 0;
+const LIGHT_TEAR_DURATION_MS = 820;
 
 function primeMusicStart(audio) {
   if (!audio || audio.dataset.startPositionApplied === 'true') return;
+
+  // Starting at zero needs no seek. Avoid touching currentTime while the
+  // browser is still preparing its first playback request.
+  if (MUSIC_START_SECONDS <= 0) {
+    audio.dataset.startPositionApplied = 'true';
+    return;
+  }
 
   const seekToOpening = () => {
     if (audio.dataset.startPositionApplied === 'true') return;
@@ -319,40 +353,76 @@ function primeMusicStart(audio) {
 }
 
 function playMusicSmoothly(audio) {
-  if (!audio) return null;
+  if (!audio) return Promise.reject(new Error('Wedding audio element is missing'));
 
-  const shouldFadeIn = audio.paused;
-  if (shouldFadeIn) {
-    cancelAnimationFrame(audio.__musicFadeFrame || 0);
-    audio.volume = REDUCED_MOTION ? 1 : 0;
+  // Start at an audible level. Some mobile/in-app browsers can resolve
+  // play() while leaving a scripted fade-in at volume 0 indefinitely.
+  audio.defaultMuted = false;
+  audio.muted = false;
+  audio.volume = 1;
+
+  let playPromise;
+  try {
+    playPromise = audio.play();
+  } catch (error) {
+    audio.volume = 1;
+    return Promise.reject(error);
   }
 
-  const playPromise = audio.play();
-  if (shouldFadeIn && playPromise && typeof playPromise.then === 'function') {
-    playPromise.then(() => {
-      if (REDUCED_MOTION) {
-        audio.volume = 1;
-        return;
-      }
+  const normalizedPlayPromise = playPromise && typeof playPromise.then === 'function'
+    ? playPromise
+    : Promise.resolve();
 
-      const startedAt = performance.now();
-      const fadeStep = (now) => {
-        const progress = Math.min(1, (now - startedAt) / MUSIC_FADE_IN_MS);
-        audio.volume = progress;
-        if (progress < 1 && !audio.paused) {
-          audio.__musicFadeFrame = requestAnimationFrame(fadeStep);
-        } else {
-          audio.volume = 1;
-          audio.__musicFadeFrame = 0;
-        }
-      };
-      audio.__musicFadeFrame = requestAnimationFrame(fadeStep);
-    }).catch(() => {
-      audio.volume = 1;
-    });
-  }
+  return normalizedPlayPromise.then(() => {
+    audio.defaultMuted = false;
+    audio.muted = false;
+    audio.volume = 1;
+  });
+}
 
-  return playPromise;
+function waitForMusicReady(audio, timeoutMs = 5000) {
+  if (!audio) return Promise.reject(new Error('Wedding audio element is missing'));
+  if (audio.readyState >= 3) return Promise.resolve();
+
+  return new Promise((resolve, reject) => {
+    let timeoutId = 0;
+
+    const cleanup = () => {
+      window.clearTimeout(timeoutId);
+      audio.removeEventListener('canplay', handleCanPlay);
+      audio.removeEventListener('error', handleError);
+    };
+
+    const handleCanPlay = () => {
+      cleanup();
+      resolve();
+    };
+
+    const handleError = () => {
+      cleanup();
+      reject(audio.error || new Error('Wedding audio failed to load'));
+    };
+
+    audio.addEventListener('canplay', handleCanPlay, { once: true });
+    audio.addEventListener('error', handleError, { once: true });
+    timeoutId = window.setTimeout(() => {
+      cleanup();
+      reject(new Error('Wedding audio did not become playable in time'));
+    }, timeoutMs);
+  });
+}
+
+function playMusicReliably(audio) {
+  return playMusicSmoothly(audio).catch((error) => {
+    const nonRetryable = ['NotAllowedError', 'NotSupportedError', 'SecurityError'];
+    if (!audio || audio.error || nonRetryable.includes(error && error.name)) {
+      throw error;
+    }
+
+    // A cold mobile load can abort the first play request. Retry once after
+    // the browser confirms that enough audio data is available.
+    return waitForMusicReady(audio).then(() => playMusicSmoothly(audio));
+  });
 }
 
 
@@ -361,7 +431,6 @@ function playMusicSmoothly(audio) {
   const cover = document.getElementById('cover-screen');
   const btn = document.getElementById('cover-btn');
   const guestEl = document.getElementById('cover-guest');
-  const bloom = document.getElementById('bloom');
   const hero = document.getElementById('hero');
   const ticket = cover.querySelector('.cover-ticket');
   const dash = cover.querySelector('.cover-ticket-dash');
@@ -371,10 +440,14 @@ function playMusicSmoothly(audio) {
   document.body.style.overflow = 'hidden';
 
   // Show guest name if ?to= param exists
-  const name = new URLSearchParams(window.location.search).get('to');
+  const params = new URLSearchParams(window.location.search);
+  const name = params.get('to');
+  const greetingKey = params.get('type')?.toLowerCase() === 'group'
+    ? 'groupGuestGreeting'
+    : 'guestGreeting';
   if (name) {
     const renderGuest = () => {
-      guestEl.innerHTML = getTranslation('guestGreeting', { name: name.replace(/[&<>]/g, '') });
+      guestEl.innerHTML = getTranslation(greetingKey, { name: name.replace(/[&<>]/g, '') });
     };
     renderGuest();
     guestEl.classList.remove('hidden');
@@ -391,7 +464,7 @@ function playMusicSmoothly(audio) {
   }
 
   function makeTearClipPaths(width, height, tearY) {
-    const segments = 14;
+    const segments = 10;
     const topEdge = [];
     const bottomEdge = [];
 
@@ -415,10 +488,7 @@ function playMusicSmoothly(audio) {
     const ticketRect = ticket.getBoundingClientRect();
     const dashRect = dash.getBoundingClientRect();
     const tearY = dashRect.top - ticketRect.top + dashRect.height / 2;
-    const zoomScale = Math.max(
-      window.innerWidth / ticketRect.width,
-      window.innerHeight / ticketRect.height
-    ) * 1.18;
+    const zoomScale = 1.03;
 
     const stage = document.createElement('div');
     stage.className = 'ticket-transition-stage';
@@ -448,32 +518,25 @@ function playMusicSmoothly(audio) {
 
     setTimeout(() => {
       if (hero) hero.classList.add('hero-emerge');
-    }, 1250);
-
-    setTimeout(() => cover.classList.add('dismissed'), 1450);
+      cover.classList.add('dismissed');
+    }, 360);
 
     setTimeout(() => {
       stage.remove();
       cover.remove();
-    }, 1750);
+    }, LIGHT_TEAR_DURATION_MS);
 
     return true;
   }
 
-  function runBloomFallback() {
-    const rect = btn.getBoundingClientRect();
-    bloom.style.left = (rect.left + rect.width / 2) + 'px';
-    bloom.style.top = (rect.top + rect.height / 2) + 'px';
-    bloom.classList.add('active');
-
-    setTimeout(() => cover.classList.add('dismissed'), 250);
+  function runFadeFallback() {
+    cover.classList.add('dismissed');
     setTimeout(() => {
       if (hero) hero.classList.add('hero-emerge');
-    }, 500);
+    }, 120);
     setTimeout(() => {
       cover.remove();
-      bloom.classList.remove('active');
-    }, 1400);
+    }, 650);
   }
 
   btn.addEventListener('click', () => {
@@ -486,22 +549,22 @@ function playMusicSmoothly(audio) {
     // music player via a custom event so it can sync its UI to the outcome.
     const audio = document.getElementById('bg-audio');
     primeMusicStart(audio);
-    const playPromise = playMusicSmoothly(audio);
+    const playPromise = playMusicReliably(audio);
     window.dispatchEvent(new CustomEvent('invitation-opened', { detail: { playPromise } }));
 
     // Unlock scroll as soon as the journey begins
     document.body.style.overflow = '';
 
-    // Reduced motion → simple cross-fade, no bloom
+    // Reduced motion → simple cross-fade
     if (REDUCED_MOTION) {
       cover.classList.add('dismissed');
       cover.addEventListener('transitionend', () => cover.remove(), { once: true });
       return;
     }
 
-    // If cloning is unavailable for any reason, retain the original bloom
-    // transition rather than leaving the guest on a frozen cover.
-    if (!runTicketTransition()) runBloomFallback();
+    // If cloning is unavailable for any reason, use a simple fade rather
+    // than leaving the guest on a frozen cover.
+    if (!runTicketTransition()) runFadeFallback();
   });
 })();
 
@@ -539,16 +602,171 @@ updateCountdown();
 setInterval(updateCountdown, 1000);
 
 
-// ── RSVP FORM ──────────────────────────────────────────────────
-function handleRsvp(e) {
+// ── RSVP FORM + PUBLIC GUESTBOOK ───────────────────────────────
+let guestbookEntries = [];
+
+function setRsvpFeedback(message, type = '') {
+  const feedback = document.getElementById('rsvp-feedback');
+  if (!feedback) return;
+
+  feedback.textContent = message;
+  feedback.classList.toggle('is-error', type === 'error');
+  feedback.classList.toggle('is-success', type === 'success');
+}
+
+function getAttendanceLabel(attendance) {
+  return getTranslation(attendance === 'attending' ? 'attendanceStatusYes' : 'attendanceStatusNo');
+}
+
+function formatGuestbookTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+
+  return new Intl.DateTimeFormat(currentLocale === 'id' ? 'id-ID' : 'en-US', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(date);
+}
+
+function syncGuestbookScrollState() {
+  const viewport = document.getElementById('rsvp-entries-viewport');
+  const list = document.getElementById('rsvp-entries');
+  if (!viewport || !list) return;
+
+  const isScrollable = list.scrollHeight > list.clientHeight + 1;
+  const isAtEnd = !isScrollable || list.scrollTop + list.clientHeight >= list.scrollHeight - 1;
+  viewport.classList.toggle('is-scrollable', isScrollable);
+  viewport.classList.toggle('is-at-end', isAtEnd);
+}
+
+function renderGuestbook() {
+  const status = document.getElementById('rsvp-guestbook-status');
+  const list = document.getElementById('rsvp-entries');
+  if (!status || !list) return;
+
+  list.replaceChildren();
+  list.scrollTop = 0;
+
+  if (!guestbookEntries.length) {
+    status.textContent = getTranslation('guestbookEmpty');
+    syncGuestbookScrollState();
+    return;
+  }
+
+  status.textContent = '';
+
+  guestbookEntries.forEach((entry) => {
+    const card = document.createElement('article');
+    card.className = 'guestbook-entry panel';
+
+    const header = document.createElement('div');
+    header.className = 'guestbook-entry__header';
+
+    const guestInfo = document.createElement('div');
+    guestInfo.className = 'guestbook-entry__guest-info';
+
+    const name = document.createElement('h4');
+    name.className = 'guestbook-entry__name';
+    name.textContent = entry.name;
+
+    const attendance = document.createElement('span');
+    attendance.className = `guestbook-entry__attendance ${entry.attendance === 'attending' ? 'is-attending' : 'is-declining'}`;
+    attendance.textContent = getAttendanceLabel(entry.attendance);
+
+    const date = document.createElement('time');
+    date.className = 'guestbook-entry__date';
+    date.dateTime = entry.created_at;
+    date.textContent = formatGuestbookTime(entry.created_at);
+
+    const message = document.createElement('p');
+    message.className = 'guestbook-entry__message';
+    message.textContent = entry.message;
+
+    guestInfo.append(name, date);
+    header.append(guestInfo, attendance);
+
+    const divider = document.createElement('div');
+    divider.className = 'guestbook-entry__divider';
+    divider.setAttribute('aria-hidden', 'true');
+
+    card.append(header, divider, message);
+    list.append(card);
+  });
+
+  requestAnimationFrame(syncGuestbookScrollState);
+}
+
+async function loadGuestbook() {
+  const status = document.getElementById('rsvp-guestbook-status');
+  if (status) status.textContent = getTranslation('loadingGuestbook');
+
+  try {
+    const response = await fetch('/api/guestbook', { headers: { Accept: 'application/json' } });
+    if (!response.ok) throw new Error('Guestbook request failed');
+
+    const payload = await response.json();
+    guestbookEntries = Array.isArray(payload.entries) ? payload.entries : [];
+    renderGuestbook();
+  } catch (error) {
+    console.warn('Guestbook could not be loaded:', error);
+    if (status) status.textContent = getTranslation('guestbookError');
+  }
+}
+
+async function handleRsvp(e) {
   e.preventDefault();
+
   const form = document.getElementById('rsvp-form');
   const success = document.getElementById('rsvp-success');
-  // Here you can send form data to your backend or a service like Formspree
-  // For now, just show success UI
-  form.style.display = 'none';
-  success.style.display = 'block';
+  const submit = form?.querySelector('button[type="submit"]');
+  if (!form || !submit || submit.disabled) return;
+
+  const formData = new FormData(form);
+  const payload = {
+    name: String(formData.get('name') || ''),
+    guests: Number(formData.get('guests') || 1),
+    attendance: String(formData.get('attendance') || ''),
+    message: String(formData.get('message') || ''),
+  };
+
+  submit.disabled = true;
+  setRsvpFeedback('');
+
+  try {
+    const response = await fetch('/api/guestbook', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      const message = response.status === 429
+        ? getTranslation('rsvpSubmitRateLimited')
+        : getTranslation('rsvpSubmitError');
+      throw new Error(result.error || message);
+    }
+
+    guestbookEntries = [result.entry, ...guestbookEntries.filter((entry) => entry.id !== result.entry.id)].slice(0, 50);
+    renderGuestbook();
+    form.reset();
+    document.getElementById('att-yes').checked = true;
+    document.getElementById('rsvp-guests').value = '1';
+    if (success) success.style.display = 'block';
+    setRsvpFeedback(getTranslation('rsvpReceived'), 'success');
+  } catch (error) {
+    console.warn('RSVP submission failed:', error);
+    const fallback = error.message || getTranslation('rsvpSubmitError');
+    setRsvpFeedback(fallback, 'error');
+  } finally {
+    submit.disabled = false;
+  }
 }
+
+document.addEventListener('localechange', renderGuestbook);
+document.getElementById('rsvp-entries')?.addEventListener('scroll', syncGuestbookScrollState, { passive: true });
+window.addEventListener('resize', syncGuestbookScrollState);
+loadGuestbook();
 
 
 // ── REVEAL ON SCROLL ───────────────────────────────────────────
@@ -704,10 +922,9 @@ initFallbackReveals();
   const iconNote = document.getElementById('icon-note');
   const iconMute = document.getElementById('icon-mute');
 
-  let isPlaying = false;
+  let wantsMusic = false;
 
   function setUIPlaying(state) {
-    isPlaying = state;
     if (state) {
       panel.classList.add('open');
       btn.classList.add('is-playing');
@@ -721,17 +938,37 @@ initFallbackReveals();
     }
   }
 
+  function trackPlayback(playPromise) {
+    return Promise.resolve(playPromise)
+      .then(() => {
+        if (!wantsMusic || document.hidden) {
+          audio.pause();
+          setUIPlaying(false);
+          return false;
+        }
+
+        audio.defaultMuted = false;
+        audio.muted = false;
+        audio.volume = 1;
+        setUIPlaying(true);
+        return true;
+      })
+      .catch((error) => {
+        wantsMusic = false;
+        setUIPlaying(false);
+        console.warn('Wedding music could not start:', error);
+        return false;
+      });
+  }
+
   function startPlay() {
+    wantsMusic = true;
     primeMusicStart(audio);
-    playMusicSmoothly(audio).then(() => {
-      setUIPlaying(true);
-    }).catch(() => { });
+    return trackPlayback(playMusicReliably(audio));
   }
 
   function stopPlay() {
-    cancelMusicLoopFade();
-    cancelAnimationFrame(audio.__musicFadeFrame || 0);
-    audio.__musicFadeFrame = 0;
+    wantsMusic = false;
     audio.pause();
     audio.volume = 1;
     setUIPlaying(false);
@@ -739,74 +976,28 @@ initFallbackReveals();
 
   // Toggle button
   btn.addEventListener('click', () => {
-    if (isPlaying) stopPlay(); else startPlay();
+    if (wantsMusic) stopPlay(); else startPlay();
   });
 
-  function cancelMusicLoopFade() {
-    cancelAnimationFrame(audio.__musicLoopFadeFrame || 0);
-    audio.__musicLoopFadeFrame = 0;
-    audio.__musicLoopTransitioning = false;
-  }
-
-  function fadeInFromLoopStart(bounds) {
-    audio.currentTime = bounds.start;
-    audio.volume = 0;
-
-    const startedAt = performance.now();
-    const fadeIn = (now) => {
-      if (audio.paused || !isPlaying) {
-        cancelMusicLoopFade();
-        return;
-      }
-
-      const progressRatio = Math.min(1, (now - startedAt) / MUSIC_CROSSFADE_MS);
-      audio.volume = progressRatio;
-
-      if (progressRatio < 1) {
-        audio.__musicLoopFadeFrame = requestAnimationFrame(fadeIn);
-      } else {
-        audio.volume = 1;
-        audio.__musicLoopFadeFrame = 0;
-        audio.__musicLoopTransitioning = false;
-      }
-    };
-
-    audio.__musicLoopFadeFrame = requestAnimationFrame(fadeIn);
-  }
-
-  function startMusicLoopTransition(bounds) {
-    if (audio.__musicLoopTransitioning || audio.paused || !isPlaying) return;
-
-    audio.__musicLoopTransitioning = true;
-    const startingVolume = audio.volume;
-    const remainingAudioMs = Math.max(160, (bounds.end - audio.currentTime) * 1000);
-    const startedAt = performance.now();
-
-    const fadeOut = (now) => {
-      if (audio.paused || !isPlaying) {
-        cancelMusicLoopFade();
-        return;
-      }
-
-      const progressRatio = Math.min(1, (now - startedAt) / remainingAudioMs);
-      audio.volume = startingVolume * (1 - progressRatio);
-
-      if (progressRatio < 1) {
-        audio.__musicLoopFadeFrame = requestAnimationFrame(fadeOut);
-        return;
-      }
-
-      fadeInFromLoopStart(bounds);
-    };
-
-    audio.__musicLoopFadeFrame = requestAnimationFrame(fadeOut);
-  }
+  audio.addEventListener('playing', () => {
+    if (wantsMusic && !document.hidden) {
+      audio.defaultMuted = false;
+      audio.muted = false;
+      audio.volume = 1;
+      setUIPlaying(true);
+    }
+  });
+  audio.addEventListener('pause', () => setUIPlaying(false));
+  audio.addEventListener('error', () => {
+    wantsMusic = false;
+    setUIPlaying(false);
+  });
 
   function getMusicLoopBounds() {
     if (!Number.isFinite(audio.duration) || audio.duration <= 0) return null;
 
     const start = Math.min(MUSIC_START_SECONDS, Math.max(0, audio.duration - 0.1));
-    const end = Math.min(MUSIC_LOOP_END_SECONDS, audio.duration);
+    const end = audio.duration;
     return { start, end: Math.max(start + 0.1, end) };
   }
 
@@ -814,22 +1005,19 @@ initFallbackReveals();
     const bounds = getMusicLoopBounds();
     if (!bounds) return;
 
-    if (audio.currentTime >= bounds.end - MUSIC_CROSSFADE_MS / 1000) {
-      startMusicLoopTransition(bounds);
-    }
-
     const position = Math.min(bounds.end, Math.max(bounds.start, audio.currentTime));
     progress.style.width = (((position - bounds.start) / (bounds.end - bounds.start)) * 100) + '%';
   }
 
-  // Keep playback inside the intentional 14s–1:47 segment.
+  // Native looping avoids scripted volume fades getting stuck at zero.
   audio.addEventListener('timeupdate', syncMusicLoopAndProgress);
   audio.addEventListener('loadedmetadata', syncMusicLoopAndProgress);
   audio.addEventListener('ended', () => {
     const bounds = getMusicLoopBounds();
     if (!bounds) return;
-    if (isPlaying) {
-      audio.play().then(() => fadeInFromLoopStart(bounds)).catch(() => { });
+    if (wantsMusic) {
+      audio.currentTime = bounds.start;
+      trackPlayback(playMusicReliably(audio));
     } else {
       audio.currentTime = bounds.start;
     }
@@ -837,10 +1025,10 @@ initFallbackReveals();
 
   // Pause/resume on tab visibility change
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden && isPlaying) {
+    if (document.hidden && wantsMusic && !audio.paused) {
       audio.pause();
-    } else if (!document.hidden && isPlaying) {
-      audio.play().catch(() => { });
+    } else if (!document.hidden && wantsMusic) {
+      trackPlayback(playMusicReliably(audio));
     }
   });
 
@@ -849,14 +1037,12 @@ initFallbackReveals();
   // (the trusted user gesture iOS requires) and hands us the resulting
   // Promise. We only mirror the UI to whether playback actually started.
   window.addEventListener('invitation-opened', (e) => {
+    wantsMusic = true;
     const playPromise = e.detail && e.detail.playPromise;
     if (playPromise && typeof playPromise.then === 'function') {
-      playPromise
-        .then(() => setUIPlaying(true))
-        .catch(() => {/* blocked — widget stays available for a manual tap */ });
+      trackPlayback(playPromise);
     } else {
-      // No promise handed over (e.g. missing audio) — try once, ignore failure.
-      playMusicSmoothly(audio).then(() => setUIPlaying(true)).catch(() => { });
+      startPlay();
     }
   });
 })();
@@ -867,7 +1053,7 @@ initFallbackReveals();
 // inertial scrolling, scroll-scrubbed editorial layers, and a pinned
 // narrative chapter. Content and timing stay specific to this invitation.
 function initScrollStory() {
-  if (REDUCED_MOTION) return false;
+  if (REDUCED_MOTION || NATIVE_SCROLL_MODE) return false;
 
   const gsap = window.gsap;
   const ScrollTrigger = window.ScrollTrigger;
@@ -922,12 +1108,10 @@ function initScrollStory() {
         requestAnimationFrame(() => {
           smoother.paused(false);
           smoother.scrollTo(0, false);
-          ScrollTrigger.refresh();
         });
 
-        // The torn-ticket transition changes fixed layers for 1.75s.
-        // Refresh once more after it leaves the DOM.
-        window.setTimeout(() => ScrollTrigger.refresh(), 1850);
+        // Refresh once after the light tear leaves the DOM.
+        window.setTimeout(() => ScrollTrigger.refresh(), LIGHT_TEAR_DURATION_MS + 80);
       }, { once: true });
     }
 
@@ -1056,64 +1240,14 @@ function initScrollStory() {
       });
     }
 
-    // Photo band (Figma 312:74): the rounded panel expands to fill the
-    // screen on the way in and contracts on the way out, while the
-    // context column stays pinned beside the scrolling photographs.
-    // Only the empty .gallery-frame is animated — nothing that GSAP
-    // pins sits inside it, so the pin maths stays in untransformed space.
+    // Photo band (Figma 312:74): the background frame stays full-bleed
+    // while the context column remains pinned beside the scrolling
+    // photographs.
     const band = document.getElementById('photo-band');
-    const frame = band && band.querySelector('.gallery-frame');
     const galleryLayout = band && band.querySelector('.gallery-layout');
     const galleryContext = band && band.querySelector('.gallery-context__inner');
     const galleryGrid = document.getElementById('galleryGrid');
     const galleryCards = galleryGrid ? Array.from(galleryGrid.querySelectorAll('.gallery-card')) : [];
-
-    const FRAME_INSET = '6%';
-    const FRAME_RADIUS = 56;
-
-    if (band && frame) {
-      remember(frame);
-
-      gsap.fromTo(frame,
-        { left: FRAME_INSET, right: FRAME_INSET, borderRadius: FRAME_RADIUS },
-        {
-          left: '0%',
-          right: '0%',
-          borderRadius: 0,
-          ease: 'none',
-          immediateRender: true,
-          scrollTrigger: {
-            trigger: band,
-            start: 'top bottom',
-            end: 'top top',
-            scrub: 0.6,
-            invalidateOnRefresh: true,
-            onToggle: (self) => setWillChange(frame, self.isActive),
-          },
-        }
-      );
-
-      // immediateRender stays off so this never stomps the entry state
-      // while the panel is still sitting full-bleed in the middle.
-      gsap.fromTo(frame,
-        { left: '0%', right: '0%', borderRadius: 0 },
-        {
-          left: FRAME_INSET,
-          right: FRAME_INSET,
-          borderRadius: FRAME_RADIUS,
-          ease: 'none',
-          immediateRender: false,
-          scrollTrigger: {
-            trigger: band,
-            start: 'bottom bottom',
-            end: 'bottom top',
-            scrub: 0.6,
-            invalidateOnRefresh: true,
-            onToggle: (self) => setWillChange(frame, self.isActive),
-          },
-        }
-      );
-    }
 
     if (galleryContext) {
       remember(galleryContext);
