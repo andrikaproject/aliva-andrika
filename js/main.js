@@ -1398,4 +1398,14 @@ function initScrollStory() {
   }
 }
 
-initScrollStory();
+const scrollStoryReady = window.__scrollStoryReady;
+if (scrollStoryReady && typeof scrollStoryReady.then === 'function') {
+  scrollStoryReady
+    .then(() => initScrollStory())
+    .catch((error) => {
+      console.warn('Scroll story dependencies failed; using native-scroll fallbacks.', error);
+      initFallbackReveals();
+    });
+} else {
+  initScrollStory();
+}

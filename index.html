@@ -22,413 +22,17 @@
   <meta property="og:image" content="Aliva-thebride.jpeg" />
   <meta name="twitter:card" content="summary_large_image" />
 
+  <!-- Prioritize the cover background because it is the mobile LCP candidate. -->
+  <link rel="preload" href="assets/cover/first-photo-01.webp" as="image" type="image/webp"
+    fetchpriority="high" />
+
   <!-- Branded favicon — matches the ✦ ornaments used throughout -->
   <link rel="icon"
     href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 L18.6 13.4 L30 16 L18.6 18.6 L16 30 L13.4 18.6 L2 16 L13.4 13.4 Z' fill='%23C9A96E'/%3E%3C/svg%3E" />
 
   <!-- Critical first-paint styles for the cover while full CSS loads. -->
   <style id="critical-css">
-    :root {
-      color-scheme: light;
-      color-scheme: only light;
-      --background: 42 47% 96%;
-      --foreground: 15 16% 15%;
-      --card: 48 100% 99%;
-      --primary: 15 16% 15%;
-      --primary-foreground: 40 57% 77%;
-      --secondary: 38 44% 93%;
-      --muted: 36 41% 90%;
-      --muted-foreground: 24 10% 46%;
-      --accent: 36 45% 61%;
-      --border: 40 57% 77%;
-      --text-rose: hsl(10 38% 36%);
-      --radius: 0.5rem;
-      --radius-full: 9999px;
-      --shadow-gold: 0 0 0 3px hsl(36 45% 61% / 0.25);
-      --font-display: 'Cormorant Garamond', Georgia, serif;
-      --font-body: 'Jost', sans-serif;
-      --duration-fast: 150ms;
-      --duration-base: 200ms;
-      --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
-      --ease-out: cubic-bezier(0, 0, 0.2, 1);
-    }
-
-    html,
-    body {
-      color-scheme: only light !important;
-    }
-
-    @font-face {
-      font-family: "Cormorant Garamond";
-      font-style: normal;
-      font-weight: 300 600;
-      font-display: swap;
-      src: url("assets/fonts/CormorantGaramond-Regular.woff2") format("woff2");
-    }
-
-    @font-face {
-      font-family: "Cormorant Garamond";
-      font-style: italic;
-      font-weight: 300 500;
-      font-display: swap;
-      src: url("assets/fonts/CormorantGaramond-Italic.woff2") format("woff2");
-    }
-
-    @font-face {
-      font-family: "DM Mono";
-      font-style: normal;
-      font-weight: 500;
-      font-display: swap;
-      src: url("assets/fonts/DMMono-Medium.woff2") format("woff2");
-    }
-
-    @font-face {
-      font-family: "Jost";
-      font-style: normal;
-      font-weight: 300 500;
-      font-display: swap;
-      src: url("assets/fonts/Jost-Latin.woff2") format("woff2");
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      overflow-x: hidden;
-      background-color: hsl(var(--background));
-      color: hsl(var(--foreground));
-      font-family: var(--font-body);
-      font-size: 1rem;
-      font-weight: 400;
-    }
-
-    p,
-    figure {
-      margin: 0;
-    }
-
-    button {
-      font: inherit;
-    }
-
-    img {
-      display: block;
-      max-width: 100%;
-      height: auto;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    #petalCanvas {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 40;
-    }
-
-    #grain {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 45;
-      opacity: 0.04;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    }
-
-    #cover-screen {
-      position: fixed;
-      inset: 0;
-      z-index: 70;
-      overflow: hidden;
-      min-height: 100vh;
-      min-height: 100dvh;
-      touch-action: none;
-      text-align: center;
-      background: hsl(var(--secondary));
-      color: hsl(var(--foreground));
-      font-family: var(--font-body);
-      transition:
-        transform 1s cubic-bezier(0.22, 1, 0.36, 1),
-        opacity 0.9s ease-out;
-    }
-
-    .cover-photo {
-      position: absolute;
-      z-index: 0;
-      top: clamp(-2.2rem, -36vw, -8.45rem);
-      left: 50%;
-      width: min(100vw, 42rem);
-      aspect-ratio: 2 / 3;
-      transform: translateX(-50%);
-      background:
-        linear-gradient(180deg,
-          hsl(var(--secondary) / 0) 16%,
-          hsl(var(--foreground) / 0.2) 44%,
-          hsl(var(--secondary) / 0.72) 68%,
-          hsl(var(--secondary)) 84%),
-        url("assets/cover/first-photo-01.webp") center / cover no-repeat;
-    }
-
-    .cover-ticket {
-      --ticket-gap: clamp(1.35rem, 8.27vw, 1.9375rem);
-      --ticket-padding: clamp(0.8rem, 4.27vw, 1rem);
-      --ticket-photo-height: clamp(4.7rem, 23.73vw, 5.5625rem);
-      --ticket-notch-y: calc(var(--ticket-padding) + 1.5625rem + var(--ticket-gap) + var(--ticket-photo-height) + var(--ticket-gap) + 0.09375rem);
-      position: absolute;
-      z-index: 1;
-      top: clamp(17.125rem, calc(35dvh + 3.125rem), 23.125rem);
-      left: 50%;
-      isolation: isolate;
-      display: flex;
-      width: min(75.47vw, 17.6875rem);
-      min-height: min(68.49dvh, 31.5rem);
-      transform: translateX(-50%);
-      flex-direction: column;
-      align-items: center;
-      gap: var(--ticket-gap);
-      padding: var(--ticket-padding);
-      border-radius: 1.5rem;
-      background: hsl(var(--muted));
-      box-shadow: 0 0.4rem 1.25rem hsl(var(--foreground) / 0.04);
-      -webkit-mask-image:
-        radial-gradient(circle 0.75rem at left var(--ticket-notch-y), transparent 0.72rem, #000 0.75rem),
-        radial-gradient(circle 0.75rem at right var(--ticket-notch-y), transparent 0.72rem, #000 0.75rem);
-      -webkit-mask-composite: source-in;
-      mask-image:
-        radial-gradient(circle 0.75rem at left var(--ticket-notch-y), transparent 0.72rem, #000 0.75rem),
-        radial-gradient(circle 0.75rem at right var(--ticket-notch-y), transparent 0.72rem, #000 0.75rem);
-      mask-composite: intersect;
-    }
-
-    .cover-ticket-header,
-    .cover-ticket-photo,
-    .cover-ticket-dash,
-    .cover-ticket-details,
-    #cover-btn {
-      position: relative;
-      z-index: 3;
-    }
-
-    .cover-ticket-header {
-      width: 100%;
-      min-height: 1.5625rem;
-    }
-
-    .cover-ticket-header p,
-    .cover-ticket-names {
-      font-size: 1rem;
-      font-weight: 600;
-      line-height: 1.55;
-    }
-
-    .cover-ticket-header p {
-      text-transform: uppercase;
-    }
-
-    .cover-ticket-photo {
-      width: 100%;
-      height: var(--ticket-photo-height);
-      overflow: hidden;
-      margin: 0;
-      border: 3px solid hsl(var(--muted-foreground) / 0.25);
-      border-radius: var(--radius);
-    }
-
-    .cover-ticket-photo img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center 48%;
-    }
-
-    .cover-ticket-dash {
-      width: 84%;
-      height: 1px;
-      background: repeating-linear-gradient(90deg, hsl(var(--accent) / 0.65) 0 0.5rem, transparent 0.5rem 0.9rem);
-    }
-
-    .cover-ticket-details,
-    .cover-ticket-names,
-    .cover-ticket-date {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .cover-ticket-details {
-      width: 100%;
-      gap: 0.75rem;
-    }
-
-    .cover-ticket-names {
-      gap: 0.5rem;
-    }
-
-    .cover-ticket-ornament {
-      width: 0.8125rem;
-      height: 1.1336rem;
-    }
-
-    .cover-ticket-date {
-      gap: 0.25rem;
-      font-size: 0.875rem;
-      line-height: 1.55;
-    }
-
-    .cover-ticket-date p:last-child {
-      font-weight: 600;
-    }
-
-    .cover-ticket-guest {
-      max-width: 100%;
-      color: var(--text-rose);
-      font-family: var(--font-display);
-      font-size: 0.875rem;
-      font-style: italic;
-      line-height: 1.3;
-    }
-
-    #cover-btn {
-      display: inline-flex;
-      width: 100%;
-      min-height: 3.0625rem;
-      align-items: center;
-      justify-content: center;
-      padding: 0.75rem 1.25rem;
-      border: 1px solid hsl(var(--primary));
-      border-radius: 0.75rem;
-      background: hsl(var(--primary));
-      color: hsl(var(--primary-foreground));
-      font-family: var(--font-body);
-      font-size: 1rem;
-      font-weight: 500;
-      line-height: 1.55;
-      cursor: pointer;
-      transition:
-        background var(--duration-base) var(--ease-default),
-        border-color var(--duration-base) var(--ease-default),
-        color var(--duration-base) var(--ease-default),
-        box-shadow var(--duration-base) var(--ease-default),
-        transform var(--duration-fast) var(--ease-default);
-    }
-
-    #cover-btn:hover {
-      border-color: hsl(var(--accent));
-      background: hsl(var(--accent));
-      color: hsl(var(--card));
-    }
-
-    #cover-btn:focus-visible {
-      outline: none;
-      box-shadow: var(--shadow-gold);
-    }
-
-    #cover-btn:active {
-      transform: translateY(1px) scale(0.99);
-    }
-
-    #cover-screen.dismissed {
-      transform: scale(1.015);
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .language-switcher {
-      position: fixed;
-      top: 1.25rem;
-      right: 1.25rem;
-      z-index: 80;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      padding: 0.45rem 0.65rem;
-      border: 1px solid rgba(201, 169, 110, 0.55);
-      border-radius: var(--radius-full);
-      background: rgba(250, 246, 239, 0.86);
-      color: #7e5922;
-      font-family: var(--font-body);
-      font-size: 0.75rem;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 4px 18px rgba(44, 36, 32, 0.08);
-    }
-
-    .language-btn {
-      display: inline-flex;
-      min-width: 2.75rem;
-      min-height: 2.75rem;
-      align-items: center;
-      justify-content: center;
-      padding: 0.25rem 0.35rem;
-      border: 0;
-      background: transparent;
-      color: inherit;
-      cursor: pointer;
-      font: inherit;
-      letter-spacing: inherit;
-      opacity: 0.82;
-      transition: opacity 150ms ease, transform 150ms ease;
-    }
-
-    .language-btn:hover,
-    .language-btn:focus-visible,
-    .language-btn.is-active {
-      opacity: 1;
-    }
-
-    .language-btn:focus-visible {
-      outline: 1px solid currentColor;
-      outline-offset: 3px;
-    }
-
-    .language-btn:active {
-      transform: scale(0.94);
-    }
-
-    @media (max-height: 50rem) {
-      .cover-ticket {
-        --ticket-gap: 1.5rem;
-      }
-    }
-
-    @media (max-height: 41rem) {
-      .cover-ticket {
-        --ticket-gap: 1.2rem;
-        top: clamp(12.625rem, calc(26dvh + 3.125rem), 13.625rem);
-      }
-    }
-
-    @media (max-width: 47.99rem) {
-      .cover-ticket {
-        transform: translateX(-50%) translateY(-5.625rem);
-      }
-    }
-
-    @media (min-width: 48rem) {
-      .cover-photo {
-        width: 32rem;
-      }
-    }
-
-    @media (max-width: 30rem) {
-      .language-switcher {
-        top: 0.8rem;
-        right: 0.8rem;
-      }
-    }
+    :root{color-scheme:light;color-scheme:only light;--background:42 47% 96%;--foreground:15 16% 15%;--card:48 100% 99%;--primary:15 16% 15%;--primary-foreground:40 57% 77%;--secondary:38 44% 93%;--muted:36 41% 90%;--muted-foreground:24 10% 46%;--accent:36 45% 61%;--border:40 57% 77%;--text-rose:hsl(10 38% 36%);--radius:0.5rem;--radius-full:9999px;--shadow-gold:0 0 0 3px hsl(36 45% 61% / 0.25);--font-display:'Cormorant Garamond',Georgia,serif;--font-body:'Jost',sans-serif;--duration-fast:150ms;--duration-base:200ms;--ease-default:cubic-bezier(0.4, 0, 0.2, 1);--ease-out:cubic-bezier(0, 0, 0.2, 1)}body,html{color-scheme:only light!important}@font-face{font-family:"Cormorant Garamond";font-style:normal;font-weight:300 600;font-display:swap;src:url("assets/fonts/CormorantGaramond-Regular.woff2") format("woff2")}@font-face{font-family:"Cormorant Garamond";font-style:italic;font-weight:300 500;font-display:swap;src:url("assets/fonts/CormorantGaramond-Italic.woff2") format("woff2")}@font-face{font-family:"DM Mono";font-style:normal;font-weight:500;font-display:swap;src:url("assets/fonts/DMMono-Medium.woff2") format("woff2")}@font-face{font-family:Jost;font-style:normal;font-weight:300 500;font-display:swap;src:url("assets/fonts/Jost-Latin.woff2") format("woff2")}html{scroll-behavior:smooth}*,::after,::before{box-sizing:border-box}body{margin:0;overflow-x:hidden;background-color:hsl(var(--background));color:hsl(var(--foreground));font-family:var(--font-body);font-size:1rem;font-weight:400}figure,p{margin:0}button{font:inherit}img{display:block;max-width:100%;height:auto}.hidden{display:none}#petalCanvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:40}#grain{position:fixed;inset:0;pointer-events:none;z-index:45;opacity:.04;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}#cover-screen{position:fixed;inset:0;z-index:70;overflow:hidden;min-height:100vh;min-height:100dvh;touch-action:none;text-align:center;background:hsl(var(--secondary));color:hsl(var(--foreground));font-family:var(--font-body);transition:transform 1s cubic-bezier(.22, 1, .36, 1),opacity .9s ease-out}.cover-photo{position:absolute;z-index:0;top:clamp(-2.2rem,-36vw,-8.45rem);left:50%;width:min(100vw,42rem);aspect-ratio:2/3;transform:translateX(-50%);background:linear-gradient(180deg,hsl(var(--secondary) / 0) 16%,hsl(var(--foreground) / .2) 44%,hsl(var(--secondary) / .72) 68%,hsl(var(--secondary)) 84%),url("assets/cover/first-photo-01.webp") center/cover no-repeat}.cover-ticket{--ticket-gap:clamp(1.35rem, 8.27vw, 1.9375rem);--ticket-padding:clamp(0.8rem, 4.27vw, 1rem);--ticket-photo-height:clamp(4.7rem, 23.73vw, 5.5625rem);--ticket-notch-y:calc(var(--ticket-padding) + 1.5625rem + var(--ticket-gap) + var(--ticket-photo-height) + var(--ticket-gap) + 0.09375rem);position:absolute;z-index:1;top:clamp(17.125rem,calc(35dvh + 3.125rem),23.125rem);left:50%;isolation:isolate;display:flex;width:min(75.47vw,17.6875rem);min-height:min(68.49dvh,31.5rem);transform:translateX(-50%);flex-direction:column;align-items:center;gap:var(--ticket-gap);padding:var(--ticket-padding);border-radius:1.5rem;background:hsl(var(--muted));box-shadow:0 .4rem 1.25rem hsl(var(--foreground) / .04);-webkit-mask-image:radial-gradient(circle 0.75rem at left var(--ticket-notch-y),transparent 0.72rem,#000 0.75rem),radial-gradient(circle 0.75rem at right var(--ticket-notch-y),transparent 0.72rem,#000 0.75rem);-webkit-mask-composite:source-in;mask-image:radial-gradient(circle 0.75rem at left var(--ticket-notch-y),transparent 0.72rem,#000 0.75rem),radial-gradient(circle 0.75rem at right var(--ticket-notch-y),transparent 0.72rem,#000 0.75rem);mask-composite:intersect}#cover-btn,.cover-ticket-dash,.cover-ticket-details,.cover-ticket-header,.cover-ticket-photo{position:relative;z-index:3}.cover-ticket-header{width:100%;min-height:1.5625rem}.cover-ticket-header p,.cover-ticket-names{font-size:1rem;font-weight:600;line-height:1.55}.cover-ticket-header p{text-transform:uppercase}.cover-ticket-photo{width:100%;height:var(--ticket-photo-height);overflow:hidden;margin:0;border:3px solid hsl(var(--muted-foreground) / .25);border-radius:var(--radius)}.cover-ticket-photo img{width:100%;height:100%;object-fit:cover;object-position:center 48%}.cover-ticket-dash{width:84%;height:1px;background:repeating-linear-gradient(90deg,hsl(var(--accent) / .65) 0 .5rem,transparent .5rem .9rem)}.cover-ticket-date,.cover-ticket-details,.cover-ticket-names{display:flex;flex-direction:column;align-items:center}.cover-ticket-details{width:100%;gap:.75rem}.cover-ticket-names{gap:.5rem}.cover-ticket-ornament{width:.8125rem;height:1.1336rem}.cover-ticket-date{gap:.25rem;font-size:.875rem;line-height:1.55}.cover-ticket-date p:last-child{font-weight:600}.cover-ticket-guest{max-width:100%;color:var(--text-rose);font-family:var(--font-display);font-size:.875rem;font-style:italic;line-height:1.3}#cover-btn{display:inline-flex;width:100%;min-height:3.0625rem;align-items:center;justify-content:center;padding:.75rem 1.25rem;border:1px solid hsl(var(--primary));border-radius:.75rem;background:hsl(var(--primary));color:hsl(var(--primary-foreground));font-family:var(--font-body);font-size:1rem;font-weight:500;line-height:1.55;cursor:pointer;transition:background var(--duration-base) var(--ease-default),border-color var(--duration-base) var(--ease-default),color var(--duration-base) var(--ease-default),box-shadow var(--duration-base) var(--ease-default),transform var(--duration-fast) var(--ease-default)}#cover-btn:hover{border-color:hsl(var(--accent));background:hsl(var(--accent));color:hsl(var(--card))}#cover-btn:focus-visible{outline:0;box-shadow:var(--shadow-gold)}#cover-btn:active{transform:translateY(1px) scale(.99)}#cover-screen.dismissed{transform:scale(1.015);opacity:0;pointer-events:none}.language-switcher{position:fixed;top:1.25rem;right:1.25rem;z-index:80;display:inline-flex;align-items:center;gap:.35rem;padding:.45rem .65rem;border:1px solid rgba(201,169,110,.55);border-radius:var(--radius-full);background:rgba(250,246,239,.86);color:#7e5922;font-family:var(--font-body);font-size:.75rem;font-weight:500;letter-spacing:.12em;backdrop-filter:blur(10px);box-shadow:0 4px 18px rgba(44,36,32,.08)}.language-btn{display:inline-flex;min-width:2.75rem;min-height:2.75rem;align-items:center;justify-content:center;padding:.25rem .35rem;border:0;background:0 0;color:inherit;cursor:pointer;font:inherit;letter-spacing:inherit;opacity:.82;transition:opacity 150ms ease,transform 150ms ease}.language-btn.is-active,.language-btn:focus-visible,.language-btn:hover{opacity:1}.language-btn:focus-visible{outline:1px solid currentColor;outline-offset:3px}.language-btn:active{transform:scale(.94)}@media (max-height:50rem){.cover-ticket{--ticket-gap:1.5rem}}@media (max-height:41rem){.cover-ticket{--ticket-gap:1.2rem;top:clamp(12.625rem,calc(26dvh + 3.125rem),13.625rem)}}@media (max-width:47.99rem){.cover-ticket{transform:translateX(-50%) translateY(-5.625rem)}}@media (min-width:48rem){.cover-photo{width:32rem}}@media (max-width:30rem){.language-switcher{top:.8rem;right:.8rem}}
   </style>
 
   <!-- ============================================================
@@ -444,12 +48,12 @@
   <!-- ============================================================
        GLOBAL STYLES
   ============================================================ -->
-  <link rel="preload" href="css/design-system.css?v=20260823-light-theme" as="style"
+  <link rel="preload" href="css/design-system.min.css?v=20260825-tokens-min" as="style"
     onload="this.onload=null;this.rel='stylesheet'" />
-  <noscript><link rel="stylesheet" href="css/design-system.css?v=20260823-light-theme" /></noscript>
-  <link rel="preload" href="css/styles.css?v=20260825-guestbook-fade" as="style"
+  <noscript><link rel="stylesheet" href="css/design-system.min.css?v=20260825-tokens-min" /></noscript>
+  <link rel="preload" href="css/styles.min.css?v=20260825-css-min" as="style"
     onload="this.onload=null;this.rel='stylesheet'" />
-  <noscript><link rel="stylesheet" href="css/styles.css?v=20260825-guestbook-fade" /></noscript>
+  <noscript><link rel="stylesheet" href="css/styles.min.css?v=20260825-css-min" /></noscript>
 </head>
 
 <body class="antialiased">
@@ -1153,7 +757,7 @@
 
           <p class="font-display italic text-text-rose text-base leading-relaxed">
             <span data-i18n="footerQuote">"The best thing to hold onto in life is each other."</span><br />
-            <span class="text-xs font-body not-italic opacity-70 block mt-1">— Audrey Hepburn</span>
+            <span class="text-xs font-body not-italic block mt-1">— Audrey Hepburn</span>
           </p>
 
           <p class="text-xs text-ink opacity-70 mt-10 tracking-wider">
@@ -1174,7 +778,7 @@
      is hidden.
      Song: Wedding Backsound
 ================================================================ -->
-  <audio id="bg-audio" preload="auto" loop>
+  <audio id="bg-audio" preload="none" loop>
     <source src="backsound-wedding.mp3" type="audio/mpeg" />
   </audio>
 
@@ -1212,10 +816,35 @@
   <!-- ================================================================
      SCRIPTS
 ================================================================ -->
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollSmoother.min.js"></script>
-  <script src="js/main.js?v=20260825-guestbook-layout"></script>
+  <script>
+    (() => {
+      const useNativeScroll =
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+        window.matchMedia('(max-width: 767px), (max-height: 699px), (pointer: coarse)').matches ||
+        navigator.maxTouchPoints > 0;
+      const sources = [
+        'https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js',
+        'https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js',
+        'https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollSmoother.min.js',
+      ];
+
+      const loadScript = (src) => new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = resolve;
+        script.onerror = () => reject(new Error(`Failed to load ${src}`));
+        document.head.appendChild(script);
+      });
+
+      window.__scrollStoryReady = useNativeScroll
+        ? Promise.resolve()
+        : sources.reduce(
+          (chain, src) => chain.then(() => loadScript(src)),
+          Promise.resolve()
+        );
+    })();
+  </script>
+  <script src="js/main.min.js?v=20260825-js-min"></script>
 
 </body>
 
