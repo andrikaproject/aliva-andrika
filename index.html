@@ -447,9 +447,9 @@
   <link rel="preload" href="css/design-system.css?v=20260823-light-theme" as="style"
     onload="this.onload=null;this.rel='stylesheet'" />
   <noscript><link rel="stylesheet" href="css/design-system.css?v=20260823-light-theme" /></noscript>
-  <link rel="preload" href="css/styles.css?v=20260825-cover-mobile-lift" as="style"
+  <link rel="preload" href="css/styles.css?v=20260825-guestbook-layout" as="style"
     onload="this.onload=null;this.rel='stylesheet'" />
-  <noscript><link rel="stylesheet" href="css/styles.css?v=20260825-cover-mobile-lift" /></noscript>
+  <noscript><link rel="stylesheet" href="css/styles.css?v=20260825-guestbook-layout" /></noscript>
 </head>
 
 <body class="antialiased">
@@ -945,7 +945,9 @@
             </div>
 
             <p id="rsvp-guestbook-status" class="rsvp-guestbook-status" role="status" aria-live="polite" data-i18n="loadingGuestbook">Loading messages…</p>
-            <div id="rsvp-entries" class="rsvp-entries" aria-live="polite"></div>
+            <div id="rsvp-entries-viewport" class="rsvp-entries-viewport">
+              <div id="rsvp-entries" class="rsvp-entries" tabindex="0" role="region" aria-label="Guestbook messages" aria-live="polite"></div>
+            </div>
           </div>
 
         </div>
@@ -1213,7 +1215,7 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollSmoother.min.js"></script>
-  <script src="js/main.js?v=20260825-group-recipient"></script>
+  <script src="js/main.js?v=20260825-guestbook-layout"></script>
 
 </body>
 

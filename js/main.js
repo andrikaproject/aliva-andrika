@@ -628,15 +628,28 @@ function formatGuestbookTime(value) {
   }).format(date);
 }
 
+function syncGuestbookScrollState() {
+  const viewport = document.getElementById('rsvp-entries-viewport');
+  const list = document.getElementById('rsvp-entries');
+  if (!viewport || !list) return;
+
+  const isScrollable = list.scrollHeight > list.clientHeight + 1;
+  const isAtEnd = !isScrollable || list.scrollTop + list.clientHeight >= list.scrollHeight - 1;
+  viewport.classList.toggle('is-scrollable', isScrollable);
+  viewport.classList.toggle('is-at-end', isAtEnd);
+}
+
 function renderGuestbook() {
   const status = document.getElementById('rsvp-guestbook-status');
   const list = document.getElementById('rsvp-entries');
   if (!status || !list) return;
 
   list.replaceChildren();
+  list.scrollTop = 0;
 
   if (!guestbookEntries.length) {
     status.textContent = getTranslation('guestbookEmpty');
+    syncGuestbookScrollState();
     return;
   }
 
@@ -648,6 +661,9 @@ function renderGuestbook() {
 
     const header = document.createElement('div');
     header.className = 'guestbook-entry__header';
+
+    const guestInfo = document.createElement('div');
+    guestInfo.className = 'guestbook-entry__guest-info';
 
     const name = document.createElement('h4');
     name.className = 'guestbook-entry__name';
@@ -666,10 +682,18 @@ function renderGuestbook() {
     message.className = 'guestbook-entry__message';
     message.textContent = entry.message;
 
-    header.append(name, attendance, date);
-    card.append(header, message);
+    guestInfo.append(name, date);
+    header.append(guestInfo, attendance);
+
+    const divider = document.createElement('div');
+    divider.className = 'guestbook-entry__divider';
+    divider.setAttribute('aria-hidden', 'true');
+
+    card.append(header, divider, message);
     list.append(card);
   });
+
+  requestAnimationFrame(syncGuestbookScrollState);
 }
 
 async function loadGuestbook() {
@@ -740,6 +764,8 @@ async function handleRsvp(e) {
 }
 
 document.addEventListener('localechange', renderGuestbook);
+document.getElementById('rsvp-entries')?.addEventListener('scroll', syncGuestbookScrollState, { passive: true });
+window.addEventListener('resize', syncGuestbookScrollState);
 loadGuestbook();
 
 
