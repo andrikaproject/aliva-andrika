@@ -89,7 +89,8 @@ const TRANSLATIONS = {
     nowPlaying: 'Sedang Diputar',
     weddingBacksound: 'Musik Pernikahan',
     footerQuote: '“Hal terbaik untuk dipertahankan dalam hidup adalah satu sama lain.”',
-    guestGreeting: 'Kepada {name} &amp; Pasangan'
+    guestGreeting: 'Kepada {name} &amp; Pasangan',
+    groupGuestGreeting: 'Kepada Yth. {name}'
   },
   en: {
     coverTitle: 'The Wedding Of',
@@ -180,7 +181,8 @@ const TRANSLATIONS = {
     nowPlaying: 'Now Playing',
     weddingBacksound: 'Wedding Backsound',
     footerQuote: '“The best thing to hold onto in life is each other.”',
-    guestGreeting: 'Dear {name} &amp; Partner'
+    guestGreeting: 'Dear {name} &amp; Partner',
+    groupGuestGreeting: 'Dear {name}'
   }
 };
 
@@ -438,10 +440,14 @@ function playMusicReliably(audio) {
   document.body.style.overflow = 'hidden';
 
   // Show guest name if ?to= param exists
-  const name = new URLSearchParams(window.location.search).get('to');
+  const params = new URLSearchParams(window.location.search);
+  const name = params.get('to');
+  const greetingKey = params.get('type')?.toLowerCase() === 'group'
+    ? 'groupGuestGreeting'
+    : 'guestGreeting';
   if (name) {
     const renderGuest = () => {
-      guestEl.innerHTML = getTranslation('guestGreeting', { name: name.replace(/[&<>]/g, '') });
+      guestEl.innerHTML = getTranslation(greetingKey, { name: name.replace(/[&<>]/g, '') });
     };
     renderGuest();
     guestEl.classList.remove('hidden');
