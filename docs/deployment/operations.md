@@ -108,8 +108,23 @@ Astro meng-emit setiap gambar yang diimpor, termasuk berkas asli 4000 px yang ti
 dilayani; pemangkasan ini membuang sekitar 12 MB per build. Hanya gambar raster yang
 dipangkas, sehingga referensi yang gagal dikenali paling buruk hanya memboroskan byte.
 
-## Yang belum ada di sini
+## VPS dan rilis
 
-Prosedur staging, cutover produksi, rollback, retensi backup, dan pemantauan pascarilis
-belum ditulis karena inventaris VPS belum dikerjakan. Lihat
-[`vps-inventory.md`](vps-inventory.md) untuk daftar yang masih kosong.
+Runbook lengkap ada di [`runbook.md`](runbook.md). Ringkasnya, rilis dibuat lokal dari
+commit branch `refactor-aliva-andrika`, dist diunggah ke `/opt/apps/aliva/releases/<commit>`,
+dan stack Compose bernama `aliva` dijalankan terpisah dari aplikasi photobooth yang sudah ada.
+Caddy photobooth tetap menjadi proxy TLS tunggal.
+
+Perintah operasional di VPS:
+
+```bash
+cd /opt/apps/aliva
+docker compose --env-file release.env -p aliva \
+  -f compose.yaml -f compose.production.yaml ps
+docker compose --env-file release.env -p aliva \
+  -f compose.yaml -f compose.production.yaml logs --tail=100 api web
+systemctl status aliva-rsvp-backup.timer
+```
+
+Jangan menjalankan `docker compose down -v` pada project `photobooth`, jangan melakukan
+`docker system prune`, dan jangan menghapus `/opt/apps/rsvp/data` saat rollback kode.

@@ -1,6 +1,9 @@
 # Audit dan usulan refactor Astro / Vue
 
-Tanggal: 8 September 2026. Status: usulan arsitektur, belum diimplementasikan.
+Tanggal: 8 September 2026. Status: audit awal dan keputusan arsitektur historis.
+Implementasi Astro + Tailwind + TypeScript, packaging, staging, deployment, dan runbook
+kemudian diselesaikan pada branch `refactor-aliva-andrika`; bukti rilis ada di
+[`docs/verification/2026-09-08-phase5-7-release.md`](verification/2026-09-08-phase5-7-release.md).
 Konteks yang dikonfirmasi: tetap satu undangan Andrika–Aliva.
 
 Pembaruan setelah pemeriksaan domain produksi: HTML di `andrika-aliva.my.id` memakai Tailwind compiled serta JS/CSS minified yang berbeda dari source lokal dalam audit ini. Temuan CDN di bawah berlaku untuk source lokal. Rekonsiliasi lokal/produksi menjadi Fase 0 pada [rencana refactor dan deployment VPS](2026-09-08-refactor-phases-vps.md).

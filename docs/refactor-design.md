@@ -1,7 +1,10 @@
 # Rencana per fase: refactor undangan dan deployment VPS
 
 Tanggal: 8 September 2026.
-Status: rencana pelaksanaan. Implementasi aplikasi dan perubahan VPS belum dilakukan.
+Status: Fase 0–4 telah direkonsiliasi pada branch `refactor-aliva-andrika`.
+Fase 5–7 dijalankan dengan bukti pada
+[`docs/verification/2026-09-08-phase5-7-release.md`](verification/2026-09-08-phase5-7-release.md)
+dan prosedur operasional pada [`docs/deployment/runbook.md`](deployment/runbook.md).
 Dasar keputusan: [audit Astro/Vue](2026-09-08-astro-vue-refactor-audit.md).
 
 **Keputusan dan konteks**

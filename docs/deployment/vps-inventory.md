@@ -1,10 +1,9 @@
 # Inventaris VPS — andrika-aliva.my.id
 
-Status: **belum lengkap.** Hanya berisi fakta yang dapat diamati dari luar melalui HTTP.
-Akses SSH belum dilakukan pada sesi 8 September 2026 karena perintah `ssh vps` ditolak
-pembatasan izin. Dokumen ini tidak boleh dipakai sebagai dasar perubahan produksi.
+Status: **lengkap untuk rilis 8 September 2026.** Fakta host dicatat melalui SSH read-only
+sebelum perubahan. Rahasia, password, dan private key tidak dicatat di repositori.
 
-## Yang sudah terverifikasi (HTTP read-only, 8 September 2026)
+## Yang sudah terverifikasi (HTTP dan host, 8 September 2026)
 
 | Item | Nilai | Bukti |
 | --- | --- | --- |
@@ -16,26 +15,32 @@ pembatasan izin. Dokumen ini tidak boleh dipakai sebagai dasar perubahan produks
 | Cache | **tidak diatur** | `Cache-Control` absen; hanya `ETag` + `Last-Modified` |
 | Rilis terlayani | HTML `last-modified` 25 Agu 2026 13:40 GMT | header respons |
 | Versi aset | query string manual (`?v=20260825-css-min`), bukan hash isi | HTML produksi |
+| Host | Ubuntu 24.04.4 LTS, Docker Engine 29.1.3, Compose 2.40.3 | SSH read-only |
+| Source lama | `/var/www/aliva-andrika`, branch `deploy/vps-live-20260823`, commit `3215a01` | Git read-only |
+| Proxy | `photobooth-caddy-1`, Caddy 2.11.4, port host 80/443 | Docker inspect |
+| API lama | `photobooth-rsvp-api-1`, internal port 4000, restart `unless-stopped` | Docker inspect |
+| Database RSVP | `/opt/apps/rsvp/data/rsvp.sqlite`, bind ke `/data`, SQLite WAL | Docker inspect |
+| Database sebelum cutover | 0 record; backup konsisten diuji dengan integrity check | backup + query |
+| Kapasitas | filesystem 48 GB, terpakai 28 GB, tersedia 21 GB; RAM tersedia sekitar 1,9 GiB; swap 0 | `df`/`free` |
+| Port API publik | tidak dipublish oleh container lama; hanya Caddy yang memegang 80/443 | Docker inspect |
 
 Header `server: Caddy` adalah petunjuk proxy yang terlihat publik. Header ini **tidak**
 membuktikan letak Caddy (host atau container), jumlah upstream, atau topologi jaringan VPS.
 
-## Yang masih kosong dan wajib diisi sebelum Fase 5
+## Keputusan deployment yang diterapkan
 
-- [ ] OS dan versi (`/etc/os-release`); rencana mengasumsikan Ubuntu 24.04 tetapi belum diverifikasi.
-- [ ] Versi Docker dan Compose; daftar container berjalan, image/tag, port publish, restart policy.
-- [ ] Nama network dan volume yang benar-benar dipakai, termasuk mount database RSVP.
-- [ ] Isi Caddyfile atau konfigurasi proxy yang aktif: document root statis, upstream `/api/*`, TLS.
-- [ ] Apakah port API (4000) dapat dijangkau langsung dari internet.
-- [ ] Kapasitas dan sisa disk; RAM dan swap (catatan sebelumnya: 2,9 GB tanpa swap).
-- [ ] Lokasi source produksi yang menghasilkan `*.min.css` / `main.min.js` dan cara build-nya.
-- [ ] Mekanisme rilis yang sekarang dipakai (upload manual, git pull, atau lainnya).
-- [ ] Backup SQLite konsisten (`VACUUM INTO` atau online backup) + uji restore terisolasi,
-      termasuk integrity check dan jumlah record. Database memakai WAL, sehingga menyalin
-      file `.sqlite` saat layanan aktif bukan prosedur backup yang sah.
-- [ ] Salinan artefak frontend dan konfigurasi rilis lama untuk rollback.
+- Static frontend dan API baru berada di stack Compose `aliva`, dengan network private
+  `aliva_private` dan koneksi terbatas ke network Caddy `photobooth_default`.
+- Caddy utama tetap menjadi satu-satunya pemilik TLS dan port 80/443. Domain diarahkan ke
+  alias `aliva-web:8080` dan `aliva-api:4000`.
+- Artefak frontend berada di `/opt/apps/aliva/releases/<commit>/public`; API dibangun dari
+  folder `api` pada commit yang sama. Database tetap memakai `/opt/apps/rsvp/data`.
+- Rilis lama disimpan di `/opt/apps/aliva/legacy/3215a01` dan image API diberi tag
+  `aliva-rsvp:legacy-3215a01`.
+- Backup konsisten berada di `/opt/apps/rsvp/backups` dan satu salinan privat berada di
+  komputer operator. Backup rutin memakai systemd timer harian pukul 03:15 WIB.
 
-## Topologi target (belum diterapkan)
+## Topologi yang diterapkan
 
 ```text
 Browser tamu
@@ -43,13 +48,13 @@ Browser tamu
            |
     Caddy/proxy yang aktif
            |
-           +-- / dan aset ----------> static server: hasil build Astro (dist/)
+           +-- / dan aset ----------> aliva-web:8080, hasil build Astro (dist/)
            |
            +-- /api/guestbook ------> Node API:4000 (internal saja)
                                          |
-                                     /data/rsvp.sqlite pada volume persisten
+                                         /data/rsvp.sqlite pada bind persisten
                                          |
-                                     backup konsisten di luar web root
+                                     backup konsisten di luar web root dan rilis
 ```
 
 Letak Caddy dan bentuk static server diputuskan dari inventaris di atas, bukan diasumsikan.

@@ -23,7 +23,8 @@ services:
     logging: &logging
       driver: json-file
       options: {max-size: "10m", max-file: "3"}
-    networks: [private]
+    networks:
+      private: {}
 
   api:
     image: aliva-rsvp:${RELEASE_ID:?Set RELEASE_ID}
@@ -48,7 +49,8 @@ services:
       retries: 3
       start_period: 10s
     logging: *logging
-    networks: [private]
+    networks:
+      private: {}
 
 networks:
   private:
