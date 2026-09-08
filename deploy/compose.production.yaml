@@ -1,0 +1,15 @@
+services:
+  web:
+    networks:
+      edge:
+        aliases: [aliva-web]
+  api:
+    networks:
+      edge:
+        aliases: [aliva-api]
+
+networks:
+  edge:
+    external: true
+    name: photobooth_default
+

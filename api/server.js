@@ -235,7 +235,11 @@ async function handleGuestbook(request, response) {
   sendJson(response, 201, { entry });
 }
 
-const server = http.createServer(async (request, response) => {
+const server = http.createServer({
+  requestTimeout: 15_000,
+  headersTimeout: 10_000,
+  connectionsCheckingInterval: 1_000,
+}, async (request, response) => {
   try {
     const requestUrl = new URL(request.url, 'http://localhost');
 

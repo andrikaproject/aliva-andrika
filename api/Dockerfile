@@ -4,6 +4,7 @@ WORKDIR /app
 
 COPY package.json ./
 COPY server.js ./
+COPY backup.cjs ./
 
 RUN mkdir -p /data
 

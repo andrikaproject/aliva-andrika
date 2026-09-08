@@ -1,0 +1,55 @@
+services:
+  web:
+    image: caddy@sha256:5f5c8640aae01df9654968d946d8f1a56c497f1dd5c5cda4cf95ab7c14d58648
+    environment:
+      RELEASE_ID: ${RELEASE_ID:?Set RELEASE_ID}
+    volumes:
+      - ${RELEASE_DIR:?Set RELEASE_DIR}/public:/srv/site:ro
+      - ${LEGACY_DIR:?Set LEGACY_DIR}:/srv/legacy:ro
+      - ${RELEASE_DIR}/deploy/Caddyfile.web:/etc/caddy/Caddyfile:ro
+    expose: ["8080"]
+    restart: unless-stopped
+    read_only: true
+    tmpfs: [/data, /config]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    healthcheck:
+      test: [CMD, wget, -q, --spider, http://127.0.0.1:8080/]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging: &logging
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+    networks: [private]
+
+  api:
+    image: aliva-rsvp:${RELEASE_ID:?Set RELEASE_ID}
+    build:
+      context: ${RELEASE_DIR}/api
+    environment:
+      PORT: "4000"
+      DATABASE_PATH: /data/rsvp.sqlite
+      TRUSTED_PROXY_HOPS: "1"
+    volumes:
+      - ${DATA_DIR:?Set DATA_DIR}:/data
+    expose: ["4000"]
+    restart: unless-stopped
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:4000/healthz').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging: *logging
+    networks: [private]
+
+networks:
+  private:
+    name: ${STACK_NAME:?Set STACK_NAME}_private
+

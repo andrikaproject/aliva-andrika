@@ -1,0 +1,10 @@
+[Unit]
+Description=Consistent SQLite backup for the Aliva RSVP API
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+UMask=0077
+ExecStart=/bin/sh /opt/apps/aliva/backup.sh
+

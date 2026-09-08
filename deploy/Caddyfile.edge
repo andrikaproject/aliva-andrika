@@ -1,0 +1,24 @@
+{$CADDY_DOMAIN:localhost} {
+  reverse_proxy app:3000
+}
+
+andrika-aliva.my.id {
+  handle /api/* {
+    reverse_proxy aliva-api:4000 {
+      transport http {
+        dial_timeout 3s
+        response_header_timeout 10s
+      }
+    }
+  }
+
+  handle {
+    reverse_proxy aliva-web:8080 {
+      transport http {
+        dial_timeout 3s
+        response_header_timeout 10s
+      }
+    }
+  }
+}
+

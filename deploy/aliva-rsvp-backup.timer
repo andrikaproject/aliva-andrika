@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily Aliva RSVP backup (03:15 Asia/Jakarta)
+
+[Timer]
+OnCalendar=*-*-* 20:15:00 UTC
+Persistent=true
+RandomizedDelaySec=300
+Unit=aliva-rsvp-backup.service
+
+[Install]
+WantedBy=timers.target
