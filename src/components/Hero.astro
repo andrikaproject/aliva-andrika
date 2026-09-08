@@ -1,0 +1,100 @@
+---
+import { Image } from 'astro:assets';
+
+import couplePortrait from '../../assets/hero/couple-portrait1.webp';
+import gardenCrop from '../../assets/hero/hero-section-aliva-text.jpg';
+import handsCrop from '../../assets/hero/hands-celebration.png';
+import stageCrop from '../../assets/pict/Pre-wedd-Gredding/DSC00479_4_11zon.webp';
+import { couple, weddingDay } from '../data/wedding.ts';
+import { DEFAULT_LOCALE, translate } from '../i18n/index.ts';
+
+const t = (key: string) => translate(DEFAULT_LOCALE, key);
+
+/**
+ * The four crops are typographic material, not content: they sit inside the
+ * aria-hidden statement and the sr-only heading carries the meaning. Each is
+ * sized for the widest band it can occupy (607px column, 2x screens).
+ */
+/**
+ * The crops are typographic material, not content: they sit inside the
+ * aria-hidden statement and the sr-only heading carries the meaning.
+ *
+ * Each `sizes` below is the box the crop actually occupies, measured in the
+ * browser at 390px and 1440px. A single generous value made every crop fetch
+ * a 1240px file for a band 72px wide.
+ */
+const CROPS = {
+  stage: { widths: [160, 240, 360, 480], sizes: '(min-width: 640px) 190px, 29vw', fallback: 240 },
+  hands: { widths: [128, 200, 260, 360], sizes: '(min-width: 640px) 125px, 19vw', fallback: 200 },
+  portrait: { widths: [144, 224, 320, 420], sizes: '(min-width: 640px) 145px, 22vw', fallback: 224 },
+  garden: { widths: [260, 420, 620, 840], sizes: '(min-width: 640px) 405px, 61vw', fallback: 420 },
+} as const;
+
+const crop = (key: keyof typeof CROPS, image: { width: number; height: number }) => ({
+  widths: [...CROPS[key].widths],
+  sizes: CROPS[key].sizes,
+  width: CROPS[key].fallback,
+  height: Math.round((CROPS[key].fallback * image.height) / image.width),
+  loading: 'eager' as const,
+  fetchpriority: 'low' as const,
+});
+---
+
+<section id="hero" aria-labelledby="hero-title">
+  <div class="hero-content">
+    <header class="hero-masthead">
+      <p>{couple.groom.firstName.toUpperCase()} &amp; {couple.bride.firstName.toUpperCase()}</p>
+      <p data-i18n="hero.celebration">{t('hero.celebration')}</p>
+    </header>
+
+    <div class="hero-statement-wrap">
+      <h1 id="hero-title" class="sr-only" data-i18n="hero.title">{t('hero.title')}</h1>
+
+      <div class="hero-statement" aria-hidden="true">
+        <div class="hero-line hero-line--celebrate">
+          <span data-i18n="hero.celebrating">{t('hero.celebrating')}</span>
+          <figure class="hero-crop hero-crop--stage">
+            <Image src={stageCrop} alt="" {...crop('stage', stageCrop)} />
+          </figure>
+        </div>
+
+        <div class="hero-line hero-line--happy">
+          <figure class="hero-crop hero-crop--hands">
+            <Image src={handsCrop} alt="" {...crop('hands', handsCrop)} />
+          </figure>
+          <span data-i18n="hero.theWedding">{t('hero.theWedding')}</span>
+        </div>
+
+        <div class="hero-line hero-line--names">
+          <span data-i18n="hero.ofAndrikaAnd">{t('hero.ofAndrikaAnd')}</span>
+          <figure class="hero-crop hero-crop--portrait">
+            <Image src={couplePortrait} alt="" {...crop('portrait', couplePortrait)} />
+          </figure>
+        </div>
+
+        <div class="hero-line hero-line--aliva">
+          <figure class="hero-crop hero-crop--garden">
+            <Image src={gardenCrop} alt="" {...crop('garden', gardenCrop)} />
+          </figure>
+          <span>{couple.bride.firstName.toUpperCase()}</span>
+        </div>
+      </div>
+
+      <p class="hero-scroll-cue">
+        <span data-i18n="hero.scrollForMore">{t('hero.scrollForMore')}</span>
+        <span aria-hidden="true">↓</span>
+      </p>
+    </div>
+
+    <footer class="hero-meta">
+      <p class="hero-meta__tagline">
+        <span data-i18n="hero.tagline">{t('hero.tagline')}</span>
+      </p>
+      <p class="hero-meta__couple">{couple.groom.firstName.toUpperCase()} and {couple.bride.firstName.toUpperCase()}</p>
+      <div class="hero-meta__date">
+        <p data-i18n="hero.saveTheDateUpper">{t('hero.saveTheDateUpper')}</p>
+        <p>{weddingDay.stamp}</p>
+      </div>
+    </footer>
+  </div>
+</section>

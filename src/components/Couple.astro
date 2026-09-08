@@ -1,0 +1,91 @@
+---
+import { Image } from 'astro:assets';
+
+import alivaPortrait from '../../assets/couple/aliva-portrait.jpeg';
+import andrikaPortrait from '../../assets/couple/andrika-portrait.jpeg';
+import { couple } from '../data/wedding.ts';
+import { DEFAULT_LOCALE, translate } from '../i18n/index.ts';
+
+const t = (key: string) => translate(DEFAULT_LOCALE, key);
+
+const profiles = [
+  {
+    modifier: 'couple-card--groom',
+    portrait: andrikaPortrait,
+    alt: 'Ilustrasi cat air Andrika mengenakan batik, duduk di depan rangkaian bunga.',
+    roleKey: 'couple.theGroom',
+    roleClass: 'text-text-rose',
+    name: couple.groom.fullName,
+    parentsKey: 'couple.groomParents',
+    noteKey: 'couple.groomNote',
+    delay: undefined,
+  },
+  {
+    modifier: 'couple-card--bride',
+    portrait: alivaPortrait,
+    alt: 'Ilustrasi cat air Aliva mengenakan kebaya putih, berdiri di depan latar bunga bermonogram AA.',
+    roleKey: 'couple.theBride',
+    roleClass: 'text-text-sage',
+    name: couple.bride.fullName,
+    parentsKey: 'couple.brideParents',
+    noteKey: 'couple.brideNote',
+    delay: '0.15s',
+  },
+] as const;
+---
+
+<section id="couple" class="couple-story py-20 sm:py-28 px-4 sm:px-6">
+  <div class="couple-stage max-w-4xl mx-auto">
+    <div class="couple-heading text-center reveal stagger">
+      <h2 class="font-display text-4xl md:text-5xl font-light text-ink" data-i18n="couple.heading">
+        {t('couple.heading')}
+      </h2>
+      <div class="gold-divider mt-5 w-32 mx-auto"><span class="diamond"></span></div>
+      <p class="couple-intro" data-i18n="couple.intro">{t('couple.intro')}</p>
+    </div>
+
+    <div class="couple-cards mt-12 grid md:grid-cols-2 gap-6">
+      {
+        profiles.map((profile) => (
+          <article
+            class:list={['couple-card', profile.modifier, 'reveal']}
+            style={profile.delay ? `transition-delay: ${profile.delay};` : undefined}
+          >
+            <div class="couple-card__portrait">
+              <Image
+                src={profile.portrait}
+                alt={profile.alt}
+                width={260}
+                height={260}
+                fit="cover"
+                position="top"
+                widths={[190, 260, 380, 500]}
+                sizes="(min-width: 768px) 250px, 190px"
+                loading="lazy"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <div class="couple-card__content">
+              <p class:list={['couple-card__role', profile.roleClass]} data-i18n={profile.roleKey}>
+                {t(profile.roleKey)}
+              </p>
+              <h3 class="font-display text-2xl font-light text-ink">{profile.name}</h3>
+              <div class="couple-card__rule bg-gold-light" />
+              <p class="couple-card__bio">
+                <span data-i18n={profile.parentsKey}>{t(profile.parentsKey)}</span>
+                <br />
+                <span data-i18n={profile.noteKey}>{t(profile.noteKey)}</span>
+              </p>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+
+    <blockquote class="couple-quote mt-10 text-center reveal" style="transition-delay: 0.25s;">
+      <p class="font-display italic text-xl text-text-rose max-w-md mx-auto leading-relaxed" data-i18n="couple.quote">
+        {t('couple.quote')}
+      </p>
+    </blockquote>
+  </div>
+</section>

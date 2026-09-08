@@ -1,0 +1,159 @@
+---
+import { getImage } from 'astro:assets';
+
+import coverPhoto from '../../assets/cover/first-photo-01.webp';
+import ogPhoto from '../../assets/couple/aliva-portrait.jpeg';
+import Cover from '../components/Cover.astro';
+import LanguageSwitcher from '../components/LanguageSwitcher.astro';
+import MusicPlayer from '../components/MusicPlayer.astro';
+import { site } from '../data/wedding.ts';
+import { DEFAULT_LOCALE } from '../i18n/index.ts';
+import '../styles/global.css';
+
+/**
+ * The cover photograph is the mobile LCP. It is emitted once here, preloaded
+ * in the head and handed to the cover as a custom property, so the preload
+ * and the paint can never point at two different files.
+ */
+const cover = await getImage({ src: coverPhoto, width: 1800, format: 'webp' });
+
+/** Social previews need an absolute URL; a relative one shows no image. */
+const ogImage = await getImage({ src: ogPhoto, width: 1200, format: 'jpeg' });
+const ogImageUrl = new URL(ogImage.src, site.url).href;
+const canonical = new URL(Astro.url.pathname, site.url).href;
+
+const locale = DEFAULT_LOCALE;
+---
+
+<html lang={locale} class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- The invitation is a warm-paper design with photographs on it. An
+         OS dark preference must not repaint any of that. -->
+    <meta name="color-scheme" content="only light" />
+    <meta name="theme-color" content={site.themeColor} />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+    <title>{site.title}</title>
+    <meta name="description" content={site.description} />
+    <link rel="canonical" href={canonical} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={site.title} />
+    <meta property="og:description" content={site.ogDescription} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content={String(ogImage.attributes.width ?? 1200)} />
+    <meta property="og:image:height" content={String(ogImage.attributes.height ?? 1200)} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={ogImageUrl} />
+
+    <link rel="preload" href={cover.src} as="image" type="image/webp" fetchpriority="high" />
+
+    <!--
+      Without scripting the cover has no way to open, so it would seal the
+      invitation shut. Everything that genuinely needs JavaScript steps aside
+      here and says so, instead of showing dead controls.
+    -->
+    <noscript>
+      <style>
+        #cover-screen,
+        #music-widget,
+        #language-switcher,
+        .when-countdown,
+        #rsvp-form,
+        #rsvp-guestbook-status,
+        #rsvp-entries-viewport,
+        .gift-copy-btn {
+          display: none !important;
+        }
+
+        .no-js-note {
+          display: block !important;
+        }
+      </style>
+    </noscript>
+
+    <!-- The ✦ that punctuates the invitation, drawn as the tab icon. -->
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 L18.6 13.4 L30 16 L18.6 18.6 L16 30 L13.4 18.6 L2 16 L13.4 13.4 Z' fill='%23C9A96E'/%3E%3C/svg%3E"
+    />
+  </head>
+
+  <body class="antialiased">
+    <LanguageSwitcher />
+
+    <!-- Atmosphere: drifting petals and a whisper of grain, both fixed
+         behind the story and both inert to assistive technology. -->
+    <canvas id="petalCanvas" aria-hidden="true"></canvas>
+    <div id="grain" aria-hidden="true"></div>
+
+    <Cover photoUrl={cover.src} />
+
+    <!-- ScrollSmoother transforms only this pair. The cover, the switcher
+         and the music control stay outside so they can remain fixed. -->
+    <div id="smooth-wrapper">
+      <div id="smooth-content">
+        <slot />
+      </div>
+    </div>
+
+    <MusicPlayer />
+
+    <script>
+      import '../scripts/main.ts';
+    </script>
+
+    <!--
+      Same failure, different cause: if the module never arrives the cover
+      button does nothing. This releases the invitation rather than leaving a
+      guest staring at a ticket that will not tear.
+    -->
+    <script is:inline>
+      window.setTimeout(() => {
+        if (document.documentElement.dataset.invitationReady === 'true') return;
+        const cover = document.getElementById('cover-screen');
+        if (!cover) return;
+        cover.remove();
+        document.body.style.overflow = '';
+        document.querySelectorAll('.reveal').forEach((element) => element.classList.add('visible'));
+      }, 8000);
+    </script>
+
+    <!--
+      GSAP is only fetched on pointer-precise desktop viewports that will
+      actually run the scroll story. Deciding here, before the module loads,
+      keeps three CDN requests off every phone.
+    -->
+    <script is:inline>
+      (() => {
+        const useNativeScroll =
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+          window.matchMedia('(max-width: 767px), (max-height: 699px), (pointer: coarse)').matches ||
+          navigator.maxTouchPoints > 0;
+
+        const sources = [
+          'https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js',
+          'https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js',
+          'https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollSmoother.min.js',
+        ];
+
+        const loadScript = (src) =>
+          new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = resolve;
+            script.onerror = () => reject(new Error(`Failed to load ${src}`));
+            document.head.appendChild(script);
+          });
+
+        window.__scrollStoryReady = useNativeScroll
+          ? Promise.resolve()
+          : sources.reduce((chain, src) => chain.then(() => loadScript(src)), Promise.resolve());
+      })();
+    </script>
+  </body>
+</html>

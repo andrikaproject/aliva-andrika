@@ -1,0 +1,101 @@
+---
+import { ceremonies, venue, weddingDay } from '../data/wedding.ts';
+import { DEFAULT_LOCALE, translate } from '../i18n/index.ts';
+
+const t = (key: string) => translate(DEFAULT_LOCALE, key);
+
+const days = [
+  { number: weddingDay.calendar.previous, labelKey: 'date.friday', active: false },
+  { number: weddingDay.calendar.day, labelKey: 'date.saturday', active: true },
+  { number: weddingDay.calendar.next, labelKey: 'date.sunday', active: false },
+] as const;
+
+const units = ['days', 'hours', 'minutes', 'seconds'] as const;
+---
+
+<section id="when" class="section-ground-down py-20 sm:py-28 px-4 sm:px-6">
+  <div class="max-w-3xl mx-auto text-center when-shell">
+    <div class="reveal stagger">
+      <p class="section-label mb-3" data-i18n="date.label">{t('date.label')}</p>
+      <h2 class="font-display text-4xl md:text-5xl font-light text-ink italic" data-i18n="date.heading">
+        {t('date.heading')}
+      </h2>
+      <div class="gold-divider mt-5 w-32 mx-auto"><span class="diamond"></span></div>
+    </div>
+
+    <!-- Three days, with the 17th ringed. -->
+    <div class="mt-12 reveal">
+      <div class="panel inline-flex items-stretch w-full max-w-xs mx-auto overflow-hidden when-calendar">
+        {
+          days.map((day) => (
+            <div
+              class:list={[
+                'flex-1 flex flex-col items-center justify-center py-6 px-3 when-calendar__day',
+                day.active && 'when-calendar__day--active',
+              ]}
+            >
+              <p class:list={['section-label mb-3', day.active && 'text-text-gold']} data-i18n={day.labelKey}>
+                {t(day.labelKey)}
+              </p>
+
+              {day.active ? (
+                <div class="when-calendar__ring">
+                  <span class="font-display text-3xl font-light text-ink leading-none">{day.number}</span>
+                </div>
+              ) : (
+                <span class="font-display text-4xl font-light text-ink leading-none">{day.number}</span>
+              )}
+
+              {day.active && (
+                <p class="section-label mt-3 text-text-gold" data-i18n="date.monthYear">
+                  {t('date.monthYear')}
+                </p>
+              )}
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="mt-10 reveal when-countdown" style="transition-delay: 0.1s;">
+      <p class="section-label mb-5 tracking-widest2" data-i18n="date.countingDays">{t('date.countingDays')}</p>
+      <div class="flex justify-center gap-2 sm:gap-4 w-full max-w-sm mx-auto">
+        {
+          units.map((unit) => (
+            <div class="cd-box panel">
+              <span class="cd-num" id={`cd-${unit}`}>--</span>
+              <span class="cd-label" data-i18n={`date.${unit}`}>{t(`date.${unit}`)}</span>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="mt-12 grid sm:grid-cols-2 gap-5 text-left reveal when-events" style="transition-delay: 0.2s;">
+      {
+        ceremonies.map((ceremony, index) => (
+          <div class="panel px-6 py-6 when-event" style={index > 0 ? 'transition-delay: 0.1s;' : undefined}>
+            <p
+              class:list={[
+                'section-label mb-4 when-event__title',
+                ceremony.accent === 'rose' ? 'text-text-rose' : 'text-text-gold',
+              ]}
+            >
+              {ceremony.name}
+            </p>
+            <p class="font-display text-lg font-light text-ink leading-snug when-event__date" data-i18n="date.fullDate">
+              {t('date.fullDate')}
+            </p>
+            <p class="font-display italic text-text-gold text-base mt-1 when-event__time">{ceremony.time}</p>
+            <div class="w-8 h-px bg-gold-light my-4 when-event__rule" />
+            <p class="text-sm text-ink opacity-70 leading-relaxed when-event__venue">
+              {venue.hall}
+              <br />
+              {venue.name}, {venue.city}
+            </p>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

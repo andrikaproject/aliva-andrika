@@ -1,0 +1,356 @@
+/* Cover screen and the ticket-tear opening */
+
+/* ── Cover Screen ── */
+#cover-screen {
+  --cover-surface: hsl(var(--secondary));
+  --ticket-surface: hsl(var(--muted));
+  overflow: hidden;
+  min-height: 100vh;
+  min-height: 100dvh;
+  touch-action: none;
+  background: var(--cover-surface);
+  font-family: var(--font-body);
+  color: hsl(var(--foreground));
+  transition:
+  transform 1s cubic-bezier(0.22, 1, 0.36, 1),
+  opacity 0.9s ease-out;
+}
+
+.cover-photo {
+  position: absolute;
+  z-index: 0;
+  top: clamp(-2.2rem, -36vw, -8.45rem);
+  left: 50%;
+  width: min(100vw, 42rem);
+  aspect-ratio: 2 / 3;
+  transform: translateX(-50%);
+  background:
+  linear-gradient(180deg,
+  hsl(var(--secondary) / 0) 16%,
+  hsl(var(--foreground) / 0.2) 44%,
+  hsl(var(--secondary) / 0.72) 68%,
+  var(--cover-surface) 84%),
+  var(--cover-photo) center / cover no-repeat;
+}
+
+.cover-ticket {
+  --ticket-gap: clamp(1.35rem, 8.27vw, 1.9375rem);
+  --ticket-padding: clamp(0.8rem, 4.27vw, 1rem);
+  --ticket-photo-height: clamp(4.7rem, 23.73vw, 5.5625rem);
+  --ticket-notch-y: calc(var(--ticket-padding) + 1.5625rem + var(--ticket-gap) + var(--ticket-photo-height) + var(--ticket-gap) + 0.09375rem);
+  position: absolute;
+  z-index: 1;
+  top: clamp(17.125rem, calc(35dvh + 3.125rem), 23.125rem);
+  left: 50%;
+  isolation: isolate;
+  display: flex;
+  width: min(75.47vw, 17.6875rem);
+  min-height: min(68.49dvh, 31.5rem);
+  transform: translateX(-50%);
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ticket-gap);
+  padding: var(--ticket-padding);
+  border-radius: 1.5rem;
+  background: var(--ticket-surface);
+  box-shadow: 0 0.4rem 1.25rem hsl(var(--foreground) / 0.04);
+  -webkit-mask-image:
+  radial-gradient(circle 0.75rem at left var(--ticket-notch-y),
+  transparent 0.72rem,
+  #000 0.75rem),
+  radial-gradient(circle 0.75rem at right var(--ticket-notch-y),
+  transparent 0.72rem,
+  #000 0.75rem);
+  -webkit-mask-composite: source-in;
+  mask-image:
+  radial-gradient(circle 0.75rem at left var(--ticket-notch-y),
+  transparent 0.72rem,
+  #000 0.75rem),
+  radial-gradient(circle 0.75rem at right var(--ticket-notch-y),
+  transparent 0.72rem,
+  #000 0.75rem);
+  mask-composite: intersect;
+}
+
+.cover-ticket-header {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  min-height: 1.5625rem;
+}
+
+.cover-ticket-header p,
+.cover-ticket-names {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.55;
+}
+
+.cover-ticket-header p {
+  text-transform: uppercase;
+}
+
+.cover-ticket-photo {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  height: var(--ticket-photo-height);
+  overflow: hidden;
+  margin: 0;
+  border: 3px solid hsl(var(--muted-foreground) / 0.25);
+  border-radius: var(--radius);
+}
+
+.cover-ticket-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 48%;
+}
+
+.cover-ticket-dash {
+  position: relative;
+  z-index: 3;
+  width: 84%;
+  height: 1px;
+  background: repeating-linear-gradient(90deg,
+  hsl(var(--accent) / 0.65) 0 0.5rem,
+  transparent 0.5rem 0.9rem);
+}
+
+.cover-ticket-details {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cover-ticket-names {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cover-ticket-ornament {
+  width: 0.8125rem;
+  height: 1.1336rem;
+}
+
+.cover-ticket-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+.cover-ticket-date p:last-child {
+  font-weight: 600;
+}
+
+.cover-ticket-guest {
+  max-width: 100%;
+  color: var(--color-text-rose);
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  font-style: italic;
+  line-height: 1.3;
+}
+
+#cover-btn {
+  position: relative;
+  z-index: 3;
+  display: inline-flex;
+  width: 100%;
+  min-height: 3.0625rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.25rem;
+  border: 1px solid hsl(var(--primary));
+  border-radius: 0.75rem;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.55;
+  cursor: pointer;
+  transition:
+  background var(--duration-base) var(--ease-default),
+  border-color var(--duration-base) var(--ease-default),
+  color var(--duration-base) var(--ease-default),
+  box-shadow var(--duration-base) var(--ease-default),
+  transform var(--duration-fast) var(--ease-default);
+}
+
+#cover-btn:hover {
+  border-color: hsl(var(--accent));
+  background: hsl(var(--accent));
+  color: hsl(var(--card));
+}
+
+#cover-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-shadow-gold);
+}
+
+#cover-btn:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+@media (max-height: 50rem) {
+  .cover-ticket {
+    --ticket-gap: 1.5rem;
+  }
+
+}
+
+@media (max-height: 41rem) {
+  .cover-ticket {
+    --ticket-gap: 1.2rem;
+    top: clamp(12.625rem, calc(26dvh + 3.125rem), 13.625rem);
+  }
+
+}
+
+@media (min-width: 48rem) {
+  .cover-photo {
+    width: 32rem;
+  }
+
+}
+
+/* ── Ticket tear → full-screen opening transition ── */
+#cover-screen.ticket-transitioning {
+  transition: opacity 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+#cover-screen.ticket-transitioning>.cover-ticket {
+  visibility: hidden;
+}
+
+#cover-screen.ticket-transitioning.dismissed {
+  transform: none;
+}
+
+.ticket-transition-stage {
+  position: fixed;
+  z-index: 4;
+  overflow: visible;
+  pointer-events: none;
+  transform: translateZ(0) scale(1);
+  transform-origin: center center;
+  will-change: transform;
+}
+
+.ticket-transition-stage.is-active {
+  animation: ticket-stage-zoom 0.82s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.ticket-transition-clone {
+  position: absolute;
+  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  transform: none;
+  box-shadow: none;
+  pointer-events: none;
+  filter: blur(0);
+  will-change: transform;
+}
+
+.ticket-transition-clone--top {
+  transform-origin: center var(--ticket-tear-y);
+}
+
+.ticket-transition-clone--bottom {
+  transform-origin: center var(--ticket-tear-y);
+}
+
+.ticket-transition-stage.is-active .ticket-transition-clone--top {
+  animation: ticket-tear-top 0.82s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.ticket-transition-stage.is-active .ticket-transition-clone--bottom {
+  animation: ticket-tear-bottom 0.82s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes ticket-tear-top {
+  0% {
+  transform: translate3d(0, 0, 0) rotate(0);
+  }
+  38% {
+  transform: translate3d(-2px, -7px, 0) rotate(-0.3deg);
+  }
+  62% {
+  transform: translate3d(-3px, -9px, 0) rotate(-0.4deg);
+  }
+  100% {
+  transform: translate3d(-4px, -10px, 0) rotate(-0.45deg);
+  }
+}
+
+@keyframes ticket-tear-bottom {
+  0% {
+  transform: translate3d(0, 0, 0) rotate(0);
+  }
+  38% {
+  transform: translate3d(2px, 8px, 0) rotate(0.3deg);
+  }
+  62% {
+  transform: translate3d(3px, 10px, 0) rotate(0.4deg);
+  }
+  100% {
+  transform: translate3d(4px, 12px, 0) rotate(0.45deg);
+  }
+}
+
+@keyframes ticket-stage-zoom {
+  0%,
+  50% {
+  transform: translateZ(0) scale(1);
+  }
+  100% {
+  transform: translateZ(0) scale(var(--ticket-zoom-scale));
+  }
+}
+
+/* Cover dissolves rather than sliding away */
+#cover-screen.dismissed {
+  transform: scale(1.015);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Large couple names: a touch tighter for a more composed look */
+#hero h1.text-5xl,
+#hero h1.text-6xl,
+#cover-screen h1 {
+  letter-spacing: 0.01em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #cover-screen {
+    transition: opacity 0.4s ease-out !important;
+  }
+
+  #cover-screen.dismissed {
+    transform: none !important;
+  }
+
+  .ticket-transition-stage,
+  .ticket-transition-clone {
+    animation: none !important;
+    transform: none !important;
+  }
+
+}
+

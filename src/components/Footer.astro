@@ -1,0 +1,28 @@
+---
+import { couple, weddingDay } from '../data/wedding.ts';
+import { DEFAULT_LOCALE, translate } from '../i18n/index.ts';
+
+const t = (key: string) => translate(DEFAULT_LOCALE, key);
+---
+
+<footer class="py-12 sm:py-16 px-4 sm:px-6 text-center border-t border-gold-light">
+  <div class="max-w-xl mx-auto">
+    <div class="floral-accent mb-5 text-xl tracking-widest" aria-hidden="true">✦ &nbsp; ✦ &nbsp; ✦</div>
+
+    <p class="font-display text-4xl font-light text-ink mb-1">
+      {couple.groom.firstName} <span class="text-text-gold italic">&amp;</span> {couple.bride.firstName}
+    </p>
+    <p class="section-label text-text-gold tracking-widest2 mt-1 mb-6">{weddingDay.stamp}</p>
+
+    <div class="w-16 h-px bg-gold-light mx-auto mb-6"></div>
+
+    <blockquote class="font-display italic text-text-rose text-base leading-relaxed">
+      <p data-i18n="footer.quote">{t('footer.quote')}</p>
+      <footer class="text-xs font-body not-italic block mt-1" data-i18n="footer.quoteAuthor">
+        {t('footer.quoteAuthor')}
+      </footer>
+    </blockquote>
+
+    <p class="text-xs text-ink opacity-70 mt-10 tracking-wider" data-i18n="footer.madeWith">{t('footer.madeWith')}</p>
+  </div>
+</footer>

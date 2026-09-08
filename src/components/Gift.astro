@@ -1,0 +1,79 @@
+---
+import { gift } from '../data/wedding.ts';
+import { DEFAULT_LOCALE, translate } from '../i18n/index.ts';
+
+const t = (key: string) => translate(DEFAULT_LOCALE, key);
+---
+
+<section id="gift" class="section-ground-down py-20 sm:py-28 px-4 sm:px-6">
+  <div class="max-w-4xl mx-auto gift-shell">
+    <div class="text-center reveal stagger">
+      <p class="section-label mb-3" data-i18n="gift.label">{t('gift.label')}</p>
+      <h2 class="font-display text-4xl md:text-5xl font-light text-ink" data-i18n="gift.heading">{t('gift.heading')}</h2>
+      <div class="gold-divider mt-5 w-32 mx-auto"><span class="diamond"></span></div>
+      <p class="mt-5 text-sm text-ink opacity-65 leading-relaxed max-w-lg mx-auto" data-i18n="gift.intro">
+        {t('gift.intro')}
+      </p>
+    </div>
+
+    <div class="gift-cards mt-10">
+      {
+        gift.accounts.map((account, index) => (
+          <article
+            class="gift-card panel reveal"
+            data-gift-account={account.number}
+            style={index > 0 ? 'transition-delay: 0.1s;' : undefined}
+          >
+            <div class="floral-accent gift-card__ornament" aria-hidden="true">✦</div>
+            <p class="section-label gift-card__bank">{account.bank}</p>
+            <p class="section-label gift-card__holder-label" data-i18n="gift.accountHolder">
+              {t('gift.accountHolder')}
+            </p>
+            <h3 class="font-display text-2xl sm:text-3xl font-light text-ink gift-card__name">{account.holder}</h3>
+            <div class="gift-card__rule" aria-hidden="true" />
+            <p class="section-label gift-card__account-label" data-i18n="gift.accountNumber">
+              {t('gift.accountNumber')}
+            </p>
+
+            {/* Rendered server-side so the number is readable without JavaScript. */}
+            <p class="gift-card__number" data-gift-account-number>{account.number}</p>
+
+            <button type="button" class="gift-copy-btn" data-gift-copy hidden>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="9" y="9" width="10" height="10" rx="1.5" />
+                <path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1" />
+              </svg>
+              <span data-gift-copy-label data-i18n="gift.copyAccount">{t('gift.copyAccount')}</span>
+            </button>
+
+            <p class="gift-card__status" data-gift-status role="status" />
+          </article>
+        ))
+      }
+    </div>
+
+    <div class="gift-address panel reveal" style="transition-delay: 0.18s;">
+      <div class="floral-accent gift-address__ornament" aria-hidden="true">✦</div>
+      <p class="section-label gift-address__label" data-i18n="gift.deliveryLabel">{t('gift.deliveryLabel')}</p>
+      <h3 class="font-display text-2xl sm:text-3xl font-light text-ink" data-i18n="gift.deliveryHeading">
+        {t('gift.deliveryHeading')}
+      </h3>
+      <div class="gift-address__rule" aria-hidden="true"></div>
+      <address class="gift-address__details">
+        <strong>{gift.delivery.recipient}</strong><br />
+        {gift.delivery.addressLines.map((line, index) => (
+          <>{line}{index < gift.delivery.addressLines.length - 1 && <br />}</>
+        ))}
+      </address>
+    </div>
+  </div>
+</section>

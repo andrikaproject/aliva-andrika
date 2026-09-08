@@ -1,0 +1,19 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "include": [
+    ".astro/types.d.ts",
+    "**/*.ts",
+    "**/*.astro"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "api"
+  ],
+  "compilerOptions": {
+    "strictNullChecks": true,
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true
+  }
+}

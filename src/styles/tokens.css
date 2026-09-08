@@ -1,0 +1,129 @@
+/* ================================================================
+   DESIGN TOKENS
+   One source of truth for colour, type and motion.
+
+   @theme feeds Tailwind: every value below also becomes a utility
+   (bg-gold-light, text-text-rose, font-display, tracking-widest2)
+   and stays readable from custom CSS as var(--color-gold-light).
+
+   Names Tailwind already owns (--text-*, --radius-sm, --leading-*,
+   --shadow-*) are deliberately left alone. Redeclaring them in :root
+   would silently retune the utilities the invitation already uses —
+   leading-relaxed and tracking-widest most of all. Project-specific
+   scales that clash with those namespaces carry a --ds- prefix.
+================================================================ */
+
+@import 'tailwindcss';
+
+@theme {
+  /* ── Type families ────────────────────────────────────────── */
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'Jost', sans-serif;
+
+  /* ── Letter spacing beyond Tailwind's scale ───────────────── */
+  --tracking-widest2: 0.25em;
+  --tracking-widest3: 0.35em;
+  --tracking-label: 0.3em;
+
+  /* ── Semantic surfaces, composed from the HSL channels below ─ */
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  /* ── Wedding palette, for decoration and surfaces ─────────── */
+  --color-parchment: #faf6ef;
+  --color-ivory: #f5efe4;
+  --color-ink: #2c2420;
+  --color-rose-soft: #e8c4b8;
+  --color-rose-muted: #d4998a;
+  --color-rose-deep: #b5705e;
+  --color-gold-light: #e8d5a3;
+  --color-gold-mid: #c9a96e;
+  --color-gold-deep: #a07840;
+  --color-sage-light: #d4ddd0;
+  --color-sage-mid: #9caf98;
+
+  /* ── Readable text colours ────────────────────────────────── */
+  /* The palette hues fail AA as text on parchment: gold-mid reads
+     3.18:1, rose-muted 2.24:1, sage-mid 1.94:1. These darkened
+     variants clear 5.4:1 and are what every text utility uses. */
+  --color-text-gold: hsl(35 55% 30%); /* #7E5922 — 5.83:1 */
+  --color-text-rose: hsl(10 38% 36%); /* #7D4438 — 5.49:1 */
+  --color-text-sage: hsl(110 18% 32%); /* #486248 — 5.47:1 */
+
+  /* --muted-foreground is a surface tone; as text on the card it measures
+     exactly 4.50:1, the threshold rather than a margin. This is the readable
+     version, used wherever a muted tone carries words. */
+  --color-text-muted: hsl(24 10% 42%); /* #766960 — 5.22:1 */
+}
+
+:root {
+  /* Warm parchment only. The invitation has no dark theme, and an
+     OS-level dark preference must not repaint the photographs. */
+  color-scheme: light;
+  color-scheme: only light;
+
+  /* ── HSL channels ──────────────────────────────────────────
+     Kept as bare channels so custom CSS can compose alpha:
+     hsl(var(--accent) / 0.65). ────────────────────────────── */
+  --background: 42 47% 96%;         /* #FAF6EF parchment */
+  --foreground: 15 16% 15%;         /* #2C2420 ink */
+  --card: 48 100% 99%;              /* #FFFDF9 elevated surface */
+  --card-foreground: 15 16% 15%;
+  --primary: 15 16% 15%;
+  --primary-foreground: 40 57% 77%; /* #E8D5A3 gold-light */
+  --secondary: 38 44% 93%;          /* #F5EFE4 ivory */
+  --secondary-foreground: 15 16% 15%;
+  --muted: 36 41% 90%;              /* #F0E8DA */
+  --muted-foreground: 24 10% 46%;
+  --accent: 36 45% 61%;             /* #C9A96E gold-mid */
+  --accent-foreground: 15 16% 15%;
+  --destructive: 10 35% 54%;        /* #B5705E rose-deep */
+  --destructive-foreground: 42 47% 96%;
+  --border: 40 57% 77%;
+  --input: 40 57% 77%;
+  --ring: 36 45% 61%;
+
+  /* ── Radius ────────────────────────────────────────────────
+     --radius-sm matches Tailwind's own 0.25rem, so it is not
+     redeclared here. ───────────────────────────────────────── */
+  --radius: 0.5rem;
+
+  /* ── Elevation ─────────────────────────────────────────────
+     Prefixed: Tailwind's --shadow-sm/md carry different values. */
+  --ds-shadow-sm: 0 1px 4px 0 hsl(15 16% 15% / 0.06);
+  --ds-shadow-md: 0 4px 16px 0 hsl(15 16% 15% / 0.08);
+  --ds-shadow-gold: 0 0 0 3px hsl(36 45% 61% / 0.25);
+
+  /* ── Line height ───────────────────────────────────────────
+     Prefixed for the same reason: these are looser than Tailwind's
+     leading-* utilities and must not replace them. ─────────── */
+  --ds-leading-tight: 1.2;
+  --ds-leading-snug: 1.4;
+  --ds-leading-relaxed: 1.75;
+
+  /* ── Motion ────────────────────────────────────────────────── */
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --duration-slow: 350ms;
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html,
+body {
+  color-scheme: only light !important;
+}

@@ -1,0 +1,71 @@
+---
+import { Image } from 'astro:assets';
+
+import { galleryPhotos } from '../data/gallery.ts';
+import { DEFAULT_LOCALE, translate } from '../i18n/index.ts';
+
+const t = (key: string) => translate(DEFAULT_LOCALE, key);
+
+/**
+ * Cards are one column on phones and at most four on very wide screens, so
+ * the largest a photo is ever painted is roughly a quarter of a 1440px band.
+ * These widths cover that plus 2x screens; the browser picks from `sizes`.
+ */
+const PHOTO_WIDTHS = [200, 320, 400, 520, 660, 820];
+const PHOTO_SIZES = '(min-width: 1440px) 250px, (min-width: 1024px) 24vw, (min-width: 640px) 30vw, 42vw';
+
+/**
+ * The fallback `src` and the intrinsic attributes. Without an explicit width
+ * Astro falls back to the 4000px original, and the reserved box collapses
+ * until the photo lands.
+ */
+const FALLBACK_WIDTH = 400;
+const sized = galleryPhotos.map((photo) => ({
+  ...photo,
+  width: FALLBACK_WIDTH,
+  height: Math.round((FALLBACK_WIDTH * photo.src.height) / photo.src.width),
+}));
+---
+
+<section id="photo-band" aria-labelledby="gallery-heading">
+  <div class="gallery-frame" aria-hidden="true"></div>
+
+  <div class="gallery-layout">
+    <div class="gallery-context">
+      <div class="gallery-context__inner reveal">
+        <p class="section-label gallery-context__label" data-i18n="gallery.label">{t('gallery.label')}</p>
+        <p id="gallery-heading" class="gallery-context__heading font-display" data-i18n="gallery.heading">
+          {t('gallery.heading')}
+        </p>
+        <div class="gold-divider gallery-context__rule"><span class="diamond"></span></div>
+        <p class="gallery-context__intro" data-i18n="gallery.intro">{t('gallery.intro')}</p>
+        <p class="gallery-context__count" id="galleryCount" aria-live="polite">
+          {translate(DEFAULT_LOCALE, 'gallery.photoCount', { count: galleryPhotos.length })}
+        </p>
+      </div>
+    </div>
+
+    <div class="gallery-grid" id="galleryGrid">
+      {
+        sized.map((photo) => (
+          <figure class="gallery-card">
+            <div class="gallery-card__media">
+              <Image
+                src={photo.src}
+                alt={photo.alt[DEFAULT_LOCALE]}
+                width={photo.width}
+                height={photo.height}
+                widths={PHOTO_WIDTHS}
+                sizes={PHOTO_SIZES}
+                loading="lazy"
+                decoding="async"
+                data-alt-id={photo.alt.id}
+                data-alt-en={photo.alt.en}
+              />
+            </div>
+          </figure>
+        ))
+      }
+    </div>
+  </div>
+</section>

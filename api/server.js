@@ -13,6 +13,13 @@ const MAX_MESSAGE_LENGTH = 500;
 const RATE_LIMIT_WINDOW_MS = 30_000;
 const RATE_LIMIT_MAX_ENTRIES = 10_000;
 
+// How many proxies sit in front of this process. Caddy appends the real peer
+// to X-Forwarded-For, so with one hop the last entry is the guest and any
+// header the guest invented sits harmlessly to its left. Set this to the real
+// chain length; 0 ignores the header and rate-limits by socket address, which
+// only makes sense when the API is reached directly.
+const TRUSTED_PROXY_HOPS = Number(process.env.TRUSTED_PROXY_HOPS ?? 1);
+
 fs.mkdirSync(path.dirname(DATABASE_PATH), { recursive: true });
 
 const db = new DatabaseSync(DATABASE_PATH);
@@ -40,6 +47,8 @@ const listEntries = db.prepare(`
   LIMIT ?
 `);
 
+const countEntries = db.prepare('SELECT COUNT(*) AS total FROM guestbook_entries');
+
 const insertEntry = db.prepare(`
   INSERT INTO guestbook_entries (name, message, attendance, guests, created_at)
   VALUES (?, ?, ?, ?, ?)
@@ -48,12 +57,17 @@ const insertEntry = db.prepare(`
 const rateLimit = new Map();
 
 function getClientKey(request) {
-  const forwarded = request.headers['x-forwarded-for'];
-  if (typeof forwarded === 'string' && forwarded.trim()) {
-    return forwarded.split(',')[0].trim();
-  }
+  const socketAddress = request.socket.remoteAddress || 'unknown';
+  if (TRUSTED_PROXY_HOPS <= 0) return socketAddress;
 
-  return request.socket.remoteAddress || 'unknown';
+  const forwarded = request.headers['x-forwarded-for'];
+  if (typeof forwarded !== 'string' || !forwarded.trim()) return socketAddress;
+
+  // Count in from the right: those entries were written by our own proxies.
+  // Reading the leftmost entry would let a guest spoof a new identity per
+  // request and walk straight past the rate limit.
+  const hops = forwarded.split(',').map((value) => value.trim()).filter(Boolean);
+  return hops[hops.length - TRUSTED_PROXY_HOPS] || socketAddress;
 }
 
 function isRateLimited(key) {
@@ -70,6 +84,10 @@ function isRateLimited(key) {
   }
 
   return false;
+}
+
+function sendError(response, statusCode, code, message) {
+  sendJson(response, statusCode, { error: message, code });
 }
 
 function sendJson(response, statusCode, payload) {
@@ -106,8 +124,13 @@ function readJson(request) {
     request.on('data', (chunk) => {
       size += Buffer.byteLength(chunk);
       if (size > MAX_BODY_BYTES) {
-        fail(new Error('Request body is too large'));
-        request.destroy();
+        // Stop reading, but leave the socket alive long enough to answer.
+        // Destroying it here made an oversized body look like a network
+        // failure to the browser instead of a refusal it can explain.
+        request.pause();
+        const error = new Error('Request body is too large');
+        error.code = 'body_too_large';
+        fail(error);
         return;
       }
       body += chunk;
@@ -118,7 +141,9 @@ function readJson(request) {
       try {
         resolve(JSON.parse(body || '{}'));
       } catch {
-        reject(new Error('Invalid JSON'));
+        const error = new Error('Invalid JSON');
+        error.code = 'invalid_json';
+        reject(error);
       }
     });
     request.on('error', fail);
@@ -150,12 +175,12 @@ async function handleGuestbook(request, response) {
 
   if (request.method !== 'POST') {
     response.setHeader('Allow', 'GET, POST');
-    sendJson(response, 405, { error: 'Method not allowed' });
+    sendError(response, 405, 'method_not_allowed', 'Method not allowed');
     return;
   }
 
   if (isRateLimited(getClientKey(request))) {
-    sendJson(response, 429, { error: 'Please wait before sending another message.' });
+    sendError(response, 429, 'rate_limited', 'Please wait before sending another message.');
     return;
   }
 
@@ -163,7 +188,11 @@ async function handleGuestbook(request, response) {
   try {
     payload = await readJson(request);
   } catch (error) {
-    sendJson(response, 400, { error: error.message });
+    const code = error.code === 'body_too_large' ? 'body_too_large' : 'invalid_json';
+    const status = code === 'body_too_large' ? 413 : 400;
+    response.setHeader('Connection', 'close');
+    response.on('finish', () => request.destroy());
+    sendError(response, status, code, error.message);
     return;
   }
 
@@ -173,22 +202,22 @@ async function handleGuestbook(request, response) {
   const guests = Number(payload.guests || 1);
 
   if (!name) {
-    sendJson(response, 422, { error: 'Name is required.' });
+    sendError(response, 422, 'name_required', 'Name is required.');
     return;
   }
 
   if (!message) {
-    sendJson(response, 422, { error: 'Message is required.' });
+    sendError(response, 422, 'message_required', 'Message is required.');
     return;
   }
 
   if (!['attending', 'not_attending'].includes(attendance)) {
-    sendJson(response, 422, { error: 'Attendance selection is invalid.' });
+    sendError(response, 422, 'attendance_invalid', 'Attendance selection is invalid.');
     return;
   }
 
   if (!Number.isInteger(guests) || guests < 1 || guests > 4) {
-    sendJson(response, 422, { error: 'Number of guests must be between 1 and 4.' });
+    sendError(response, 422, 'guests_invalid', 'Number of guests must be between 1 and 4.');
     return;
   }
 
@@ -211,7 +240,13 @@ const server = http.createServer(async (request, response) => {
     const requestUrl = new URL(request.url, 'http://localhost');
 
     if (requestUrl.pathname === '/healthz') {
-      sendJson(response, 200, { ok: true });
+      try {
+        countEntries.get();
+        sendJson(response, 200, { ok: true, database: 'ok' });
+      } catch (error) {
+        console.error('Health check query failed:', error);
+        sendError(response, 503, 'server_error', 'Database unavailable.');
+      }
       return;
     }
 
@@ -220,10 +255,10 @@ const server = http.createServer(async (request, response) => {
       return;
     }
 
-    sendJson(response, 404, { error: 'Not found' });
+    sendError(response, 404, 'not_found', 'Not found');
   } catch (error) {
     console.error('Unhandled request error:', error);
-    if (!response.headersSent) sendJson(response, 500, { error: 'Temporary server error.' });
+    if (!response.headersSent) sendError(response, 500, 'server_error', 'Temporary server error.');
     else response.destroy();
   }
 });

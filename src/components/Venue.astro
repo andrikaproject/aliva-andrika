@@ -1,0 +1,93 @@
+---
+import { schedule, venue } from '../data/wedding.ts';
+import { DEFAULT_LOCALE, translate } from '../i18n/index.ts';
+
+const t = (key: string) => translate(DEFAULT_LOCALE, key);
+---
+
+<section id="where" class="py-20 sm:py-28 px-4 sm:px-6">
+  <div class="max-w-4xl mx-auto">
+    <div class="text-center reveal stagger">
+      <p class="section-label mb-3" data-i18n="venue.label">{t('venue.label')}</p>
+      <h2 class="font-display text-4xl md:text-5xl font-light text-ink" data-i18n="venue.heading">
+        {t('venue.heading')}
+      </h2>
+      <div class="gold-divider mt-5 w-32 mx-auto"><span class="diamond"></span></div>
+    </div>
+
+    <div class="mt-14 grid md:grid-cols-2 gap-8 items-start">
+      <div class="panel p-5 sm:p-8 reveal">
+        <p class="section-label mb-4 text-text-rose" data-i18n="venue.mainVenue">{t('venue.mainVenue')}</p>
+        <h3 class="font-display text-2xl font-light text-ink mb-1">{venue.hall}</h3>
+        <p class="font-display italic text-text-gold text-lg mb-5">{venue.name}</p>
+        <address class="space-y-1 text-sm text-ink opacity-75 leading-relaxed not-italic">
+          {venue.addressLines.map((line) => <p>{line}</p>)}
+        </address>
+        <div class="w-full h-px bg-gold-light my-6"></div>
+        <a
+          href={venue.mapsUrl}
+          target="_blank"
+          rel="noopener"
+          class="inline-flex min-h-11 items-center gap-2 section-label text-text-gold border border-gold-mid px-5 py-2.5 hover:bg-gold-mid hover:text-white transition-all"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-3.5 h-3.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+            ></path>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+          <span data-i18n="venue.openInMaps">{t('venue.openInMaps')}</span>
+        </a>
+      </div>
+
+      <div class="reveal" style="transition-delay: 0.15s;">
+        <p class="section-label text-text-rose mb-5 text-center md:text-left" data-i18n="venue.scheduleOfEvents">
+          {t('venue.scheduleOfEvents')}
+        </p>
+
+        <div class="flex justify-center md:justify-start">
+          <ol class="venue-timeline">
+            <!-- One rule spanning every row, drawn behind the entries. -->
+            <li class="venue-timeline__rule bg-gold-light" aria-hidden="true"></li>
+
+            {
+              schedule.map((entry, index) => (
+                <>
+                  <li class="venue-timeline__time" style={`grid-row: ${index + 1};`}>
+                    <span class="font-display text-text-gold text-sm">{entry.time}</span>
+                    {'until' in entry && (
+                      <>
+                        <span class="font-display text-text-gold text-xs" aria-hidden="true">
+                          –
+                        </span>
+                        <span class="font-display text-text-gold text-sm">{entry.until}</span>
+                      </>
+                    )}
+                  </li>
+                  <li class="venue-timeline__item" style={`grid-row: ${index + 1};`}>
+                    <p class="font-body text-sm font-medium text-ink" data-i18n={'nameKey' in entry ? entry.nameKey : undefined}>
+                      {'nameKey' in entry ? t(entry.nameKey) : entry.name}
+                    </p>
+                    <p class="text-xs text-ink opacity-70 mt-0.5" data-i18n={entry.noteKey}>
+                      {t(entry.noteKey)}
+                    </p>
+                  </li>
+                </>
+              ))
+            }
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

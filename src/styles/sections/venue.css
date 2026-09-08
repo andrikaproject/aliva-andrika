@@ -1,0 +1,30 @@
+/* Venue card and the running order beside it */
+
+.venue-timeline {
+  display: grid;
+  gap: 1.25rem 0;
+  grid-template-columns: 3.5rem 1px 1fr;
+}
+
+/* One continuous rule behind every row rather than a border per item. */
+.venue-timeline__rule {
+  grid-row: 1 / -1;
+  grid-column: 2;
+}
+
+.venue-timeline__time {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  padding-top: 0.125rem;
+  padding-right: 1rem;
+  grid-column: 1;
+  line-height: 1;
+  text-align: right;
+}
+
+.venue-timeline__item {
+  padding-left: 1rem;
+  grid-column: 3;
+}

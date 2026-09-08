@@ -1,0 +1,70 @@
+---
+import { Image } from 'astro:assets';
+
+import ringOrnament from '../../assets/cover/ring-ornament.svg';
+import weddingRings from '../../assets/cover/wedding-rings.jpeg';
+import { couple } from '../data/wedding.ts';
+import { DEFAULT_LOCALE, translate } from '../i18n/index.ts';
+
+interface Props {
+  /** Emitted cover photograph, shared with the preload in the layout. */
+  photoUrl: string;
+}
+
+const { photoUrl } = Astro.props;
+const t = (key: string) => translate(DEFAULT_LOCALE, key);
+---
+
+<div id="cover-screen" class="fixed inset-0 z-[70] text-center">
+  <div class="cover-photo" style={`--cover-photo: url("${photoUrl}")`} aria-hidden="true"></div>
+
+  <article class="cover-ticket" aria-label={`${couple.groom.firstName} & ${couple.bride.firstName} — ${t('cover.title')}`}>
+    <header class="cover-ticket-header">
+      <p data-i18n="cover.title">{t('cover.title')}</p>
+    </header>
+
+    <figure class="cover-ticket-photo">
+      <Image
+        src={weddingRings}
+        alt={`${couple.groom.firstName} dan ${couple.bride.firstName} bergandengan tangan, memperlihatkan cincin`}
+        width={320}
+        height={214}
+        widths={[300, 560, 860]}
+        sizes="(min-width: 48rem) 260px, 76vw"
+        loading="eager"
+        fetchpriority="high"
+      />
+    </figure>
+
+    <div class="cover-ticket-dash" aria-hidden="true"></div>
+
+    <div class="cover-ticket-details">
+      <div class="cover-ticket-names">
+        <p>{couple.groom.firstName}</p>
+        <p aria-hidden="true">&amp;</p>
+        <p>{couple.bride.firstName}</p>
+      </div>
+
+      <img
+        class="cover-ticket-ornament"
+        src={ringOrnament.src}
+        width="13"
+        height="18"
+        alt=""
+        aria-hidden="true"
+      />
+
+      <div class="cover-ticket-date">
+        <p data-i18n="cover.saveTheDate">{t('cover.saveTheDate')}</p>
+        <p data-i18n="cover.date">{t('cover.date')}</p>
+      </div>
+
+      <!-- Filled from ?to= at runtime; stays out of the flow otherwise. -->
+      <p id="cover-guest" class="cover-ticket-guest hidden"></p>
+    </div>
+
+    <button id="cover-btn" type="button" data-i18n="cover.openInvitation">
+      {t('cover.openInvitation')}
+    </button>
+  </article>
+</div>

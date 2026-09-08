@@ -1,0 +1,26 @@
+---
+import { DEFAULT_LOCALE, LOCALES, translate } from '../i18n/index.ts';
+---
+
+<div
+  id="language-switcher"
+  class="language-switcher"
+  role="group"
+  aria-label={translate(DEFAULT_LOCALE, 'a11y.languageGroup')}
+>
+  {
+    LOCALES.map((locale, index) => (
+      <>
+        {index > 0 && <span aria-hidden="true">/</span>}
+        <button
+          type="button"
+          class:list={['language-btn', locale === DEFAULT_LOCALE && 'is-active']}
+          data-locale={locale}
+          aria-pressed={locale === DEFAULT_LOCALE}
+        >
+          {locale.toUpperCase()}
+        </button>
+      </>
+    ))
+  }
+</div>

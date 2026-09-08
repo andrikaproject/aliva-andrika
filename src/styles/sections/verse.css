@@ -1,0 +1,17 @@
+/* Q.S. Ar-Rum : 21 — the calm beat between the hero and the couple */
+
+.verse-ayat {
+  margin-bottom: 1.25rem;
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 4.5vw, 1.85rem);
+  font-weight: 300;
+  line-height: 2.2;
+  opacity: 0.9;
+}
+
+.verse-translation {
+  max-width: 30rem;
+  margin: 0 auto 0.5rem;
+  font-size: clamp(1rem, 3.5vw, 1.15rem);
+}

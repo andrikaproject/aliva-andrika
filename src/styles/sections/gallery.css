@@ -1,0 +1,224 @@
+/* Pre-wedding gallery band (Figma 312:74) */
+
+/* ── Prewedding gallery ──
+Figma 312:74. The section is full-bleed and tall; .gallery-frame is
+the rounded panel painted behind the content. GSAP scrubs the frame's
+horizontal inset and radius so it expands to fill the screen on the
+way in and contracts on the way out. Without GSAP it simply sits
+full-bleed, which is a correct resting state on its own. */
+#photo-band {
+  position: relative;
+  z-index: 1;
+  padding: clamp(3.5rem, 8vw, 6rem) 0 clamp(3.5rem, 8vw, 5.5rem);
+}
+
+.gallery-frame {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  /* Animated by GSAP. Content padding below always clears the largest
+  inset these reach, so the layout never escapes the panel. */
+  left: 0;
+  right: 0;
+  border-radius: 0;
+  z-index: 0;
+  background-image:
+  radial-gradient(120% 55% at 50% 0%, hsl(28 22% 30%), transparent 70%),
+  linear-gradient(180deg, #3F3128 0%, #372B22 100%);
+}
+
+.gallery-layout {
+  position: relative;
+  z-index: 2;
+  max-width: 1560px;
+  margin: 0 auto;
+  /* Never less than the frame's 6% inset, at any viewport. */
+  padding: 0 clamp(1.5rem, 8vw, 9rem);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(2.25rem, 5vw, 3.5rem);
+}
+
+@media (min-width: 1024px) {
+  .gallery-layout {
+    grid-template-columns: minmax(230px, 30%) 1fr;
+    gap: clamp(2.5rem, 4vw, 4rem);
+    align-items: start;
+  }
+
+}
+
+/* ── Left column: the context ── */
+.gallery-context__inner {
+  text-align: center;
+}
+
+@media (min-width: 1024px) {
+  .gallery-context__inner {
+    text-align: left;
+    /* Clears the fixed language switcher when pinned. */
+    padding-top: 0.5rem;
+  }
+
+  .gallery-context__rule {
+    margin-left: 0;
+    justify-content: flex-start;
+  }
+
+  .gallery-context__rule::before {
+    display: none;
+  }
+
+}
+
+.gallery-context__label {
+  color: #F3E7CF;
+  margin-bottom: 0.85rem;
+}
+
+.gallery-context__heading {
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(1.75rem, 3.2vw, 2.75rem);
+  line-height: var(--ds-leading-tight);
+  color: #FCF7EC;
+  margin: 0;
+}
+
+.gallery-context__rule {
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+  max-width: 8rem;
+}
+
+.gallery-context__intro {
+  font-size: var(--text-base);
+  line-height: var(--ds-leading-relaxed);
+  color: #E4D4B4;
+  margin: 0 0 1.75rem;
+  max-width: 34ch;
+}
+
+@media (max-width: 1023px) {
+  .gallery-context__intro {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+}
+
+.gallery-context__count {
+  margin: 1.25rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  /* Lifted from #C9AF7E: over the band's radial highlight (#5D4739) that
+     measured 4.09:1, below AA for 12px text. This clears 4.98:1. */
+  color: #D8C296;
+}
+
+/* ── Masonry grid ──
+CSS multi-column: every card keeps its own image ratio while the
+gutters stay mechanically even. Cards flow down each column.
+--gallery-columns is the count this breakpoint wants. */
+.gallery-grid {
+  --gallery-columns: 2;
+  column-count: var(--gallery-columns);
+  column-gap: clamp(0.7rem, 1.6vw, 1.35rem);
+}
+
+@media (min-width: 640px) {
+  /* Counts follow the width the grid actually gets, which is not monotonic:
+  it grows while the layout is stacked, drops back at 1024 when the
+  context column splits off, then grows again. */
+  .gallery-grid {
+    --gallery-columns: 3;
+  }
+
+}
+
+@media (min-width: 1024px) {
+  .gallery-grid {
+    --gallery-columns: 2;
+  }
+
+}
+
+@media (min-width: 1440px) {
+  .gallery-grid {
+    --gallery-columns: 3;
+  }
+
+}
+
+.gallery-card {
+  break-inside: avoid;
+  margin: 0 0 clamp(1.35rem, 2.4vw, 2rem);
+}
+
+.gallery-card__media {
+  overflow: hidden;
+  border-radius: 10px;
+  background: rgba(255, 253, 249, 0.05);
+  box-shadow: 0 8px 20px -10px rgba(16, 10, 5, 0.55);
+  transition: box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.gallery-card__media img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .gallery-card:hover .gallery-card__media {
+    box-shadow: 0 16px 32px -12px rgba(16, 10, 5, 0.68);
+  }
+
+  .gallery-card:hover .gallery-card__media img {
+    transform: scale(1.045);
+  }
+
+}
+
+.gallery-card__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.85rem;
+  padding: 0.7rem 0.15rem 0;
+}
+
+.gallery-card__title {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 1rem;
+  line-height: var(--ds-leading-snug);
+  color: #FBF4E6;
+}
+
+@media (max-width: 1023px) {
+  .gallery-card__meta {
+    flex-direction: column;
+    align-items: flex-start;
+    padding-top: 0.55rem;
+  }
+
+  .gallery-card__title {
+    font-size: 0.875rem;
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-card__media,
+  .gallery-card__media img {
+    transition: none;
+  }
+
+}
+

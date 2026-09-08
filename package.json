@@ -1,0 +1,27 @@
+{
+  "name": "andrika-aliva-invitation",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Undangan pernikahan Andrika & Aliva \u2014 17 Oktober 2026",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "api:dev": "node api/server.js",
+    "test": "node --test tests/*.test.ts tests/*.test.js"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^26.5.0",
+    "astro": "^7.3.1",
+    "sharp": "^0.35.4",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.2"
+  }
+}

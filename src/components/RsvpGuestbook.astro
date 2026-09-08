@@ -1,0 +1,149 @@
+---
+import { rsvp } from '../data/wedding.ts';
+import { DEFAULT_LOCALE, translate } from '../i18n/index.ts';
+
+const t = (key: string) => translate(DEFAULT_LOCALE, key);
+
+const deadline = new Intl.DateTimeFormat(DEFAULT_LOCALE === 'id' ? 'id-ID' : 'en-GB', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+}).format(new Date(`${rsvp.deadlineDate}T00:00:00+07:00`));
+---
+
+<section id="rsvp" class="section-ground-up py-20 sm:py-28 px-4 sm:px-6">
+  <div class="max-w-2xl mx-auto rsvp-shell">
+    <div class="text-center reveal stagger">
+      <p class="section-label mb-3">RSVP</p>
+      <h2 class="font-display text-4xl md:text-5xl font-light text-ink" data-i18n="rsvp.heading">
+        {t('rsvp.heading')}
+      </h2>
+      <div class="gold-divider mt-5 w-32 mx-auto"><span class="diamond"></span></div>
+      <p class="mt-5 text-sm text-ink opacity-65 leading-relaxed max-w-sm mx-auto">
+        <span data-i18n="rsvp.introBefore">{t('rsvp.introBefore')}</span>
+        {' '}
+        <strong class="font-medium text-text-rose" data-rsvp-deadline data-deadline-date={rsvp.deadlineDate}>
+          {deadline}
+        </strong>.
+        <br />
+        <span data-i18n="rsvp.introAfter">{t('rsvp.introAfter')}</span>
+      </p>
+    </div>
+
+    <div class="panel mt-10 p-5 sm:p-8 reveal rsvp-form-panel" style="transition-delay: 0.1s;">
+      <div id="rsvp-success">
+        <div class="floral-accent text-2xl mb-4" aria-hidden="true">✦ &nbsp; ✦ &nbsp; ✦</div>
+        <h3 class="font-display text-2xl font-light text-ink mb-2" data-i18n="rsvp.thankYou">{t('rsvp.thankYou')}</h3>
+        <p class="text-sm text-ink opacity-70" data-i18n="rsvp.received">{t('rsvp.received')}</p>
+      </div>
+
+      <p class="no-js-note" data-i18n="rsvp.noScript">{t('rsvp.noScript')}</p>
+
+      <form id="rsvp-form" class="space-y-5 rsvp-form" novalidate>
+        <div class="rsvp-primary-fields">
+          <div>
+            <label for="rsvp-name" class="section-label block mb-2" data-i18n="rsvp.fullName">{t('rsvp.fullName')}</label>
+            <input
+              id="rsvp-name"
+              type="text"
+              name="name"
+              required
+              maxlength={rsvp.maxNameLength}
+              autocomplete="name"
+              data-i18n-placeholder="rsvp.fullNamePlaceholder"
+              placeholder={t('rsvp.fullNamePlaceholder')}
+              class="form-input"
+            />
+          </div>
+
+          <div>
+            <label for="rsvp-guests" class="section-label block mb-2" data-i18n="rsvp.numberOfGuests">
+              {t('rsvp.numberOfGuests')}
+            </label>
+            <input
+              id="rsvp-guests"
+              type="number"
+              name="guests"
+              min={rsvp.minGuests}
+              max={rsvp.maxGuests}
+              step="1"
+              inputmode="numeric"
+              value={rsvp.minGuests}
+              class="form-input rsvp-guest-count"
+            />
+          </div>
+        </div>
+
+        <fieldset>
+          <legend class="section-label block mb-3" data-i18n="rsvp.attendance">{t('rsvp.attendance')}</legend>
+          <div class="flex gap-3 flex-wrap rsvp-attendance-options">
+            <div class="radio-card">
+              <input type="radio" id="att-yes" name="attendance" value="attending" checked />
+              <label for="att-yes" data-i18n="rsvp.accepts">{t('rsvp.accepts')}</label>
+            </div>
+            <div class="radio-card">
+              <input type="radio" id="att-no" name="attendance" value="not_attending" />
+              <label for="att-no" data-i18n="rsvp.declines">{t('rsvp.declines')}</label>
+            </div>
+          </div>
+        </fieldset>
+
+        <div>
+          <label for="rsvp-message" class="section-label block mb-2" data-i18n="rsvp.message">{t('rsvp.message')}</label>
+          <textarea
+            id="rsvp-message"
+            name="message"
+            rows="4"
+            maxlength={rsvp.maxMessageLength}
+            required
+            data-i18n-placeholder="rsvp.messagePlaceholder"
+            placeholder={t('rsvp.messagePlaceholder')}
+            class="form-input rsvp-message resize-y"></textarea>
+        </div>
+
+        <div class="pt-2 rsvp-submit-row">
+          <button type="submit" class="btn-submit">
+            <span data-rsvp-submit-label data-i18n="rsvp.send">{t('rsvp.send')}</span>
+          </button>
+        </div>
+
+        <p id="rsvp-feedback" class="rsvp-feedback" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+
+    <div class="rsvp-guestbook mt-10 reveal" style="transition-delay: 0.18s;">
+      <div class="text-center mb-6">
+        <p class="section-label mb-3" data-i18n="guestbook.label">{t('guestbook.label')}</p>
+        <h3 class="font-display text-3xl sm:text-4xl font-light text-ink" data-i18n="guestbook.heading">
+          {t('guestbook.heading')}
+        </h3>
+        <div class="gold-divider mt-4 w-24 mx-auto"><span class="diamond"></span></div>
+      </div>
+
+      <p
+        id="rsvp-guestbook-status"
+        class="rsvp-guestbook-status"
+        role="status"
+        aria-live="polite"
+        data-i18n="guestbook.loading"
+      >
+        {t('guestbook.loading')}
+      </p>
+
+      <p class="no-js-note" data-i18n="guestbook.noScript">{t('guestbook.noScript')}</p>
+
+      <!-- The list scrolls in place; the viewport owns the fade cue. -->
+      <div id="rsvp-entries-viewport" class="rsvp-entries-viewport">
+        <div
+          id="rsvp-entries"
+          class="rsvp-entries"
+          tabindex="0"
+          role="region"
+          aria-label={t('a11y.guestbookRegion')}
+          aria-live="polite"
+        >
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
