@@ -1,0 +1,8 @@
+services:
+  web:
+    environment:
+      RELEASE_ID: legacy-3215a01
+    volumes:
+      - ${LEGACY_DIR:?Set LEGACY_DIR}:/srv/site:ro
+  api:
+    image: aliva-rsvp:legacy-3215a01

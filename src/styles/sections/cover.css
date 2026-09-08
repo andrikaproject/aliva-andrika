@@ -218,6 +218,12 @@
 
 }
 
+@media (max-width: 47.99rem) {
+  .cover-ticket {
+    transform: translateX(-50%) translateY(-5.625rem);
+  }
+}
+
 @media (min-width: 48rem) {
   .cover-photo {
     width: 32rem;
@@ -353,4 +359,3 @@
   }
 
 }
-
