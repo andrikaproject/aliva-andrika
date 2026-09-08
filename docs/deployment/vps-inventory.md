@@ -19,7 +19,7 @@ sebelum perubahan. Rahasia, password, dan private key tidak dicatat di repositor
 | Versi aset setelah cutover | nama file Astro berhash isi, cache immutable | header respons |
 | Host | Ubuntu 24.04.4 LTS, Docker Engine 29.1.3, Compose 2.40.3 | SSH read-only |
 | Source lama | `/var/www/aliva-andrika`, branch `deploy/vps-live-20260823`, commit `3215a01` | Git read-only |
-| Source checkout setelah deploy | `/var/www/aliva-andrika`, branch `refactor-aliva-andrika`, commit `744906ed0a0e08bbd73d605c56ac20a12cdc1424` | Git read-only |
+| Source checkout setelah deploy | `/var/www/aliva-andrika`, branch `refactor-aliva-andrika`; runtime release `744906ed0a0e08bbd73d605c56ac20a12cdc1424` | Git read-only |
 | Proxy | `photobooth-caddy-1`, Caddy 2.11.4, port host 80/443 | Docker inspect |
 | API lama | `photobooth-rsvp-api-1`, internal port 4000, restart `unless-stopped` | Docker inspect |
 | Database RSVP | `/opt/apps/rsvp/data/rsvp.sqlite`, bind ke `/data`, SQLite WAL | Docker inspect |
