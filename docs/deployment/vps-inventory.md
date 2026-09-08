@@ -13,10 +13,13 @@ sebelum perubahan. Rahasia, password, dan private key tidak dicatat di repositor
 | TLS | aktif pada 443 | permintaan `https://` berhasil |
 | Kompresi | **tidak aktif** | `content-encoding` absen meski `Accept-Encoding` dikirim |
 | Cache | **tidak diatur** | `Cache-Control` absen; hanya `ETag` + `Last-Modified` |
-| Rilis terlayani | HTML `last-modified` 25 Agu 2026 13:40 GMT | header respons |
-| Versi aset | query string manual (`?v=20260825-css-min`), bukan hash isi | HTML produksi |
+| Rilis terlayani sebelum cutover | HTML `last-modified` 25 Agu 2026 13:40 GMT | header respons baseline |
+| Versi aset sebelum cutover | query string manual (`?v=20260825-css-min`), bukan hash isi | HTML baseline |
+| Rilis terlayani setelah cutover | header `X-Release: 744906ed0a0e08bbd73d605c56ac20a12cdc1424` | smoke test publik |
+| Versi aset setelah cutover | nama file Astro berhash isi, cache immutable | header respons |
 | Host | Ubuntu 24.04.4 LTS, Docker Engine 29.1.3, Compose 2.40.3 | SSH read-only |
 | Source lama | `/var/www/aliva-andrika`, branch `deploy/vps-live-20260823`, commit `3215a01` | Git read-only |
+| Source checkout setelah deploy | `/var/www/aliva-andrika`, branch `refactor-aliva-andrika`, commit `744906ed0a0e08bbd73d605c56ac20a12cdc1424` | Git read-only |
 | Proxy | `photobooth-caddy-1`, Caddy 2.11.4, port host 80/443 | Docker inspect |
 | API lama | `photobooth-rsvp-api-1`, internal port 4000, restart `unless-stopped` | Docker inspect |
 | Database RSVP | `/opt/apps/rsvp/data/rsvp.sqlite`, bind ke `/data`, SQLite WAL | Docker inspect |
@@ -39,6 +42,9 @@ membuktikan letak Caddy (host atau container), jumlah upstream, atau topologi ja
   `aliva-rsvp:legacy-3215a01`.
 - Backup konsisten berada di `/opt/apps/rsvp/backups` dan satu salinan privat berada di
   komputer operator. Backup rutin memakai systemd timer harian pukul 03:15 WIB.
+
+Konfigurasi aktif sudah divalidasi setelah reload Caddy. Container photobooth, Postgres, dan
+bot lain tetap berjalan; route domain wedding kini menuju alias `aliva-web` dan `aliva-api`.
 
 ## Topologi yang diterapkan
 

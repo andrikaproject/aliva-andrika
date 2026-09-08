@@ -12,9 +12,9 @@ Dasar keputusan: [audit Astro/Vue](2026-09-08-astro-vue-refactor-audit.md).
 - Satu undangan Andrika dan Aliva, dengan Astro static output, Tailwind compiled, dan TypeScript.
 - API Node + SQLite dipertahankan. Vue tidak menjadi dependensi pada rencana utama; dapat dievaluasi kemudian jika state RSVP berkembang.
 - Antislop diterapkan selama refactor, sesuai pilihan pengguna. Gunakan core yang sudah tersedia; rencana ini tidak memasang skill atau mengubah AGENTS.md.
-- Domain produksi: `andrika-aliva.my.id`, sudah aktif. Docker dikonfirmasi pengguna; Ubuntu 24.04 masih perlu diverifikasi di server.
+- Domain produksi: `andrika-aliva.my.id`, sudah aktif. Docker dan Ubuntu 24.04 diverifikasi pada host.
 - Desain dan perilaku produksi yang telah disepakati menjadi baseline. Fokusnya mempertahankan identitas undangan sambil memperbaiki struktur, keandalan, dan pengiriman aset.
-- Detail akses SSH, Compose aktif, lokasi volume, proxy, dan mekanisme rilis lama belum tersedia. Pengumpulan detail tersebut merupakan pekerjaan wajib Fase 0 sebelum menulis konfigurasi deployment final.
+- Detail SSH, Compose aktif, lokasi volume, proxy, dan mekanisme rilis lama dicatat pada inventaris VPS sebelum konfigurasi deployment dibuat.
 
 **Temuan produksi yang mengubah prioritas**
 
@@ -208,4 +208,7 @@ Refactor selesai setelah source modular dapat dibangun ulang dari lockfile, tamp
 - [Astro deployment](https://docs.astro.build/en/guides/deploy/): build dan deployment Astro.
 - [Sumber antislop yang digunakan](/Users/andrika/.agents/skills/antislop/SKILL.md): kualitas UI selama pelaksanaan.
 
-Dokumentasi Docker dan SQLite diperiksa langsung melalui HTTP pada sesi penyusunan. Referensi Astro/Tailwind beserta audit sumber lokal tersedia pada dokumen audit pendamping. Pemeriksaan publik domain hanya membaca halaman; akses SSH dan mutasi produksi belum dilakukan.
+Dokumentasi Docker dan SQLite diperiksa langsung, lalu konfigurasi aktual diverifikasi melalui
+SSH. Referensi Astro/Tailwind beserta audit sumber lokal tersedia pada dokumen audit pendamping.
+Pemeriksaan pascadeploy membaca domain dan API produksi tanpa POST sintetis; bukti tulis berasal
+dari database staging yang terisolasi.

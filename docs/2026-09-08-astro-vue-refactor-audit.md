@@ -169,7 +169,9 @@ Jalankan typecheck/build, tes terarah untuk kalkulasi countdown dan state RSVP/l
 - `node --check js/main.js` dan `node --check api/server.js` lulus pada Node v24.19.0.
 - API dijalankan lokal dengan database temporer: GET awal 200, POST valid 201, pengiriman berulang 429, attendance invalid 422, data terbaca kembali setelah restart. Database produksi tidak dipakai.
 - Uji IP header dan perbedaan parsing tanggal Jakarta/UTC seperti dijelaskan di atas.
-- Belum menjalankan audit visual browser, Lighthouse, atau pengukuran perangkat nyata. Konfigurasi deployment produksi dan target browser tamu belum tersedia.
+- Audit awal ini tidak memuat browser smoke test atau pengukuran perangkat nyata. Pemeriksaan
+  browser dan deployment lanjutan dicatat pada
+  [`docs/verification/2026-09-08-phase5-7-release.md`](verification/2026-09-08-phase5-7-release.md).
 - Working tree awal berisi perubahan aset milik pengguna; perubahan tersebut tidak disentuh oleh audit ini.
 
 **Referensi resmi yang diperiksa**
