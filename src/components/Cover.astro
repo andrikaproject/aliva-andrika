@@ -59,8 +59,15 @@ const t = (key: string) => translate(DEFAULT_LOCALE, key);
         <p data-i18n="cover.date">{t('cover.date')}</p>
       </div>
 
-      <!-- Filled from ?to= at runtime; stays out of the flow otherwise. -->
-      <p id="cover-guest" class="cover-ticket-guest hidden"></p>
+      <!--
+        Filled from ?to= at runtime. Hidden by attribute rather than by the
+        .hidden utility, because this element sets its own display and an
+        unlayered class would win over Tailwind's utility layer.
+      -->
+      <p id="cover-guest" class="cover-ticket-guest" hidden>
+        <span class="cover-ticket-guest__prefix" data-cover-guest-prefix></span>
+        <span class="cover-ticket-guest__name" data-cover-guest-name></span>
+      </p>
     </div>
 
     <button id="cover-btn" type="button" data-i18n="cover.openInvitation">

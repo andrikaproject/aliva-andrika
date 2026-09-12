@@ -34,6 +34,7 @@ npm run dev
 | Nama, orang tua, tanggal, jam acara, venue, Maps, rekening, alamat hadiah | `src/data/wedding.ts` |
 | Target countdown | `src/data/wedding.ts`, konstanta `countdownTarget` (wajib membawa offset `+07:00`) |
 | Teks Indonesia dan Inggris | `src/i18n/id.ts` dan `src/i18n/en.ts` |
+| Sapaan tamu pada tiket cover | `cover.guestGreetingPrefix` / `guestGreetingName`, dan pasangan `groupGreeting*` untuk `?type=group` |
 | Daftar foto galeri dan teks alt-nya | `src/data/gallery.ts` |
 | Warna, font, radius, bayangan | `src/styles/tokens.css` |
 | Tata letak satu bagian | `src/components/<Bagian>.astro` dan `src/styles/sections/<bagian>.css` |

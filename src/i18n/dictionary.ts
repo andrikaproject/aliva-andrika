@@ -20,8 +20,13 @@ export interface Dictionary {
     saveTheDate: string;
     date: string;
     openInvitation: string;
-    guestGreeting: string;
-    groupGuestGreeting: string;
+    /** Address line above the guest's name, e.g. "Kepada". */
+    guestGreetingPrefix: string;
+    /** The name line itself, with {name} filled from ?to=. */
+    guestGreetingName: string;
+    /** Used when ?type=group, for a family or an office. */
+    groupGreetingPrefix: string;
+    groupGreetingName: string;
   };
   hero: {
     celebration: string;

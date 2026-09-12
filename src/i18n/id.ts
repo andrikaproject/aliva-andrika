@@ -11,8 +11,10 @@ export const id: Dictionary = {
     saveTheDate: 'Tandai Tanggal Bahagia Kami',
     date: '17 Oktober 2026',
     openInvitation: 'Buka Undangan',
-    guestGreeting: 'Kepada {name} & Pasangan',
-    groupGuestGreeting: 'Kepada Yth. {name}',
+    guestGreetingPrefix: 'Kepada',
+    guestGreetingName: '{name} & Pasangan',
+    groupGreetingPrefix: 'Kepada Yth.',
+    groupGreetingName: '{name}',
   },
   hero: {
     celebration: 'PERAYAAN PERNIKAHAN / 2026',

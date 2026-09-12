@@ -26,8 +26,11 @@ export function onInvitationOpen(listener: OpenListener): void {
   openListeners.add(listener);
 }
 
-function renderGuestName(element: HTMLElement, name: string, key: string): void {
-  element.textContent = t(key, { name });
+function renderGuestName(element: HTMLElement, name: string, keys: { prefix: string; name: string }): void {
+  const prefix = element.querySelector<HTMLElement>('[data-cover-guest-prefix]');
+  const nameLine = element.querySelector<HTMLElement>('[data-cover-guest-name]');
+  if (prefix) prefix.textContent = t(keys.prefix);
+  if (nameLine) nameLine.textContent = t(keys.name, { name });
 }
 
 function buildTearClipPaths(width: number, height: number, tearY: number) {
@@ -65,11 +68,14 @@ export function initInvitation(prefersReducedMotion: boolean): void {
   const params = new URLSearchParams(window.location.search);
   const guestName = params.get('to');
   if (guestName && guestElement) {
-    const key = params.get('type')?.toLowerCase() === 'group' ? 'cover.groupGuestGreeting' : 'cover.guestGreeting';
-    const safeName = guestName.replace(/[<>]/g, '').slice(0, 60);
-    renderGuestName(guestElement, safeName, key);
-    guestElement.classList.remove('hidden');
-    onLocaleChange(() => renderGuestName(guestElement, safeName, key));
+    const group = params.get('type')?.toLowerCase() === 'group';
+    const keys = group
+      ? { prefix: 'cover.groupGreetingPrefix', name: 'cover.groupGreetingName' }
+      : { prefix: 'cover.guestGreetingPrefix', name: 'cover.guestGreetingName' };
+    const safeName = guestName.replace(/[<>]/g, '').trim().slice(0, 60);
+    renderGuestName(guestElement, safeName, keys);
+    guestElement.hidden = false;
+    onLocaleChange(() => renderGuestName(guestElement, safeName, keys));
   }
 
   function cloneTicket(modifier: string): HTMLElement {

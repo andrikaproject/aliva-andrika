@@ -153,13 +153,39 @@
   font-weight: 600;
 }
 
+/* Addressed like the date pair above it: a quiet label, then the name it is
+   really about. Both lines keep --color-text-rose, which measures 6.14:1 on
+   the ticket's muted ground, so the hierarchy comes from size and voice
+   rather than from fading one of them out. */
 .cover-ticket-guest {
+  display: flex;
   max-width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
   color: var(--color-text-rose);
-  font-family: var(--font-display);
-  font-size: 0.875rem;
-  font-style: italic;
   line-height: 1.3;
+}
+
+.cover-ticket-guest[hidden] {
+  display: none;
+}
+
+.cover-ticket-guest__prefix {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+
+/* Names arrive from a query string and can be one long run of characters,
+   so this line is allowed to break mid-word rather than widen the ticket. */
+.cover-ticket-guest__name {
+  max-width: 100%;
+  font-family: var(--font-display);
+  font-size: 0.9375rem;
+  font-style: italic;
+  font-weight: 500;
+  overflow-wrap: anywhere;
 }
 
 #cover-btn {

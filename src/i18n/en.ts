@@ -11,8 +11,10 @@ export const en: Dictionary = {
     saveTheDate: 'Save The Date!',
     date: '17 October 2026',
     openInvitation: 'Open Invitation',
-    guestGreeting: 'Dear {name} & Partner',
-    groupGuestGreeting: 'Dear {name}',
+    guestGreetingPrefix: 'Dear',
+    guestGreetingName: '{name} & Partner',
+    groupGreetingPrefix: 'Dear',
+    groupGreetingName: '{name}',
   },
   hero: {
     celebration: 'WEDDING CELEBRATION / 2026',
