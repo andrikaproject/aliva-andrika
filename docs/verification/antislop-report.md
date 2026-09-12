@@ -209,6 +209,27 @@ Yang **belum** diukur: LCP, INP, CLS pada perangkat nyata dan jaringan nyata, se
 Angka di atas adalah byte transfer, bukan Core Web Vitals. Keduanya belum diverifikasi dan
 tidak boleh diklaim lulus.
 
+## Addendum 12 September 2026 — ilustrasi cover
+
+Foto cover diganti ilustrasi pasangan atas permintaan pemilik acara, dan tata letaknya
+disusun ulang: ilustrasi kini berada pada band di atas kartu tiket, dengan tinggi band
+diturunkan dari posisi tiket sehingga tumpang-tindih tidak mungkin terjadi secara struktural.
+
+Diverifikasi ulang pada 320x568, 360x640, 375x667, 360x740, 390x844, 430x932, 768x1024,
+dan 1440x900: jarak ilustrasi ke tiket tetap 16 px di semua viewport, tidak ada yang
+tertimpa, dan tidak ada yang terpotong di tepi atas. Alur membuka undangan, hero, console,
+dan kontras tidak berubah statusnya.
+
+Transfer tampilan cover di mobile 390x844 turun lagi dari 811.315 B menjadi **634.862 B**,
+karena ilustrasi (87.627 B) jauh lebih ringan daripada foto yang digantikan (262.860 B).
+Angka "seluruh undangan" pada tabel di atas belum diukur ulang setelah perubahan ini.
+
+Catatan yang tetap terbuka: pada viewport dengan tinggi di bawah sekitar 660 px, band
+ilustrasi hanya sekitar 110 px sehingga gambarnya kecil. Ini konsekuensi tinggi tiket yang
+sudah tayang, bukan bug tata letak, dan memperbaikinya berarti mengubah proporsi tiket.
+Pada 1440x900 tiket menonjol 17 px di bawah viewport; kondisi ini sudah ada sebelum
+perubahan ini dan tidak membuat tombol menjadi tidak dapat diklik.
+
 ## Temuan terbuka
 
 **R-02 em dash — perlu keputusan pemilik acara.** Empat teks masih memuat `—`:

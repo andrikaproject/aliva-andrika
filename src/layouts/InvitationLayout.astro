@@ -1,7 +1,7 @@
 ---
 import { getImage } from 'astro:assets';
 
-import coverPhoto from '../../assets/cover/first-photo-01.webp';
+import coverPhoto from '../../assets/couple/animated-couple-cover.webp';
 import ogPhoto from '../../assets/couple/aliva-portrait.jpeg';
 import Cover from '../components/Cover.astro';
 import LanguageSwitcher from '../components/LanguageSwitcher.astro';
@@ -15,7 +15,7 @@ import '../styles/global.css';
  * in the head and handed to the cover as a custom property, so the preload
  * and the paint can never point at two different files.
  */
-const cover = await getImage({ src: coverPhoto, width: 1800, format: 'webp' });
+const cover = await getImage({ src: coverPhoto, width: 1000, format: 'webp' });
 
 /** Social previews need an absolute URL; a relative one shows no image. */
 const ogImage = await getImage({ src: ogPhoto, width: 1200, format: 'jpeg' });

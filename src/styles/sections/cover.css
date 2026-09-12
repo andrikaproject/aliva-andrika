@@ -4,6 +4,13 @@
 #cover-screen {
   --cover-surface: hsl(var(--secondary));
   --ticket-surface: hsl(var(--muted));
+
+  /* Where the ticket's top edge lands, and how far the phone layout lifts it.
+     The couple's band above is measured from these two, so the card can never
+     come to rest on top of the illustration. Overriding them per breakpoint
+     moves both pieces together. */
+  --cover-ticket-top: clamp(17.125rem, calc(35dvh + 3.125rem), 23.125rem);
+  --cover-ticket-lift: 0rem;
   overflow: hidden;
   min-height: 100vh;
   min-height: 100dvh;
@@ -16,21 +23,24 @@
   opacity 0.9s ease-out;
 }
 
+/* The couple, drawn, standing above the ticket.
+   The band is exactly the room between the top of the screen and the card,
+   and `contain` keeps the whole illustration inside it, so nothing is cropped
+   by the layout and nothing is covered. It is a cut-out on the parchment
+   rather than a photograph, so the old darkening gradient is gone; only the
+   bottom edge is feathered, because the artwork ends mid-batik and a hard
+   horizontal line would read as a mistake. */
 .cover-photo {
   position: absolute;
   z-index: 0;
-  top: clamp(-2.2rem, -36vw, -8.45rem);
+  top: 0;
   left: 50%;
-  width: min(100vw, 42rem);
-  aspect-ratio: 2 / 3;
+  width: min(100vw - 1.5rem, 26rem);
+  height: max(6rem, calc(var(--cover-ticket-top) - var(--cover-ticket-lift) - 1rem));
   transform: translateX(-50%);
-  background:
-  linear-gradient(180deg,
-  hsl(var(--secondary) / 0) 16%,
-  hsl(var(--foreground) / 0.2) 44%,
-  hsl(var(--secondary) / 0.72) 68%,
-  var(--cover-surface) 84%),
-  var(--cover-photo) center / cover no-repeat;
+  background: var(--cover-photo) bottom center / contain no-repeat;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 86%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 86%, transparent 100%);
 }
 
 .cover-ticket {
@@ -40,13 +50,13 @@
   --ticket-notch-y: calc(var(--ticket-padding) + 1.5625rem + var(--ticket-gap) + var(--ticket-photo-height) + var(--ticket-gap) + 0.09375rem);
   position: absolute;
   z-index: 1;
-  top: clamp(17.125rem, calc(35dvh + 3.125rem), 23.125rem);
+  top: var(--cover-ticket-top);
   left: 50%;
   isolation: isolate;
   display: flex;
   width: min(75.47vw, 17.6875rem);
   min-height: min(68.49dvh, 31.5rem);
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(calc(-1 * var(--cover-ticket-lift)));
   flex-direction: column;
   align-items: center;
   gap: var(--ticket-gap);
@@ -237,24 +247,20 @@
 }
 
 @media (max-height: 41rem) {
+  #cover-screen {
+    --cover-ticket-top: clamp(12.625rem, calc(26dvh + 3.125rem), 13.625rem);
+  }
+
   .cover-ticket {
     --ticket-gap: 1.2rem;
-    top: clamp(12.625rem, calc(26dvh + 3.125rem), 13.625rem);
   }
 
 }
 
 @media (max-width: 47.99rem) {
-  .cover-ticket {
-    transform: translateX(-50%) translateY(-5.625rem);
+  #cover-screen {
+    --cover-ticket-lift: 5.625rem;
   }
-}
-
-@media (min-width: 48rem) {
-  .cover-photo {
-    width: 32rem;
-  }
-
 }
 
 /* ── Ticket tear → full-screen opening transition ── */

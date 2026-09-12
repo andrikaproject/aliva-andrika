@@ -50,6 +50,33 @@ yang hanya ada di satu bahasa dan menolak markup yang menyelinap ke dalam kamus.
    lengkap dengan teks alt Indonesia dan Inggris yang menggambarkan isi foto.
 3. `npm run build`. Ukuran responsif dihasilkan otomatis; jangan menaruh foto konten di `public/`.
 
+## Ilustrasi cover
+
+Cover menampilkan ilustrasi pasangan di atas kartu tiket. Aturan tata letaknya:
+
+- `#cover-screen` memegang `--cover-ticket-top` dan `--cover-ticket-lift`, yaitu posisi tiket.
+- Tinggi band ilustrasi diturunkan dari kedua variabel itu, dikurangi jarak 1rem. Jadi
+  ilustrasi **tidak mungkin** tertimpa kartu; kalau posisi tiket digeser, band ikut menyesuaikan.
+- Ilustrasi memakai `background-size: contain` dan menempel ke bawah band, sehingga tidak pernah
+  terpotong oleh tata letak.
+
+Gambar yang dilayani adalah cut-out transparan hasil olahan dari sumber milik pasangan.
+Sumbernya `assets/couple/Animated-andrika.webp` (latar putih rata); hasilnya
+`assets/couple/animated-couple-cover.webp`. Untuk membuat ulang:
+
+```bash
+node tools/cut-out-cover-figure.mjs   assets/couple/Animated-andrika.webp   assets/couple/animated-couple-cover.webp 0.70
+```
+
+Argumen terakhir adalah bagian tinggi yang dipakai, dihitung dari atas. `0.70` menyisakan
+kedua wajah, batik, dan pucuk buket; nilai lebih kecil memperbesar wajah tetapi membuang buket.
+Skrip membanjiri alpha dari tepi gambar, bukan mengambang semua warna putih, sehingga kebaya,
+orkid, dan bagian mata tetap utuh.
+
+Pada viewport yang tingginya di bawah sekitar 660 px, tiket hampir mengisi layar dan band
+ilustrasi hanya tersisa sekitar 110 px. Ilustrasi tetap utuh, hanya kecil. Memperbesarnya di
+layar tersebut berarti mengurangi tinggi tiket, dan itu keputusan desain tersendiri.
+
 ## Font hero
 
 Hanya satu bobot Reflow Sans yang dipakai, dan yang dilayani adalah subset Latin.
