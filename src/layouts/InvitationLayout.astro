@@ -2,7 +2,7 @@
 import { getImage } from 'astro:assets';
 
 import coverPhoto from '../../assets/couple/animated-couple-cover.webp';
-import ogPhoto from '../../assets/couple/aliva-portrait.jpeg';
+import ogCard from '../../assets/social/og-card.jpg';
 import Cover from '../components/Cover.astro';
 import LanguageSwitcher from '../components/LanguageSwitcher.astro';
 import MusicPlayer from '../components/MusicPlayer.astro';
@@ -17,9 +17,14 @@ import '../styles/global.css';
  */
 const cover = await getImage({ src: coverPhoto, width: 1000, format: 'webp' });
 
-/** Social previews need an absolute URL; a relative one shows no image. */
-const ogImage = await getImage({ src: ogPhoto, width: 1200, format: 'jpeg' });
-const ogImageUrl = new URL(ogImage.src, site.url).href;
+/**
+ * Social previews need an absolute URL; a relative one shows no image.
+ *
+ * The card is already composed at 1200x630 by tools/build-og-card.mjs, so it
+ * is imported rather than run through getImage: re-encoding it here would
+ * only cost quality.
+ */
+const ogImageUrl = new URL(ogCard.src, site.url).href;
 const canonical = new URL(Astro.url.pathname, site.url).href;
 
 const locale = DEFAULT_LOCALE;
@@ -45,10 +50,13 @@ const locale = DEFAULT_LOCALE;
     <meta property="og:title" content={site.title} />
     <meta property="og:description" content={site.ogDescription} />
     <meta property="og:image" content={ogImageUrl} />
-    <meta property="og:image:width" content={String(ogImage.attributes.width ?? 1200)} />
-    <meta property="og:image:height" content={String(ogImage.attributes.height ?? 1200)} />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content={String(ogCard.width)} />
+    <meta property="og:image:height" content={String(ogCard.height)} />
+    <meta property="og:image:alt" content="Ilustrasi Andrika dan Aliva, dengan Aliva memegang buket pengantin" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content={ogImageUrl} />
+    <meta name="twitter:image:alt" content="Ilustrasi Andrika dan Aliva, dengan Aliva memegang buket pengantin" />
 
     <link rel="preload" href={cover.src} as="image" type="image/webp" fetchpriority="high" />
 

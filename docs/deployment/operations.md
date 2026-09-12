@@ -77,6 +77,33 @@ Pada viewport yang tingginya di bawah sekitar 660 px, tiket hampir mengisi layar
 ilustrasi hanya tersisa sekitar 110 px. Ilustrasi tetap utuh, hanya kecil. Memperbesarnya di
 layar tersebut berarti mengurangi tinggi tiket, dan itu keputusan desain tersendiri.
 
+## Gambar pratinjau tautan (WhatsApp, Telegram, Twitter)
+
+Yang dikirim sebagai `og:image` adalah `assets/social/og-card.jpg`, kartu 1200x630 berisi
+ilustrasi pasangan di atas kertas parchment. Untuk membuat ulang setelah ilustrasinya berubah:
+
+```bash
+node tools/build-og-card.mjs
+```
+
+Skrip memakai cut-out dari `tools/cut-out-cover-figure.mjs`, jadi tidak ada berkas perantara
+yang perlu dikomit. Alasan ukurannya dipilih demikian:
+
+- Layanan pratinjau menata kartu sekitar 1,91:1. Ilustrasi aslinya potret 1360x2228, sehingga
+  kalau dikirim apa adanya akan diberi bilah blur di samping oleh Telegram.
+- `CROP_FRACTION` 0,78 menyisakan wajah yang masih terbaca di daftar percakapan, sekaligus
+  tetap memuat batik dan buket. Figur penuh menyusut jadi sekitar 130 px pada kartu Telegram
+  nyata, terlalu kecil untuk dikenali.
+- Hasilnya 55 kB, jauh di bawah batas aman layanan pratinjau.
+
+Meta `og:image` memakai URL absolut. URL relatif membuat pratinjau tampil tanpa gambar sama
+sekali, dan itulah kondisi produksi sebelum refactor.
+
+**Setelah rilis, pratinjau lama masih tersimpan di cache** WhatsApp dan Telegram. Nama berkas
+mengandung hash isi, jadi tautan baru menunjuk berkas berbeda, tetapi layanan tersebut
+mencache per URL halaman. Untuk memaksa penyegaran, kirim tautan dengan query berbeda
+(misalnya `?to=`, yang memang sudah dipakai per tamu) atau gunakan alat debug milik platform.
+
 ## Font hero
 
 Hanya satu bobot Reflow Sans yang dipakai, dan yang dilayani adalah subset Latin.
