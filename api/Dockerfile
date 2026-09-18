@@ -5,6 +5,7 @@ WORKDIR /app
 COPY package.json ./
 COPY server.js ./
 COPY backup.cjs ./
+COPY invitation-admin.cjs ./
 
 RUN mkdir -p /data
 
