@@ -134,6 +134,7 @@ python3 -m fontTools.subset assets/fonts/ReflowSans-Bold.ttf \
 | `PORT` | `4000` | Port dengar. |
 | `DATABASE_PATH` | `/data/rsvp.sqlite` | Lokasi SQLite. Harus pada volume persisten. |
 | `TRUSTED_PROXY_HOPS` | `1` | Jumlah proxy di depan API. Nilai 1 berarti entri **terakhir** pada `X-Forwarded-For` dipercaya, yaitu yang ditulis Caddy. |
+| `INVITATION_ADMIN_CODE_HASH` | tidak ada | Verifier scrypt untuk kode akses dashboard privat. Wajib diisi pada deployment yang mengaktifkan `/guest-manager`; jangan menyimpan kode mentah. |
 
 `TRUSTED_PROXY_HOPS` harus cocok dengan rantai proxy sebenarnya. Terlalu besar membuat batas
 kirim dapat dilewati dengan header palsu; terlalu kecil membuat semua tamu berbagi satu jatah.
@@ -141,6 +142,26 @@ Nilai 0 mengabaikan header sepenuhnya dan hanya benar bila API dijangkau langsun
 
 `/healthz` menjalankan satu query ke SQLite, sehingga status 200 berarti database benar-benar
 menjawab, bukan sekadar proses hidup.
+
+### Dashboard pengelola undangan
+
+`/guest-manager` memakai sesi cookie server dan endpoint berikut. Semua endpoint selain login,
+logout, dan session memerlukan sesi yang valid.
+
+```text
+POST /api/invitation-admin/login
+POST /api/invitation-admin/logout
+GET  /api/invitation-admin/session
+GET/POST /api/invitation-admin/guests
+PATCH/DELETE /api/invitation-admin/guests/:id
+GET/POST /api/invitation-admin/titles
+GET /api/invitation-admin/settings
+PUT /api/invitation-admin/settings/message-template
+```
+
+Data tamu memakai tabel `invitation_*` dan tidak mengubah `guestbook_entries`. Smoke test
+produksi harus memakai database staging yang diberi penanda jelas. Jangan menambahkan tamu uji
+atau RSVP uji ke database produksi.
 
 ### Backup
 

@@ -13,8 +13,9 @@ export const id: Dictionary = {
     openInvitation: 'Buka Undangan',
     guestGreetingPrefix: 'Kepada',
     guestGreetingName: '{name} & Pasangan',
+    titledGreetingName: '{name} & Pasangan',
     groupGreetingPrefix: 'Kepada Yth.',
-    groupGreetingName: '{name}',
+    groupGreetingName: 'Keluarga Besar {name}',
   },
   hero: {
     celebration: 'PERAYAAN PERNIKAHAN / 2026',

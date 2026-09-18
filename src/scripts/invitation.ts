@@ -1,5 +1,6 @@
 import { playReliably } from './audio.ts';
 import { onLocaleChange, t } from './locale.ts';
+import { normalizeGroupName, normalizeTitles, sanitizeRecipientPart } from '../lib/invitation-recipient.ts';
 
 /** Long enough for the tear to finish before the cover leaves the DOM. */
 export const TEAR_DURATION_MS = 820;
@@ -26,7 +27,11 @@ export function onInvitationOpen(listener: OpenListener): void {
   openListeners.add(listener);
 }
 
-function renderGuestName(element: HTMLElement, name: string, keys: { prefix: string; name: string }): void {
+function renderGuestName(
+  element: HTMLElement,
+  name: string,
+  keys: { prefix: string; name: string },
+): void {
   const prefix = element.querySelector<HTMLElement>('[data-cover-guest-prefix]');
   const nameLine = element.querySelector<HTMLElement>('[data-cover-guest-name]');
   if (prefix) prefix.textContent = t(keys.prefix);
@@ -68,14 +73,18 @@ export function initInvitation(prefersReducedMotion: boolean): void {
   const params = new URLSearchParams(window.location.search);
   const guestName = params.get('to');
   if (guestName && guestElement) {
-    const group = params.get('type')?.toLowerCase() === 'group';
+    const type = params.get('type')?.toLowerCase();
+    const group = type === 'group';
+    const titled = type === 'titled';
     const keys = group
       ? { prefix: 'cover.groupGreetingPrefix', name: 'cover.groupGreetingName' }
-      : { prefix: 'cover.guestGreetingPrefix', name: 'cover.guestGreetingName' };
-    const safeName = guestName.replace(/[<>]/g, '').trim().slice(0, 60);
-    renderGuestName(guestElement, safeName, keys);
+      : { prefix: 'cover.guestGreetingPrefix', name: titled ? 'cover.titledGreetingName' : 'cover.guestGreetingName' };
+    const safeName = group ? normalizeGroupName(guestName) : sanitizeRecipientPart(guestName);
+    const safeTitles = normalizeTitles(params.getAll('title'));
+    const displayName = titled && safeTitles.length > 0 ? `${safeTitles.join(' ')} ${safeName}` : safeName;
+    renderGuestName(guestElement, displayName, keys);
     guestElement.hidden = false;
-    onLocaleChange(() => renderGuestName(guestElement, safeName, keys));
+    onLocaleChange(() => renderGuestName(guestElement, displayName, keys));
   }
 
   function cloneTicket(modifier: string): HTMLElement {

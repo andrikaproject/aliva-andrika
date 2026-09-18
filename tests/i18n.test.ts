@@ -31,7 +31,7 @@ test('interpolates named values and leaves the rest alone', () => {
   assert.equal(translate('id', 'cover.guestGreetingPrefix'), 'Kepada');
   assert.equal(translate('id', 'cover.guestGreetingName', { name: 'Budi' }), 'Budi & Pasangan');
   assert.equal(translate('en', 'cover.groupGreetingPrefix'), 'Dear');
-  assert.equal(translate('en', 'cover.groupGreetingName', { name: 'Keluarga Sari' }), 'Keluarga Sari');
+  assert.equal(translate('en', 'cover.groupGreetingName', { name: 'Keluarga Sari' }), 'The Keluarga Sari Family');
   assert.equal(translate('id', 'gallery.photoCount', { count: 13 }), '13 foto');
 });
 

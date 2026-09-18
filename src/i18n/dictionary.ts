@@ -24,6 +24,8 @@ export interface Dictionary {
     guestGreetingPrefix: string;
     /** The name line itself, with {name} filled from ?to=. */
     guestGreetingName: string;
+    /** The name line for Personal Bergelar, with {name} already title-prefixed. */
+    titledGreetingName: string;
     /** Used when ?type=group, for a family or an office. */
     groupGreetingPrefix: string;
     groupGreetingName: string;

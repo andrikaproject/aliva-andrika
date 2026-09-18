@@ -10,6 +10,7 @@ berisi path rilis dan database, bukan rahasia aplikasi.
 - Stack `aliva` memiliki `web` untuk file statis Astro dan `api` untuk Node + SQLite.
 - `web` dan `api` hanya terhubung ke network privat stack dan alias internal Caddy.
 - Database produksi berada di `/opt/apps/rsvp/data/rsvp.sqlite`. Jangan menaruhnya di web root.
+- Dashboard privat tersedia di `/guest-manager`. API menyimpan daftar tamu, gelar, template pesan, dan sesi pada database yang sama, tetapi memakai tabel yang terpisah dari guestbook.
 
 ## Rilis kandidat
 
@@ -52,9 +53,17 @@ mempertahankan entry, dan backup/restore menghasilkan integrity `ok`.
 3. Validasi Caddyfile dengan `docker exec photobooth-caddy-1 caddy validate`.
 4. Simpan Caddyfile lama di backup. Pasang `deploy/Caddyfile.edge` sebagai konfigurasi Caddy
    host, lalu reload Caddy tanpa mengganti volume data/config Caddy.
-5. Periksa `https://andrika-aliva.my.id/`, redirect HTTP, asset, font, audio, `?to=`, bahasa,
+5. Pastikan `INVITATION_ADMIN_CODE_HASH` sudah diisi pada `release.env` VPS. Nilainya adalah
+   verifier scrypt, bukan kode akses mentah. Buat verifier dengan perintah berikut di mesin
+   operator, lalu salin hasilnya secara privat ke file environment:
+
+   ```bash
+   node --input-type=commonjs -e 'const c=require("node:crypto");const code=process.argv[1];const salt=c.randomBytes(16);const digest=c.scryptSync(code,salt,32,{N:16384,r:8,p:1});console.log(`scrypt$16384$8$1$${salt.toString("base64url")}$${digest.toString("base64url")}`)' 'KODE_AKSES_RAHASIA'
+   ```
+
+6. Periksa `https://andrika-aliva.my.id/`, `/guest-manager`, redirect HTTP, asset, font, audio, `?to=`, bahasa,
    Maps, gift copy, RSVP read, dan log. Jangan membuat POST produksi sintetis.
-6. Pastikan container aplikasi photobooth, database Postgres, dan bot lain tetap berjalan.
+7. Pastikan container aplikasi photobooth, database Postgres, dan bot lain tetap berjalan.
 
 ## Rollback kode
 

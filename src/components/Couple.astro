@@ -58,11 +58,6 @@ const profiles = [
                 width={300}
                 height={450}
                 widths={[190, 300, 420, 600]}
-                {/* The circle is 88px on a phone and 112px on a desktop, but
-                    CSS magnifies the illustration about 2x to bring the face
-                    up, and the browser cannot see a transform. These sizes
-                    describe the painted result, not the frame, so a sharp
-                    enough candidate gets chosen. */}
                 sizes="(min-width: 768px) 250px, 190px"
                 loading="lazy"
               />

@@ -13,8 +13,9 @@ export const en: Dictionary = {
     openInvitation: 'Open Invitation',
     guestGreetingPrefix: 'Dear',
     guestGreetingName: '{name} & Partner',
+    titledGreetingName: '{name} & Partner',
     groupGreetingPrefix: 'Dear',
-    groupGreetingName: '{name}',
+    groupGreetingName: 'The {name} Family',
   },
   hero: {
     celebration: 'WEDDING CELEBRATION / 2026',

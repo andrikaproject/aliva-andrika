@@ -4,6 +4,7 @@ const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 const { DatabaseSync } = require('node:sqlite');
+const { ADMIN_PREFIX, createInvitationAdmin } = require('./invitation-admin.cjs');
 
 const PORT = Number(process.env.PORT || 4000);
 const DATABASE_PATH = process.env.DATABASE_PATH || '/data/rsvp.sqlite';
@@ -53,6 +54,15 @@ const insertEntry = db.prepare(`
   INSERT INTO guestbook_entries (name, message, attendance, guests, created_at)
   VALUES (?, ?, ?, ?, ?)
 `);
+
+const invitationAdmin = createInvitationAdmin({
+  db,
+  readJson,
+  sendJson,
+  sendError,
+  sendEmpty,
+  getClientKey,
+});
 
 const rateLimit = new Map();
 
@@ -256,6 +266,11 @@ const server = http.createServer({
 
     if (requestUrl.pathname === '/api/guestbook') {
       await handleGuestbook(request, response);
+      return;
+    }
+
+    if (requestUrl.pathname === ADMIN_PREFIX || requestUrl.pathname.startsWith(`${ADMIN_PREFIX}/`)) {
+      await invitationAdmin.handle(request, response, requestUrl);
       return;
     }
 

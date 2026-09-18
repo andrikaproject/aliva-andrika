@@ -1,0 +1,180 @@
+---
+import { site } from '../data/wedding.ts';
+import '../styles/guest-manager.css';
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content={site.themeColor} />
+    <title>Pengelola Undangan | Andrika &amp; Aliva</title>
+  </head>
+  <body class="guest-manager-page">
+    <main id="guest-manager-app" data-invitation-base-url={site.url}>
+      <section id="guest-login-panel" class="gm-auth-panel" aria-labelledby="login-heading">
+        <p class="gm-eyebrow">Andrika &amp; Aliva</p>
+        <h1 id="login-heading">Pengelola Undangan</h1>
+        <p class="gm-lead">Masukkan kode akses bersama untuk melihat dan memperbarui daftar tamu.</p>
+        <form id="guest-login-form" class="gm-form" novalidate>
+          <label class="gm-label" for="access-code">Kode akses</label>
+          <input id="access-code" class="gm-input" name="code" type="password" autocomplete="current-password" required />
+          <p id="login-error" class="gm-error" role="alert" hidden></p>
+          <button class="gm-button gm-button--primary" type="submit">Buka Pengelola Undangan</button>
+        </form>
+      </section>
+
+      <section id="guest-dashboard" hidden aria-labelledby="dashboard-heading">
+        <header class="gm-header">
+          <div>
+            <p class="gm-eyebrow">Andrika &amp; Aliva</p>
+            <h1 id="dashboard-heading">Daftar Undangan</h1>
+            <p class="gm-subtitle">Cari nama, salin pesan, lalu tandai saat sudah dikirim.</p>
+          </div>
+          <div class="gm-header-actions">
+            <button id="template-button" class="gm-button gm-button--quiet" type="button">Template Pesan</button>
+            <button id="logout-button" class="gm-button gm-button--quiet" type="button">Keluar</button>
+            <button id="add-guest-button" class="gm-button gm-button--primary" type="button">Tambah Tamu</button>
+          </div>
+        </header>
+
+        <div class="gm-toolbar" aria-label="Penyaringan daftar tamu">
+          <label class="gm-search-label" for="guest-search">
+            <span class="sr-only">Cari nama tamu</span>
+            <input id="guest-search" class="gm-input" type="search" placeholder="Cari nama tamu" autocomplete="off" />
+          </label>
+          <label class="sr-only" for="guest-category-filter">Kategori</label>
+          <select id="guest-category-filter" class="gm-input gm-select">
+            <option value="">Semua kategori</option>
+            <option value="personal">Personal</option>
+            <option value="group">Group</option>
+            <option value="titled">Personal Bergelar</option>
+          </select>
+          <label class="sr-only" for="guest-status-filter">Status</label>
+          <select id="guest-status-filter" class="gm-input gm-select">
+            <option value="">Semua status</option>
+            <option value="pending">Belum dikirim</option>
+            <option value="copied">Sudah disalin</option>
+            <option value="sent">Sudah dikirim</option>
+          </select>
+          <button id="refresh-guests-button" class="gm-button gm-button--quiet" type="button">Muat ulang</button>
+        </div>
+
+        <nav id="guest-group-tabs" class="gm-tabs" aria-label="Kelompok tamu">
+          <button class="gm-tab is-active" type="button" data-group="">Semua</button>
+          <button class="gm-tab" type="button" data-group="friend_andrika">Teman Andrika</button>
+          <button class="gm-tab" type="button" data-group="friend_aliva">Teman Aliva</button>
+          <button class="gm-tab" type="button" data-group="parent_friend_andrika">Teman Orang Tua Andrika</button>
+          <button class="gm-tab" type="button" data-group="parent_friend_aliva">Teman Orang Tua Aliva</button>
+        </nav>
+
+        <div class="gm-list-heading">
+          <p id="guest-count" class="gm-count" aria-live="polite"></p>
+        </div>
+        <div id="guest-list-status" class="gm-state" role="status" aria-live="polite"></div>
+        <ul id="guest-list" class="gm-list" aria-label="Daftar tamu"></ul>
+      </section>
+    </main>
+
+    <dialog id="guest-dialog" class="gm-dialog" aria-labelledby="guest-dialog-heading">
+      <form id="guest-form" class="gm-dialog-form" novalidate>
+        <div class="gm-dialog-header">
+          <div>
+            <p class="gm-eyebrow">Data tamu</p>
+            <h2 id="guest-dialog-heading">Tambah Tamu</h2>
+          </div>
+          <button class="gm-icon-button" type="button" data-close-dialog="guest-dialog" aria-label="Tutup form">×</button>
+        </div>
+        <input id="guest-id" type="hidden" />
+        <input id="guest-version" type="hidden" />
+        <div class="gm-form-grid">
+          <div class="gm-field gm-field--wide">
+            <label class="gm-label" for="guest-name">Nama yang diundang</label>
+            <input id="guest-name" class="gm-input" name="name" maxlength="60" required />
+          </div>
+          <div class="gm-field">
+            <label class="gm-label" for="guest-category">Kategori</label>
+            <select id="guest-category" class="gm-input gm-select" name="category" required>
+              <option value="personal">Personal</option>
+              <option value="group">Group</option>
+              <option value="titled">Personal Bergelar</option>
+            </select>
+          </div>
+          <div class="gm-field">
+            <label class="gm-label" for="guest-group">Kelompok tamu</label>
+            <select id="guest-group" class="gm-input gm-select" name="relationship_group" required>
+              <option value="friend_andrika">Teman Andrika</option>
+              <option value="friend_aliva">Teman Aliva</option>
+              <option value="parent_friend_andrika">Teman Orang Tua Andrika</option>
+              <option value="parent_friend_aliva">Teman Orang Tua Aliva</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="title-controls" class="gm-title-controls" hidden>
+          <label class="gm-label" for="title-picker">Gelar</label>
+          <div class="gm-title-picker">
+            <select id="title-picker" class="gm-input gm-select">
+              <option value="">Pilih gelar</option>
+            </select>
+            <button id="add-custom-title-button" class="gm-button gm-button--quiet" type="button">Tambah manual</button>
+          </div>
+          <div id="custom-title-row" class="gm-custom-title-row" hidden>
+            <label class="sr-only" for="custom-title">Gelar manual</label>
+            <input id="custom-title" class="gm-input" maxlength="32" placeholder="Contoh: H." />
+            <button id="save-custom-title-button" class="gm-button gm-button--quiet" type="button">Simpan gelar</button>
+          </div>
+          <div id="selected-titles" class="gm-selected-titles" aria-live="polite"></div>
+          <p class="gm-help">Urutan gelar dapat diubah sebelum disimpan.</p>
+        </div>
+
+        <div class="gm-field">
+          <label class="gm-label" for="guest-status">Status pengiriman</label>
+          <select id="guest-status" class="gm-input gm-select" name="status">
+            <option value="pending">Belum dikirim</option>
+            <option value="copied">Sudah disalin</option>
+            <option value="sent">Sudah dikirim</option>
+          </select>
+        </div>
+
+        <div class="gm-preview" aria-live="polite">
+          <span class="gm-preview-label">Pratinjau di undangan</span>
+          <strong id="guest-preview-name">Nama tamu</strong>
+          <code id="guest-preview-url"></code>
+        </div>
+        <p id="guest-form-error" class="gm-error" role="alert" hidden></p>
+        <div class="gm-dialog-actions">
+          <button class="gm-button gm-button--quiet" type="button" data-close-dialog="guest-dialog">Batal</button>
+          <button class="gm-button gm-button--primary" type="submit">Simpan Tamu</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="template-dialog" class="gm-dialog" aria-labelledby="template-dialog-heading">
+      <form id="template-form" class="gm-dialog-form" novalidate>
+        <div class="gm-dialog-header">
+          <div>
+            <p class="gm-eyebrow">Satu template untuk semua kategori</p>
+            <h2 id="template-dialog-heading">Template Pesan</h2>
+          </div>
+          <button class="gm-icon-button" type="button" data-close-dialog="template-dialog" aria-label="Tutup template">×</button>
+        </div>
+        <p class="gm-help">Gunakan <code>{'{{nama_tamu}}'}</code> dan <code>{'{{link_undangan}}'}</code>. Pesan belum dapat disalin sebelum kedua placeholder tersedia.</p>
+        <label class="gm-label" for="message-template">Pesan formal</label>
+        <textarea id="message-template" class="gm-input gm-textarea" rows="12" maxlength="8000"></textarea>
+        <p id="template-form-error" class="gm-error" role="alert" hidden></p>
+        <div class="gm-dialog-actions">
+          <button class="gm-button gm-button--quiet" type="button" data-close-dialog="template-dialog">Batal</button>
+          <button class="gm-button gm-button--primary" type="submit">Simpan Template</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div id="gm-toast" class="gm-toast" role="status" aria-live="polite" hidden></div>
+    <script>
+      import '../scripts/guest-manager.ts';
+    </script>
+  </body>
+</html>

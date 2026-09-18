@@ -34,6 +34,7 @@ services:
       PORT: "4000"
       DATABASE_PATH: /data/rsvp.sqlite
       TRUSTED_PROXY_HOPS: "1"
+      INVITATION_ADMIN_CODE_HASH: ${INVITATION_ADMIN_CODE_HASH:?Set INVITATION_ADMIN_CODE_HASH}
     volumes:
       - ${DATA_DIR:?Set DATA_DIR}:/data
     expose: ["4000"]
