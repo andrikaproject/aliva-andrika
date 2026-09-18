@@ -96,9 +96,10 @@ export const music = {
 
 export const site = {
   url: 'https://andrika-aliva.my.id',
-  title: 'Andrika & Aliva — Wedding Invitation',
+  title: 'Undangan Pernikahan Andrika & Aliva',
   description:
-    'Andrika & Aliva are getting married on 17 October 2026 in Bandung. You are warmly invited to celebrate our day.',
-  ogDescription: '17 October 2026 · V Hotel & Residence, Bandung. Join us as we celebrate our wedding day.',
+    'Tanpa mengurangi rasa hormat, kami mengundang Bapak/Ibu/Saudara/i untuk hadir dan memberikan doa restu pada pernikahan Andrika dan Aliva, 17 Oktober 2026 di V Hotel & Residence, Bandung.',
+  ogDescription:
+    'Tanpa mengurangi rasa hormat, kami mengundang Bapak/Ibu/Saudara/i untuk hadir dan memberikan doa restu pada pernikahan Andrika dan Aliva, 17 Oktober 2026 di V Hotel & Residence, Bandung.',
   themeColor: '#F5EFE4',
 } as const;

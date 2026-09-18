@@ -5,6 +5,7 @@ import couplePortrait from '../../assets/hero/couple-portrait1.webp';
 import gardenCrop from '../../assets/hero/hero-section-aliva-text.jpg';
 import handsCrop from '../../assets/hero/hands-celebration.png';
 import stageCrop from '../../assets/pict/Pre-wedd-Gredding/DSC00479_4_11zon.webp';
+import logo from '../../assets/brand/andrika-aliva0logo.svg';
 import { couple, weddingDay } from '../data/wedding.ts';
 import { DEFAULT_LOCALE, translate } from '../i18n/index.ts';
 
@@ -43,7 +44,11 @@ const crop = (key: keyof typeof CROPS, image: { width: number; height: number })
 <section id="hero" aria-labelledby="hero-title">
   <div class="hero-content">
     <header class="hero-masthead">
-      <p>{couple.groom.firstName.toUpperCase()} &amp; {couple.bride.firstName.toUpperCase()}</p>
+      <img
+        class="hero-masthead__logo"
+        src={logo.src}
+        alt={`${couple.groom.firstName} & ${couple.bride.firstName}`}
+      />
       <p data-i18n="hero.celebration">{t('hero.celebration')}</p>
     </header>
 

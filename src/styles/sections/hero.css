@@ -40,6 +40,13 @@
   white-space: nowrap;
 }
 
+.hero-masthead__logo {
+  display: block;
+  width: clamp(5.25rem, 8vw, 7.25rem);
+  height: auto;
+  filter: brightness(0) saturate(100%) invert(31%) sepia(8%) saturate(798%) hue-rotate(337deg) brightness(91%) contrast(86%);
+}
+
 .hero-statement-wrap {
   display: flex;
   flex-direction: column;
@@ -324,10 +331,6 @@ html[lang="id"] .hero-line--names>span {
     align-items: flex-start;
   }
 
-  .hero-masthead p:first-child {
-    max-width: 9rem;
-  }
-
   .hero-masthead p:last-child {
     max-width: 12rem;
     white-space: normal;
@@ -368,4 +371,3 @@ html[lang="id"] .hero-line--names>span {
   }
 
 }
-

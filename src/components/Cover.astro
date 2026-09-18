@@ -18,7 +18,7 @@ const t = (key: string) => translate(DEFAULT_LOCALE, key);
 <div id="cover-screen" class="fixed inset-0 z-[70] text-center">
   <div class="cover-photo" style={`--cover-photo: url("${photoUrl}")`} aria-hidden="true"></div>
 
-  <article class="cover-ticket" aria-label={`${couple.groom.firstName} & ${couple.bride.firstName} — ${t('cover.title')}`}>
+  <article class="cover-ticket" aria-label={`${couple.groom.firstName} & ${couple.bride.firstName}, ${t('cover.title')}`}>
     <header class="cover-ticket-header">
       <p data-i18n="cover.title">{t('cover.title')}</p>
     </header>

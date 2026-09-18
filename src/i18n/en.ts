@@ -31,15 +31,15 @@ export const en: Dictionary = {
       '“And among His signs is that He created for you mates from among yourselves, that you may find tranquility in them; and He placed between you affection and mercy. Indeed in that are signs for a people who give thought.”',
   },
   couple: {
-    heading: 'Two Hearts, One Story',
-    intro: 'Meet the two people at the heart of this celebration.',
+    heading: 'The Couple',
+    intro: 'Allow us to introduce the bride and groom.',
     theGroom: 'The Groom',
     theBride: 'The Bride',
     groomParents: 'Son of Mr. Dodi Suwardi & Mrs. Sari Yagustiarini.',
-    groomNote: 'A dreamer, a builder, and above all — a devoted partner.',
+    groomNote: 'He will marry Nur Aliva Ike Purwati.',
     brideParents: 'Daughter of Mr. Triyono & Mrs. Rinarsih.',
-    brideNote: 'Full of grace, laughter, and an unwavering spirit of love.',
-    quote: '“They found in each other not just a partner, but a home.”',
+    brideNote: 'She will marry Andrika Zainal Ibrahim.',
+    quote: 'With respect, we ask for your prayers and blessing for our marriage on Saturday, 17 October 2026.',
   },
   date: {
     label: 'The Date',
@@ -90,7 +90,7 @@ export const en: Dictionary = {
     errorAttendance: 'Please choose whether you can attend.',
     errorOffline: 'The connection dropped. What you typed is still on this page.',
     retry: 'Try again',
-    noScript: 'The RSVP form needs JavaScript. Please enable it, or simply let us know over WhatsApp.',
+    noScript: 'The RSVP form requires JavaScript. Please enable JavaScript to submit your response.',
   },
   guestbook: {
     label: 'Guestbook',
@@ -118,9 +118,9 @@ export const en: Dictionary = {
     deliveryHeading: 'Send a gift to this address',
   },
   gallery: {
-    label: 'Our Story',
-    heading: 'Our story in frames',
-    intro: 'A few moments from before the day itself — from wandering together to portraits in the studio.',
+    label: 'Engagement',
+    heading: 'Our Engagement Day',
+    intro: 'Photographs from our engagement day with our families, before our wedding on 17 October 2026.',
     photoCount: '{count} photos',
   },
   music: {
@@ -129,7 +129,7 @@ export const en: Dictionary = {
   },
   footer: {
     quote: '“The best thing to hold onto in life is each other.”',
-    quoteAuthor: '— Audrey Hepburn',
-    madeWith: 'Made with love · 2026',
+    quoteAuthor: 'Audrey Hepburn',
+    madeWith: 'Made by Andrika with all my heart for Aliva and our shared project: this marriage · 2026',
   },
 };

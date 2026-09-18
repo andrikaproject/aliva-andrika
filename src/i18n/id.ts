@@ -31,15 +31,15 @@ export const id: Dictionary = {
       '“Dan di antara tanda-tanda kebesaran-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri, agar kamu cenderung dan merasa tenteram kepadanya, dan Dia menjadikan di antaramu rasa kasih dan sayang. Sungguh, pada yang demikian itu benar-benar terdapat tanda-tanda bagi kaum yang berpikir.”',
   },
   couple: {
-    heading: 'Dua Hati, Satu Cerita',
-    intro: 'Kenali dua insan di balik perayaan ini.',
+    heading: 'Kedua Mempelai',
+    intro: 'Perkenankan kami memperkenalkan kedua mempelai.',
     theGroom: 'Mempelai Pria',
     theBride: 'Mempelai Wanita',
-    groomParents: 'Putra Bapak Dodi Suwardi & Ibu Sari Yagustiarini.',
-    groomNote: 'Seorang pemimpi, pembangun, dan terutama — pasangan yang setia.',
-    brideParents: 'Putri Bapak Triyono & Ibu Rinarsih.',
-    brideNote: 'Penuh kelembutan, tawa, dan cinta yang tak tergoyahkan.',
-    quote: '“Mereka menemukan satu sama lain bukan hanya sebagai pasangan, tetapi juga sebagai rumah.”',
+    groomParents: 'Putra dari Bapak Dodi Suwardi dan Ibu Sari Yagustiarini.',
+    groomNote: 'Akan menikah dengan Nur Aliva Ike Purwati.',
+    brideParents: 'Putri dari Bapak Triyono dan Ibu Rinarsih.',
+    brideNote: 'Akan menikah dengan Andrika Zainal Ibrahim.',
+    quote: 'Dengan penuh hormat, kami memohon doa restu untuk pernikahan kami pada Sabtu, 17 Oktober 2026.',
   },
   date: {
     label: 'Tanggal',
@@ -90,7 +90,7 @@ export const id: Dictionary = {
     errorAttendance: 'Pilihan kehadiran belum dipilih.',
     errorOffline: 'Koneksi terputus. Isian Anda masih tersimpan di halaman ini.',
     retry: 'Coba lagi',
-    noScript: 'Formulir RSVP memerlukan JavaScript. Silakan aktifkan, atau kabari kami langsung lewat WhatsApp.',
+    noScript: 'Formulir RSVP memerlukan JavaScript. Silakan aktifkan JavaScript untuk mengirim konfirmasi kehadiran.',
   },
   guestbook: {
     label: 'Ucapan',
@@ -119,9 +119,9 @@ export const id: Dictionary = {
     deliveryHeading: 'Kirim hadiah ke alamat berikut',
   },
   gallery: {
-    label: 'Kisah Kami',
-    heading: 'Kisah kami dalam bingkai',
-    intro: 'Sekelumit perjalanan kami sebelum hari itu tiba — dari jalan-jalan berdua sampai potret di studio.',
+    label: 'Lamaran',
+    heading: 'Hari Lamaran Kami',
+    intro: 'Dokumentasi hari lamaran kami bersama keluarga, sebelum kami melangsungkan pernikahan pada 17 Oktober 2026.',
     photoCount: '{count} foto',
   },
   music: {
@@ -130,7 +130,7 @@ export const id: Dictionary = {
   },
   footer: {
     quote: '“Hal terbaik untuk dipertahankan dalam hidup adalah satu sama lain.”',
-    quoteAuthor: '— Audrey Hepburn',
-    madeWith: 'Dibuat dengan cinta · 2026',
+    quoteAuthor: 'Audrey Hepburn',
+    madeWith: 'Dibuat oleh Andrika dengan sepenuh hati untuk Aliva dan proyek besar kami: pernikahan ini · 2026',
   },
 };
