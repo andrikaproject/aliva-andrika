@@ -206,6 +206,14 @@
     padding: 1.35rem;
   }
 
+  /* Same width as the strip above it; tracking tightened so the label
+     holds one line down to a 320px screen. */
+  #when .when-calendar__add {
+    width: 100%;
+    padding-inline: 0.75rem;
+    letter-spacing: 0.16em;
+  }
+
 }
 
 
@@ -224,4 +232,35 @@
   border: 2px solid hsl(var(--destructive));
   border-radius: 9999px;
   box-shadow: 0 0 0 3px hsl(var(--destructive) / 0.12);
+}
+
+/* Save-to-calendar link under the strip. A secondary action, so it stays
+   outlined at rest; hover fills with the ink/gold pair the countdown uses
+   rather than white on gold, which fails AA. */
+#when .when-calendar__add {
+  border: 1px solid hsl(var(--accent));
+  border-radius: 1rem;
+  background: hsl(var(--card));
+  box-shadow: var(--ds-shadow-sm);
+  white-space: nowrap;
+  transition:
+    background-color var(--duration-base) var(--ease-default),
+    border-color var(--duration-base) var(--ease-default),
+    color var(--duration-base) var(--ease-default),
+    transform var(--duration-base) var(--ease-default);
+}
+
+#when .when-calendar__add:hover {
+  border-color: hsl(var(--primary));
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+#when .when-calendar__add:focus-visible {
+  border-radius: 1rem;
+  box-shadow: var(--ds-shadow-gold);
+}
+
+#when .when-calendar__add:active {
+  transform: translateY(1px) scale(0.99);
 }

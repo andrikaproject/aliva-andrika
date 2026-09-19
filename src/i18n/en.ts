@@ -55,6 +55,9 @@ export const en: Dictionary = {
     minutes: 'Minutes',
     seconds: 'Seconds',
     fullDate: 'Saturday, 17 October 2026',
+    addToCalendar: 'Add to Google Calendar',
+    calendarTitle: 'The Wedding of Andrika & Aliva',
+    calendarInvitation: 'Invitation',
   },
   venue: {
     label: 'Venue',

@@ -67,6 +67,9 @@ export interface Dictionary {
     minutes: string;
     seconds: string;
     fullDate: string;
+    addToCalendar: string;
+    calendarTitle: string;
+    calendarInvitation: string;
   };
   venue: {
     label: string;

@@ -68,6 +68,11 @@ function paint(locale: Locale): void {
     if (alt) image.alt = alt;
   });
 
+  document.querySelectorAll<HTMLAnchorElement>('a[data-href-id][data-href-en]').forEach((link) => {
+    const href = locale === 'id' ? link.dataset.hrefId : link.dataset.hrefEn;
+    if (href) link.href = href;
+  });
+
   document.querySelectorAll<HTMLElement>('[data-rsvp-deadline][data-deadline-date]').forEach((element) => {
     const iso = element.dataset.deadlineDate;
     if (!iso) return;

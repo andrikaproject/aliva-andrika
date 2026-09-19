@@ -55,6 +55,16 @@ export const ceremonies = [
 ] as const;
 
 /**
+ * The block a guest saves to their calendar: from the first time printed on
+ * the ceremony cards to the last, so one entry covers akad and resepsi.
+ */
+export const calendarEvent = {
+  start: `${weddingDay.date}T07:00:00${TIMEZONE_OFFSET}`,
+  end: `${weddingDay.date}T14:00:00${TIMEZONE_OFFSET}`,
+  timeZone: 'Asia/Jakarta',
+} as const;
+
+/**
  * Running order beside the venue card. `nameKey` points at the dictionary;
  * entries with a literal `name` are proper nouns that stay in Indonesian.
  */

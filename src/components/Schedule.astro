@@ -1,8 +1,25 @@
 ---
-import { ceremonies, venue, weddingDay } from '../data/wedding.ts';
+import { calendarEvent, ceremonies, site, venue, weddingDay } from '../data/wedding.ts';
+import type { Locale } from '../i18n/index.ts';
 import { DEFAULT_LOCALE, translate } from '../i18n/index.ts';
+import { googleCalendarUrl } from '../lib/google-calendar.ts';
 
 const t = (key: string) => translate(DEFAULT_LOCALE, key);
+
+// Built once per locale at build time, so the link works without JavaScript
+// and the language switch only has to swap an attribute.
+const calendarHref = (locale: Locale) =>
+  googleCalendarUrl({
+    title: translate(locale, 'date.calendarTitle'),
+    ...calendarEvent,
+    details: [
+      ...ceremonies.map((ceremony) => `${ceremony.name}: ${ceremony.time}`),
+      `${venue.hall}, ${venue.name}`,
+      '',
+      `${translate(locale, 'date.calendarInvitation')}: ${site.url}`,
+    ].join('\n'),
+    location: [venue.name, ...venue.addressLines].join(', '),
+  });
 
 const days = [
   { number: weddingDay.calendar.previous, labelKey: 'date.friday', active: false },
@@ -55,6 +72,33 @@ const units = ['days', 'hours', 'minutes', 'seconds'] as const;
           ))
         }
       </div>
+
+      <a
+        href={calendarHref(DEFAULT_LOCALE)}
+        data-href-id={calendarHref('id')}
+        data-href-en={calendarHref('en')}
+        target="_blank"
+        rel="noopener"
+        class="mt-6 mx-auto flex w-fit min-h-11 items-center justify-center gap-2.5 section-label px-5 py-3 when-calendar__add"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-4 h-4 shrink-0"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="1.75"
+          aria-hidden="true"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M8 3v3m8-3v3M4.5 9.5h15M6 5h12a1.5 1.5 0 011.5 1.5v12A1.5 1.5 0 0118 20H6a1.5 1.5 0 01-1.5-1.5v-12A1.5 1.5 0 016 5z"
+          ></path>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 12.25v4.5m-2.25-2.25h4.5"></path>
+        </svg>
+        <span data-i18n="date.addToCalendar">{t('date.addToCalendar')}</span>
+      </a>
     </div>
 
     <div class="mt-10 reveal when-countdown" style="transition-delay: 0.1s;">

@@ -55,6 +55,9 @@ export const id: Dictionary = {
     minutes: 'Menit',
     seconds: 'Detik',
     fullDate: 'Sabtu, 17 Oktober 2026',
+    addToCalendar: 'Simpan ke Google Calendar',
+    calendarTitle: 'Pernikahan Andrika & Aliva',
+    calendarInvitation: 'Undangan',
   },
   venue: {
     label: 'Lokasi',
