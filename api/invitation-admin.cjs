@@ -13,6 +13,14 @@ const LOGIN_WINDOW_MS = 5 * 60_000;
 const LOGIN_MAX_ATTEMPTS = 8;
 
 const CATEGORIES = new Set(['personal', 'group', 'titled']);
+// How many people each wording style names; two-name styles need both.
+const WORDING_STYLES = new Map([
+  ['default', 0],
+  ['ibu_family', 1],
+  ['bapak_family', 1],
+  ['ibu_bapak_family', 2],
+  ['bapak_ibu_family', 2],
+]);
 const GROUPS = new Set(['friend_andrika', 'friend_aliva', 'parent_friend_andrika', 'parent_friend_aliva']);
 const STATUSES = new Set(['pending', 'copied', 'sent']);
 const TITLES = ['Bapak', 'Ibu', 'Saudara', 'Saudari', 'H.', 'Hj.', 'Dr.', 'dr.', 'Prof.', 'Ir.'];
@@ -38,6 +46,8 @@ function initializeInvitationAdmin(db) {
         'friend_andrika', 'friend_aliva', 'parent_friend_andrika', 'parent_friend_aliva'
       )),
       status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'copied', 'sent')),
+      wording_style TEXT NOT NULL DEFAULT 'default',
+      second_name TEXT NOT NULL DEFAULT '',
       version INTEGER NOT NULL DEFAULT 1,
       copied_at TEXT,
       sent_at TEXT,
@@ -72,6 +82,16 @@ function initializeInvitationAdmin(db) {
       updated_at TEXT NOT NULL
     );
   `);
+
+  // Guest lists created before wording styles existed keep their rows; the
+  // default value is exactly the wording those rows already had.
+  const guestColumns = new Set(db.prepare('PRAGMA table_info(invitation_guests)').all().map((column) => column.name));
+  if (!guestColumns.has('wording_style')) {
+    db.exec(`ALTER TABLE invitation_guests ADD COLUMN wording_style TEXT NOT NULL DEFAULT 'default'`);
+  }
+  if (!guestColumns.has('second_name')) {
+    db.exec(`ALTER TABLE invitation_guests ADD COLUMN second_name TEXT NOT NULL DEFAULT ''`);
+  }
 
   const createdAt = new Date().toISOString();
   const insertTitle = db.prepare(`
@@ -199,6 +219,10 @@ function validateStatus(value) {
   return typeof value === 'string' && STATUSES.has(value);
 }
 
+function validateWordingStyle(value) {
+  return typeof value === 'string' && WORDING_STYLES.has(value);
+}
+
 function normalizeTitles(values) {
   if (!Array.isArray(values)) return [];
   return values
@@ -222,6 +246,8 @@ function serializeGuest(db, row) {
     id: Number(row.id),
     name: row.raw_name,
     category: row.category,
+    wording_style: row.wording_style || 'default',
+    second_name: row.second_name || '',
     relationship_group: row.relationship_group,
     titles: titleRowsFor(db, row.id),
     status: row.status,
@@ -262,13 +288,29 @@ function validateGuestInput(payload, current = {}) {
   const titles = payload.titles === undefined
     ? (current.titles || []).map((title) => title.label || title)
     : normalizeTitles(payload.titles);
+  const style = payload.wording_style === undefined ? (current.wording_style || 'default') : payload.wording_style;
+  const secondName = payload.second_name === undefined
+    ? textValue(current.second_name || '', MAX_NAME_LENGTH)
+    : textValue(payload.second_name, MAX_NAME_LENGTH);
 
   if (!name) return { error: ['name_required', 'Name is required.'] };
-  if (!validateCategory(category)) return { error: ['category_invalid', 'Invitation category is invalid.'] };
+  if (!validateWordingStyle(style)) return { error: ['wording_style_invalid', 'Wording style is invalid.'] };
   if (!validateGroup(relationshipGroup)) return { error: ['relationship_group_invalid', 'Relationship group is invalid.'] };
+
+  if (style !== 'default') {
+    if (titles.length > 0) return { error: ['titles_not_allowed', 'Titles are only allowed for Personal Bergelar.'] };
+    if (WORDING_STYLES.get(style) > 1 && !secondName) {
+      return { error: ['second_name_required', 'The second name is required for this wording style.'] };
+    }
+    // A style carries its own form of address, so the category it is filed
+    // under stays neutral rather than contradicting the printed wording.
+    return { value: { name, category: 'personal', relationshipGroup, titles: [], style, secondName } };
+  }
+
+  if (!validateCategory(category)) return { error: ['category_invalid', 'Invitation category is invalid.'] };
   if (category === 'titled' && titles.length === 0) return { error: ['titles_required', 'At least one title is required.'] };
   if (category !== 'titled' && titles.length > 0) return { error: ['titles_not_allowed', 'Titles are only allowed for Personal Bergelar.'] };
-  return { value: { name, category, relationshipGroup, titles } };
+  return { value: { name, category, relationshipGroup, titles, style, secondName: '' } };
 }
 
 function listGuests(db, url) {
@@ -276,6 +318,7 @@ function listGuests(db, url) {
   const values = [];
   const search = textValue(url.searchParams.get('search') || '', MAX_NAME_LENGTH);
   const category = url.searchParams.get('category');
+  const wordingStyle = url.searchParams.get('wording_style');
   const relationshipGroup = url.searchParams.get('relationship_group');
   const status = url.searchParams.get('status');
 
@@ -286,6 +329,10 @@ function listGuests(db, url) {
   if (validateCategory(category)) {
     clauses.push('category = ?');
     values.push(category);
+  }
+  if (validateWordingStyle(wordingStyle)) {
+    clauses.push('wording_style = ?');
+    values.push(wordingStyle);
   }
   if (validateGroup(relationshipGroup)) {
     clauses.push('relationship_group = ?');
@@ -298,7 +345,7 @@ function listGuests(db, url) {
 
   const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
   const rows = db.prepare(`
-    SELECT id, raw_name, category, relationship_group, status, version, copied_at, sent_at, created_at, updated_at
+    SELECT id, raw_name, category, wording_style, second_name, relationship_group, status, version, copied_at, sent_at, created_at, updated_at
     FROM invitation_guests
     ${where}
     ORDER BY updated_at DESC, id DESC
@@ -434,13 +481,22 @@ function createInvitationAdmin({ db, readJson, sendJson, sendError, sendEmpty, g
       const createdAt = nowIso();
       const row = runTransaction(db, () => {
         const result = db.prepare(`
-          INSERT INTO invitation_guests (raw_name, category, relationship_group, status, version, created_at, updated_at)
-          VALUES (?, ?, ?, 'pending', 1, ?, ?)
-        `).run(validated.value.name, validated.value.category, validated.value.relationshipGroup, createdAt, createdAt);
+          INSERT INTO invitation_guests
+            (raw_name, category, wording_style, second_name, relationship_group, status, version, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, 'pending', 1, ?, ?)
+        `).run(
+          validated.value.name,
+          validated.value.category,
+          validated.value.style,
+          validated.value.secondName,
+          validated.value.relationshipGroup,
+          createdAt,
+          createdAt,
+        );
         const id = Number(result.lastInsertRowid);
         insertGuestTitles(db, id, validated.value.titles, createdAt);
         return db.prepare(`
-          SELECT id, raw_name, category, relationship_group, status, version, copied_at, sent_at, created_at, updated_at
+          SELECT id, raw_name, category, wording_style, second_name, relationship_group, status, version, copied_at, sent_at, created_at, updated_at
           FROM invitation_guests WHERE id = ?
         `).get(id);
       });
@@ -459,7 +515,7 @@ function createInvitationAdmin({ db, readJson, sendJson, sendError, sendEmpty, g
         return;
       }
       const currentRow = db.prepare(`
-        SELECT id, raw_name, category, relationship_group, status, version, copied_at, sent_at, created_at, updated_at
+        SELECT id, raw_name, category, wording_style, second_name, relationship_group, status, version, copied_at, sent_at, created_at, updated_at
         FROM invitation_guests WHERE id = ?
       `).get(id);
       if (!currentRow) {
@@ -499,12 +555,15 @@ function createInvitationAdmin({ db, readJson, sendJson, sendError, sendEmpty, g
       const row = runTransaction(db, () => {
         db.prepare(`
           UPDATE invitation_guests
-          SET raw_name = ?, category = ?, relationship_group = ?, status = ?, version = version + 1,
+          SET raw_name = ?, category = ?, wording_style = ?, second_name = ?, relationship_group = ?,
+              status = ?, version = version + 1,
               copied_at = ?, sent_at = ?, updated_at = ?
           WHERE id = ? AND version = ?
         `).run(
           validated.value.name,
           validated.value.category,
+          validated.value.style,
+          validated.value.secondName,
           validated.value.relationshipGroup,
           status,
           copiedAt,
@@ -516,7 +575,7 @@ function createInvitationAdmin({ db, readJson, sendJson, sendError, sendEmpty, g
         db.prepare('DELETE FROM invitation_guest_titles WHERE guest_id = ?').run(id);
         insertGuestTitles(db, id, validated.value.titles, updatedAt);
         return db.prepare(`
-          SELECT id, raw_name, category, relationship_group, status, version, copied_at, sent_at, created_at, updated_at
+          SELECT id, raw_name, category, wording_style, second_name, relationship_group, status, version, copied_at, sent_at, created_at, updated_at
           FROM invitation_guests WHERE id = ?
         `).get(id);
       });

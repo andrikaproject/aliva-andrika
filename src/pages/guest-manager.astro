@@ -45,12 +45,20 @@ import '../styles/guest-manager.css';
             <span class="sr-only">Cari nama tamu</span>
             <input id="guest-search" class="gm-input" type="search" placeholder="Cari nama tamu" autocomplete="off" />
           </label>
-          <label class="sr-only" for="guest-category-filter">Kategori</label>
+          <label class="sr-only" for="guest-category-filter">Kategori atau style kata</label>
           <select id="guest-category-filter" class="gm-input gm-select">
             <option value="">Semua kategori</option>
-            <option value="personal">Personal</option>
-            <option value="group">Group</option>
-            <option value="titled">Personal Bergelar</option>
+            <optgroup label="Default Template">
+              <option value="personal">Personal</option>
+              <option value="group">Group</option>
+              <option value="titled">Personal Bergelar</option>
+            </optgroup>
+            <optgroup label="Style Kata">
+              <option value="style:ibu_family">Ibu &amp; Keluarga Besar</option>
+              <option value="style:bapak_family">Bapak &amp; Keluarga Besar</option>
+              <option value="style:ibu_bapak_family">Ibu &amp; Bapak Keluarga Besar</option>
+              <option value="style:bapak_ibu_family">Bapak &amp; Ibu Keluarga Besar</option>
+            </optgroup>
           </select>
           <label class="sr-only" for="guest-status-filter">Status</label>
           <select id="guest-status-filter" class="gm-input gm-select">
@@ -91,10 +99,25 @@ import '../styles/guest-manager.css';
         <input id="guest-version" type="hidden" />
         <div class="gm-form-grid">
           <div class="gm-field gm-field--wide">
-            <label class="gm-label" for="guest-name">Nama yang diundang</label>
+            <label class="gm-label" for="guest-style">Style kata</label>
+            <select id="guest-style" class="gm-input gm-select" name="wording_style" required>
+              <option value="default">Default Template</option>
+              <option value="ibu_family">Ibu &amp; Keluarga Besar</option>
+              <option value="bapak_family">Bapak &amp; Keluarga Besar</option>
+              <option value="ibu_bapak_family">Ibu &amp; Bapak Keluarga Besar</option>
+              <option value="bapak_ibu_family">Bapak &amp; Ibu Keluarga Besar</option>
+            </select>
+            <p class="gm-help">Style menentukan sapaan yang tercetak di undangan, dan nama mana saja yang diminta di bawah.</p>
+          </div>
+          <div class="gm-field gm-field--wide">
+            <label class="gm-label" id="guest-name-label" for="guest-name">Nama yang diundang</label>
             <input id="guest-name" class="gm-input" name="name" maxlength="60" required />
           </div>
-          <div class="gm-field">
+          <div class="gm-field gm-field--wide" id="second-name-field" hidden>
+            <label class="gm-label" id="guest-second-name-label" for="guest-second-name">Nama kedua</label>
+            <input id="guest-second-name" class="gm-input" name="second_name" maxlength="60" />
+          </div>
+          <div class="gm-field" id="category-field">
             <label class="gm-label" for="guest-category">Kategori</label>
             <select id="guest-category" class="gm-input gm-select" name="category" required>
               <option value="personal">Personal</option>

@@ -16,6 +16,7 @@ export const id: Dictionary = {
     titledGreetingName: '{name} & Pasangan',
     groupGreetingPrefix: 'Kepada Yth.',
     groupGreetingName: 'Keluarga Besar {name}',
+    familyGreetingName: '{name} Beserta Keluarga Besar',
   },
   hero: {
     celebration: 'PERAYAAN PERNIKAHAN / 2026',

@@ -1,6 +1,13 @@
 import { playReliably } from './audio.ts';
-import { onLocaleChange, t } from './locale.ts';
-import { normalizeGroupName, normalizeTitles, sanitizeRecipientPart } from '../lib/invitation-recipient.ts';
+import type { Locale } from '../i18n/index.ts';
+import { getLocale, onLocaleChange, t } from './locale.ts';
+import {
+  familyRecipientNames,
+  isWordingStyle,
+  normalizeGroupName,
+  normalizeTitles,
+  sanitizeRecipientPart,
+} from '../lib/invitation-recipient.ts';
 
 /** Long enough for the tear to finish before the cover leaves the DOM. */
 export const TEAR_DURATION_MS = 820;
@@ -69,22 +76,42 @@ export function initInvitation(prefersReducedMotion: boolean): void {
   document.body.style.overflow = 'hidden';
 
   // ?to=Budi personalises the ticket; ?type=group switches to the form of
-  // address used for a whole family or office.
+  // address used for a whole family or office, and ?style= addresses one or
+  // both parents of a household (with ?to2= for the second of them).
   const params = new URLSearchParams(window.location.search);
   const guestName = params.get('to');
   if (guestName && guestElement) {
+    const styleParam = params.get('style');
+    const style = isWordingStyle(styleParam) && styleParam !== 'default' ? styleParam : null;
     const type = params.get('type')?.toLowerCase();
-    const group = type === 'group';
-    const titled = type === 'titled';
-    const keys = group
-      ? { prefix: 'cover.groupGreetingPrefix', name: 'cover.groupGreetingName' }
-      : { prefix: 'cover.guestGreetingPrefix', name: titled ? 'cover.titledGreetingName' : 'cover.guestGreetingName' };
+    const group = !style && type === 'group';
+    const titled = !style && type === 'titled';
+    const keys = style
+      ? { prefix: 'cover.groupGreetingPrefix', name: 'cover.familyGreetingName' }
+      : group
+        ? { prefix: 'cover.groupGreetingPrefix', name: 'cover.groupGreetingName' }
+        : { prefix: 'cover.guestGreetingPrefix', name: titled ? 'cover.titledGreetingName' : 'cover.guestGreetingName' };
     const safeName = group ? normalizeGroupName(guestName) : sanitizeRecipientPart(guestName);
     const safeTitles = normalizeTitles(params.getAll('title'));
-    const displayName = titled && safeTitles.length > 0 ? `${safeTitles.join(' ')} ${safeName}` : safeName;
-    renderGuestName(guestElement, displayName, keys);
-    guestElement.hidden = false;
-    onLocaleChange(() => renderGuestName(guestElement, displayName, keys));
+
+    // A style spells its honorifics differently per language, so the name is
+    // rebuilt on every switch rather than captured once.
+    const nameFor = (locale: Locale): string =>
+      style
+        ? familyRecipientNames(
+            { name: guestName, category: 'personal', style, secondName: params.get('to2') ?? '' },
+            locale,
+          )
+        : titled && safeTitles.length > 0
+          ? `${safeTitles.join(' ')} ${safeName}`
+          : safeName;
+
+    if (nameFor(getLocale())) {
+      const paint = (locale: Locale) => renderGuestName(guestElement, nameFor(locale), keys);
+      paint(getLocale());
+      guestElement.hidden = false;
+      onLocaleChange(paint);
+    }
   }
 
   function cloneTicket(modifier: string): HTMLElement {

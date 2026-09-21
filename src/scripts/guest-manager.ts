@@ -1,8 +1,11 @@
 import {
   buildInvitationUrl,
   displayRecipientName,
+  styleHonorifics,
+  type Honorific,
   type InvitationCategory,
   type RelationshipGroup,
+  type WordingStyle,
 } from '../lib/invitation-recipient.ts';
 
 type DeliveryStatus = 'pending' | 'copied' | 'sent';
@@ -11,6 +14,8 @@ type Guest = {
   id: number;
   name: string;
   category: InvitationCategory;
+  wording_style: WordingStyle;
+  second_name: string;
   relationship_group: RelationshipGroup;
   titles: Title[];
   status: DeliveryStatus;
@@ -31,6 +36,8 @@ const state = {
   activeGroup: '',
   editing: null as Guest | null,
   selectedTitles: [] as Title[],
+  // Titles a style put aside; changing one's mind must not cost the picking.
+  stashedTitles: [] as Title[],
 };
 
 const $ = <T extends HTMLElement>(id: string): T => {
@@ -96,6 +103,41 @@ function categoryLabel(category: InvitationCategory): string {
   return category === 'titled' ? 'Personal Bergelar' : category === 'group' ? 'Group' : 'Personal';
 }
 
+const STYLE_LABELS: Record<WordingStyle, string> = {
+  default: 'Default Template',
+  ibu_family: 'Ibu & Keluarga Besar',
+  bapak_family: 'Bapak & Keluarga Besar',
+  ibu_bapak_family: 'Ibu & Bapak Keluarga Besar',
+  bapak_ibu_family: 'Bapak & Ibu Keluarga Besar',
+};
+
+const NAME_FIELD_LABELS: Record<Honorific, string> = { ibu: 'Nama Ibu', bapak: 'Nama Bapak' };
+
+const SAVE_ERRORS: Record<string, string> = {
+  version_conflict: 'Tamu ini berubah di perangkat lain. Muat ulang lalu periksa data terbaru.',
+  name_required: 'Nama tamu belum diisi.',
+  second_name_required: 'Nama kedua belum diisi.',
+  titles_required: 'Pilih minimal satu gelar untuk kategori Personal Bergelar.',
+  titles_not_allowed: 'Gelar hanya berlaku untuk kategori Personal Bergelar.',
+  category_invalid: 'Kategori belum dipilih dengan benar.',
+  wording_style_invalid: 'Style kata belum dipilih dengan benar.',
+  relationship_group_invalid: 'Kelompok tamu belum dipilih dengan benar.',
+  status_invalid: 'Status pengiriman belum dipilih dengan benar.',
+};
+
+/** What the row shows under the name: the style, or the old category. */
+function wordingLabel(guest: Pick<Guest, 'category' | 'wording_style'>): string {
+  return guest.wording_style && guest.wording_style !== 'default'
+    ? STYLE_LABELS[guest.wording_style]
+    : categoryLabel(guest.category);
+}
+
+/** The filter lists categories and styles together; styles carry a prefix. */
+function applyWordingFilter(params: URLSearchParams, value: string): void {
+  if (value.startsWith('style:')) params.set('wording_style', value.slice('style:'.length));
+  else if (value) params.set('category', value);
+}
+
 function groupLabel(group: RelationshipGroup): string {
   return {
     friend_andrika: 'Teman Andrika',
@@ -105,12 +147,24 @@ function groupLabel(group: RelationshipGroup): string {
   }[group];
 }
 
-function renderGuestName(guest: Pick<Guest, 'name' | 'category' | 'titles'>): string {
-  return displayRecipientName({ name: guest.name, category: guest.category, titles: guest.titles.map((title) => title.label) });
+type GuestWording = Pick<Guest, 'name' | 'category' | 'titles'> & Partial<Pick<Guest, 'wording_style' | 'second_name'>>;
+
+function recipientInput(guest: GuestWording) {
+  return {
+    name: guest.name,
+    category: guest.category,
+    titles: guest.titles.map((title) => title.label),
+    style: guest.wording_style ?? 'default',
+    secondName: guest.second_name ?? '',
+  };
 }
 
-function renderGuestUrl(guest: Pick<Guest, 'name' | 'category' | 'titles'>): string {
-  return buildInvitationUrl(baseUrl, { name: guest.name, category: guest.category, titles: guest.titles.map((title) => title.label) });
+function renderGuestName(guest: GuestWording): string {
+  return displayRecipientName(recipientInput(guest));
+}
+
+function renderGuestUrl(guest: GuestWording): string {
+  return buildInvitationUrl(baseUrl, recipientInput(guest));
 }
 
 function escapeText(value: string): Text {
@@ -128,11 +182,13 @@ function makeButton(label: string, className: string, handler: () => void): HTML
 
 function filteredGuests(): Guest[] {
   const query = ($('guest-search') as HTMLInputElement).value.trim().toLocaleLowerCase('id-ID');
-  const category = ($('guest-category-filter') as HTMLSelectElement).value;
+  const wording = ($('guest-category-filter') as HTMLSelectElement).value;
   const status = ($('guest-status-filter') as HTMLSelectElement).value;
   return state.guests.filter((guest) => {
     if (state.activeGroup && guest.relationship_group !== state.activeGroup) return false;
-    if (category && guest.category !== category) return false;
+    if (wording.startsWith('style:')) {
+      if (guest.wording_style !== wording.slice('style:'.length)) return false;
+    } else if (wording && (guest.category !== wording || guest.wording_style !== 'default')) return false;
     if (status && guest.status !== status) return false;
     if (query && !`${guest.name} ${renderGuestName(guest)}`.toLocaleLowerCase('id-ID').includes(query)) return false;
     return true;
@@ -163,7 +219,7 @@ function renderGuests(): void {
     name.append(escapeText(renderGuestName(guest)));
     const meta = document.createElement('div');
     meta.className = 'gm-row-meta';
-    meta.append(escapeText(categoryLabel(guest.category)));
+    meta.append(escapeText(wordingLabel(guest)));
     info.append(name, meta);
 
     const group = document.createElement('div');
@@ -198,9 +254,8 @@ function setListError(message: string): void {
 async function loadGuests(): Promise<void> {
   setLoading('Memuat daftar tamu...');
   const params = new URLSearchParams();
-  const category = ($('guest-category-filter') as HTMLSelectElement).value;
   const status = ($('guest-status-filter') as HTMLSelectElement).value;
-  if (category) params.set('category', category);
+  applyWordingFilter(params, ($('guest-category-filter') as HTMLSelectElement).value);
   if (status) params.set('status', status);
   if (state.activeGroup) params.set('relationship_group', state.activeGroup);
   try {
@@ -329,19 +384,49 @@ function renderSelectedTitles(): void {
   });
 }
 
-function updateGuestPreview(): void {
-  const guest = {
+function formWording(): GuestWording {
+  return {
     name: ($('guest-name') as HTMLInputElement).value,
     category: ($('guest-category') as HTMLSelectElement).value as InvitationCategory,
     titles: state.selectedTitles,
+    wording_style: ($('guest-style') as HTMLSelectElement).value as WordingStyle,
+    second_name: ($('guest-second-name') as HTMLInputElement).value,
   };
+}
+
+/**
+ * The style decides which questions the form asks: how many names, whose
+ * they are, and whether the category and titles apply at all.
+ */
+function syncStyleFields(): void {
+  const style = ($('guest-style') as HTMLSelectElement).value as WordingStyle;
+  const honorifics = styleHonorifics(style);
+  const secondInput = $('guest-second-name') as HTMLInputElement;
+
+  $('category-field').hidden = style !== 'default';
+  $('guest-name-label').textContent = honorifics.length ? NAME_FIELD_LABELS[honorifics[0]] : 'Nama yang diundang';
+  $('second-name-field').hidden = honorifics.length < 2;
+  if (honorifics.length > 1) $('guest-second-name-label').textContent = NAME_FIELD_LABELS[honorifics[1]];
+  else secondInput.value = '';
+
+  if (style !== 'default') {
+    if (state.selectedTitles.length > 0) {
+      state.stashedTitles = state.selectedTitles;
+      state.selectedTitles = [];
+      renderSelectedTitles();
+    }
+  } else if (state.stashedTitles.length > 0 && state.selectedTitles.length === 0) {
+    state.selectedTitles = state.stashedTitles;
+    state.stashedTitles = [];
+    renderSelectedTitles();
+  }
+}
+
+function updateGuestPreview(): void {
+  const guest = formWording();
   $('guest-preview-name').textContent = renderGuestName(guest);
-  $('guest-preview-url').textContent = buildInvitationUrl(baseUrl, {
-    name: guest.name,
-    category: guest.category,
-    titles: state.selectedTitles.map((title) => title.label),
-  });
-  $('title-controls').hidden = guest.category !== 'titled';
+  $('guest-preview-url').textContent = renderGuestUrl(guest);
+  $('title-controls').hidden = guest.wording_style !== 'default' || guest.category !== 'titled';
 }
 
 function resetGuestForm(): void {
@@ -349,13 +434,17 @@ function resetGuestForm(): void {
   ($('guest-id') as HTMLInputElement).value = '';
   ($('guest-version') as HTMLInputElement).value = '';
   ($('guest-status') as HTMLSelectElement).value = 'pending';
+  ($('guest-style') as HTMLSelectElement).value = 'default';
+  ($('guest-second-name') as HTMLInputElement).value = '';
   state.editing = null;
   state.selectedTitles = [];
+  state.stashedTitles = [];
   $('custom-title-row').hidden = true;
   ($('custom-title') as HTMLInputElement).value = '';
   $('guest-dialog-heading').textContent = 'Tambah Tamu';
   setError($('guest-form-error'), '');
   renderSelectedTitles();
+  syncStyleFields();
   updateGuestPreview();
 }
 
@@ -366,12 +455,15 @@ function openGuestDialog(guest: Guest | null = null): void {
     ($('guest-id') as HTMLInputElement).value = String(guest.id);
     ($('guest-version') as HTMLInputElement).value = String(guest.version);
     ($('guest-name') as HTMLInputElement).value = guest.name;
+    ($('guest-style') as HTMLSelectElement).value = guest.wording_style || 'default';
+    ($('guest-second-name') as HTMLInputElement).value = guest.second_name || '';
     ($('guest-category') as HTMLSelectElement).value = guest.category;
     ($('guest-group') as HTMLSelectElement).value = guest.relationship_group;
     ($('guest-status') as HTMLSelectElement).value = guest.status;
     state.selectedTitles = [...guest.titles];
     $('guest-dialog-heading').textContent = 'Edit Tamu';
     renderSelectedTitles();
+    syncStyleFields();
     updateGuestPreview();
   }
   guestDialog.showModal();
@@ -387,7 +479,12 @@ $('guest-category').addEventListener('change', () => {
   }
   updateGuestPreview();
 });
+$('guest-style').addEventListener('change', () => {
+  syncStyleFields();
+  updateGuestPreview();
+});
 $('guest-name').addEventListener('input', updateGuestPreview);
+$('guest-second-name').addEventListener('input', updateGuestPreview);
 $('title-picker').addEventListener('change', (event) => {
   const select = event.currentTarget as HTMLSelectElement;
   if (select.value === 'custom') {
@@ -432,9 +529,16 @@ guestForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   const errorElement = $('guest-form-error');
   setError(errorElement, '');
+  const wording = formWording();
+  const style = wording.wording_style as WordingStyle;
+  if (styleHonorifics(style).length > 1 && !wording.second_name!.trim()) {
+    return setError(errorElement, `${$('guest-second-name-label').textContent} belum diisi.`);
+  }
   const payload = {
-    name: ($('guest-name') as HTMLInputElement).value,
+    name: wording.name,
     category: ($('guest-category') as HTMLSelectElement).value,
+    wording_style: style,
+    second_name: wording.second_name,
     relationship_group: ($('guest-group') as HTMLSelectElement).value,
     titles: state.selectedTitles.map((title) => title.label),
     status: ($('guest-status') as HTMLSelectElement).value,
@@ -453,8 +557,10 @@ guestForm.addEventListener('submit', async (event) => {
     showToast(id ? 'Data tamu diperbarui.' : 'Tamu ditambahkan.');
     await loadGuests();
   } catch (error) {
-    if ((error as ApiError).code === 'version_conflict') setError(errorElement, 'Tamu ini berubah di perangkat lain. Muat ulang lalu periksa data terbaru.');
-    else setError(errorElement, error instanceof Error ? error.message : 'Tamu tidak dapat disimpan.');
+    const code = (error as ApiError).code;
+    setError(errorElement, code && code in SAVE_ERRORS
+      ? SAVE_ERRORS[code]
+      : error instanceof Error ? error.message : 'Tamu tidak dapat disimpan.');
   } finally {
     submit.disabled = false;
   }
@@ -476,6 +582,8 @@ async function updateStatus(guest: Guest, status: DeliveryStatus): Promise<void>
       version: guest.version,
       name: guest.name,
       category: guest.category,
+      wording_style: guest.wording_style,
+      second_name: guest.second_name,
       relationship_group: guest.relationship_group,
       titles: guest.titles.map((title) => title.label),
       status,

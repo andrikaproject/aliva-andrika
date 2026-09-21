@@ -163,3 +163,131 @@ test('template endpoint validates both placeholders', async () => {
   assert.equal(result.response.status, 200);
   assert.equal(result.body.settings.message_template, 'Halo {{nama_tamu}} {{link_undangan}}');
 });
+
+test('wording styles are stored, validated and filterable', async () => {
+  let result = await send('/api/invitation-admin/guests', {
+    method: 'POST',
+    body: JSON.stringify({
+      name: 'Sari',
+      category: 'personal',
+      wording_style: 'ibu_bapak_family',
+      relationship_group: 'friend_andrika',
+    }),
+  });
+  assert.equal(result.response.status, 422);
+  assert.equal(result.body.code, 'second_name_required');
+
+  result = await send('/api/invitation-admin/guests', {
+    method: 'POST',
+    body: JSON.stringify({
+      name: 'Sari',
+      category: 'titled',
+      wording_style: 'ibu_bapak_family',
+      second_name: 'Dodi',
+      relationship_group: 'friend_andrika',
+      titles: ['Dr.'],
+    }),
+  });
+  assert.equal(result.response.status, 422);
+  assert.equal(result.body.code, 'titles_not_allowed');
+
+  result = await send('/api/invitation-admin/guests', {
+    method: 'POST',
+    body: JSON.stringify({
+      name: 'Sari',
+      category: 'personal',
+      wording_style: 'tidak-ada',
+      relationship_group: 'friend_andrika',
+    }),
+  });
+  assert.equal(result.response.status, 422);
+  assert.equal(result.body.code, 'wording_style_invalid');
+
+  result = await send('/api/invitation-admin/guests', {
+    method: 'POST',
+    body: JSON.stringify({
+      name: 'Sari',
+      // The category the client happens to send must not contradict the
+      // wording the style prints.
+      category: 'group',
+      wording_style: 'ibu_bapak_family',
+      second_name: 'Dodi',
+      relationship_group: 'friend_andrika',
+    }),
+  });
+  assert.equal(result.response.status, 201);
+  assert.equal(result.body.guest.wording_style, 'ibu_bapak_family');
+  assert.equal(result.body.guest.second_name, 'Dodi');
+  assert.equal(result.body.guest.category, 'personal');
+  const styled = result.body.guest;
+
+  result = await send('/api/invitation-admin/guests?wording_style=ibu_bapak_family');
+  assert.equal(result.body.total, 1);
+  assert.equal(result.body.guests[0].id, styled.id);
+
+  result = await send('/api/invitation-admin/guests?category=personal');
+  assert.equal(result.body.guests.some((row) => row.id === styled.id), true);
+
+  // Switching back to the default wording drops the second name with it.
+  result = await send(`/api/invitation-admin/guests/${styled.id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({
+      version: styled.version,
+      name: 'Sari',
+      category: 'personal',
+      wording_style: 'default',
+      second_name: 'Dodi',
+      relationship_group: 'friend_andrika',
+      titles: [],
+      status: 'pending',
+    }),
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.body.guest.wording_style, 'default');
+  assert.equal(result.body.guest.second_name, '');
+});
+
+test('a guest list created before styles existed keeps its rows', async () => {
+  const { createRequire } = await import('node:module');
+  const { DatabaseSync } = await import('node:sqlite');
+  const require = createRequire(import.meta.url);
+  const { createInvitationAdmin } = require('../api/invitation-admin.cjs');
+
+  const db = new DatabaseSync(path.join(workdir, 'legacy.sqlite'));
+  db.exec(`
+    CREATE TABLE invitation_guests (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      raw_name TEXT NOT NULL,
+      category TEXT NOT NULL CHECK (category IN ('personal', 'group', 'titled')),
+      relationship_group TEXT NOT NULL CHECK (relationship_group IN (
+        'friend_andrika', 'friend_aliva', 'parent_friend_andrika', 'parent_friend_aliva'
+      )),
+      status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'copied', 'sent')),
+      version INTEGER NOT NULL DEFAULT 1,
+      copied_at TEXT,
+      sent_at TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+  `);
+  db.prepare(`
+    INSERT INTO invitation_guests (raw_name, category, relationship_group, created_at, updated_at)
+    VALUES ('Budi Santoso', 'personal', 'friend_aliva', '2026-01-01T00:00:00.000Z', '2026-01-01T00:00:00.000Z')
+  `).run();
+
+  const noop = () => {};
+  createInvitationAdmin({
+    db,
+    readJson: async () => ({}),
+    sendJson: noop,
+    sendError: noop,
+    sendEmpty: noop,
+    getClientKey: () => 'test',
+  });
+
+  const row = db.prepare('SELECT raw_name, wording_style, second_name FROM invitation_guests').get();
+  assert.equal(row.raw_name, 'Budi Santoso');
+  assert.equal(row.wording_style, 'default');
+  assert.equal(row.second_name, '');
+  db.close();
+});

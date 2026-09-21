@@ -29,6 +29,7 @@ export interface Dictionary {
     /** Used when ?type=group, for a family or an office. */
     groupGreetingPrefix: string;
     groupGreetingName: string;
+    familyGreetingName: string;
   };
   hero: {
     celebration: string;
