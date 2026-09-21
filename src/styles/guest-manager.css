@@ -124,6 +124,16 @@ body.guest-manager-page {
   line-height: 1.55;
 }
 
+/* Two templates stacked in one dialog: each needs air above its label,
+   which would otherwise sit on the box before it. */
+.gm-template-field {
+  margin-top: 1.4rem;
+}
+
+.gm-template-field .gm-textarea {
+  min-height: 12rem;
+}
+
 .gm-select {
   appearance: auto;
 }

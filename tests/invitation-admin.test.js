@@ -144,24 +144,107 @@ test('admin API protects data and manages titled guests', async () => {
   assert.equal(result.body.code, 'version_conflict');
 });
 
-test('template endpoint validates both placeholders', async () => {
+test('both message templates are kept, and both are validated', async () => {
   let result = await send('/api/invitation-admin/settings');
   assert.equal(result.response.status, 200);
+  assert.deepEqual(Object.keys(result.body.settings.templates).sort(), ['friend', 'parent']);
   const version = result.body.settings.version;
 
+  // A broken parent template cannot slip through on the friend one's coat-tails.
   result = await send('/api/invitation-admin/settings/message-template', {
     method: 'PUT',
-    body: JSON.stringify({ version, template: 'Halo {{nama_tamu}}' }),
+    body: JSON.stringify({
+      version,
+      templates: { friend: 'Halo {{nama_tamu}} {{link_undangan}}', parent: 'Salam {{nama_tamu}}' },
+    }),
   });
   assert.equal(result.response.status, 422);
   assert.equal(result.body.code, 'template_placeholder_missing');
 
   result = await send('/api/invitation-admin/settings/message-template', {
     method: 'PUT',
-    body: JSON.stringify({ version, template: 'Halo {{nama_tamu}} {{link_undangan}}' }),
+    body: JSON.stringify({
+      version,
+      templates: {
+        friend: 'Halo {{nama_tamu}} {{link_undangan}}',
+        parent: 'Dengan hormat {{nama_tamu}} {{link_undangan}}',
+      },
+    }),
   });
   assert.equal(result.response.status, 200);
-  assert.equal(result.body.settings.message_template, 'Halo {{nama_tamu}} {{link_undangan}}');
+  assert.deepEqual(result.body.settings.templates, {
+    friend: 'Halo {{nama_tamu}} {{link_undangan}}',
+    parent: 'Dengan hormat {{nama_tamu}} {{link_undangan}}',
+  });
+
+  result = await send('/api/invitation-admin/settings/message-template', {
+    method: 'PUT',
+    body: JSON.stringify({ version, templates: { friend: 'x {{nama_tamu}} {{link_undangan}}' } }),
+  });
+  assert.equal(result.response.status, 409);
+  assert.equal(result.body.code, 'version_conflict');
+});
+
+test('a guest carries the template their invitation is written in', async () => {
+  // Left unsaid, it follows the group the guest is filed under.
+  let result = await send('/api/invitation-admin/guests', {
+    method: 'POST',
+    body: JSON.stringify({
+      name: 'Pak Harto',
+      category: 'personal',
+      relationship_group: 'parent_friend_andrika',
+    }),
+  });
+  assert.equal(result.response.status, 201);
+  assert.equal(result.body.guest.template_key, 'parent');
+  const guest = result.body.guest;
+
+  result = await send('/api/invitation-admin/guests', {
+    method: 'POST',
+    body: JSON.stringify({ name: 'Rizky', category: 'personal', relationship_group: 'friend_andrika' }),
+  });
+  assert.equal(result.body.guest.template_key, 'friend');
+  const friend = result.body.guest;
+
+  // Said outright, the choice stands whatever the group says.
+  result = await send(`/api/invitation-admin/guests/${guest.id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({
+      version: guest.version,
+      name: 'Pak Harto',
+      category: 'personal',
+      relationship_group: 'parent_friend_andrika',
+      template_key: 'friend',
+      titles: [],
+      status: 'pending',
+    }),
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.body.guest.template_key, 'friend');
+
+  result = await send(`/api/invitation-admin/guests/${friend.id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({
+      version: friend.version,
+      name: 'Rizky',
+      category: 'personal',
+      relationship_group: 'friend_andrika',
+      template_key: 'sahabat',
+      titles: [],
+      status: 'pending',
+    }),
+  });
+  assert.equal(result.response.status, 422);
+  assert.equal(result.body.code, 'template_key_invalid');
+
+  for (const id of [guest.id, friend.id]) {
+    const current = await send(`/api/invitation-admin/guests`);
+    const row = current.body.guests.find((candidate) => candidate.id === id);
+    await send(`/api/invitation-admin/guests/${id}`, {
+      method: 'DELETE',
+      body: JSON.stringify({ version: row.version }),
+    });
+  }
 });
 
 test('wording styles are stored, validated and filterable', async () => {
@@ -331,6 +414,13 @@ test('a guest list created before styles existed keeps its rows', async () => {
     );
   `);
   db.exec(`
+    CREATE TABLE invitation_settings (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      message_template TEXT NOT NULL DEFAULT '',
+      version INTEGER NOT NULL DEFAULT 1,
+      updated_at TEXT NOT NULL
+    );
+
     CREATE TABLE invitation_titles (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       label TEXT NOT NULL,
@@ -357,6 +447,14 @@ test('a guest list created before styles existed keeps its rows', async () => {
     VALUES (1, 'Dr.', 'dr.', 1, '2026-01-01T00:00:00.000Z')
   `).run();
   db.prepare('INSERT INTO invitation_guest_titles (guest_id, title_id, position) VALUES (1, 1, 0)').run();
+  db.prepare(`
+    INSERT INTO invitation_guests (raw_name, category, relationship_group, created_at, updated_at)
+    VALUES ('Pak Broto', 'personal', 'parent_friend_andrika', '2026-01-01T00:00:00.000Z', '2026-01-01T00:00:00.000Z')
+  `).run();
+  db.prepare(`
+    INSERT INTO invitation_settings (id, message_template, version, updated_at)
+    VALUES (1, 'Halo {{nama_tamu}} {{link_undangan}}', 3, '2026-01-01T00:00:00.000Z')
+  `).run();
 
   const noop = () => {};
   createInvitationAdmin({
@@ -383,6 +481,21 @@ test('a guest list created before styles existed keeps its rows', async () => {
   assert.equal(
     db.prepare(`SELECT COUNT(*) n FROM invitation_titles WHERE placement = 'suffix'`).get().n > 0,
     true,
+  );
+
+  // The one message the couple wrote seeds both templates, and the guests
+  // filed under the parents' friends are written to as such.
+  const settings = db.prepare('SELECT * FROM invitation_settings WHERE id = 1').get();
+  assert.equal(settings.message_template_friend, 'Halo {{nama_tamu}} {{link_undangan}}');
+  assert.equal(settings.message_template_parent, 'Halo {{nama_tamu}} {{link_undangan}}');
+  assert.equal(settings.version, 3);
+  assert.equal('message_template' in settings, false);
+  assert.deepEqual(
+    db.prepare('SELECT raw_name, template_key FROM invitation_guests ORDER BY id').all().map((row) => ({ ...row })),
+    [
+      { raw_name: 'Budi Santoso', template_key: 'friend' },
+      { raw_name: 'Pak Broto', template_key: 'parent' },
+    ],
   );
   db.close();
 });

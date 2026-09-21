@@ -14,6 +14,7 @@ import {
 const PEOPLE: readonly TitlePerson[] = [1, 2];
 
 type DeliveryStatus = 'pending' | 'copied' | 'sent';
+type TemplateKey = 'friend' | 'parent';
 type Title = { id: number; label: string; placement: TitlePlacement; is_default?: boolean };
 type GuestTitle = Title & { person: TitlePerson };
 type Guest = {
@@ -22,6 +23,7 @@ type Guest = {
   category: InvitationCategory;
   wording_style: WordingStyle;
   second_name: string;
+  template_key: TemplateKey;
   relationship_group: RelationshipGroup;
   titles: GuestTitle[];
   status: DeliveryStatus;
@@ -37,8 +39,11 @@ const apiBase = '/api/invitation-admin';
 const state = {
   guests: [] as Guest[],
   titles: [] as Title[],
-  template: '',
+  templates: { friend: '', parent: '' } as Record<TemplateKey, string>,
   templateVersion: 1,
+  // Whether the couple picked a template themselves in this dialog; until
+  // they do, it follows the guest's group.
+  templatePicked: false,
   activeGroup: '',
   editing: null as Guest | null,
   // Titles per person, and the ones a changed answer put aside: saying "no"
@@ -121,12 +126,21 @@ const STYLE_LABELS: Record<WordingStyle, string> = {
 const HONORIFIC_WORDS: Record<Honorific, string> = { ibu: 'Ibu', bapak: 'Bapak' };
 const NAME_FIELD_LABELS: Record<Honorific, string> = { ibu: 'Nama Ibu', bapak: 'Nama Bapak' };
 const PLACEMENT_LABELS: Record<TitlePlacement, string> = { prefix: 'Gelar depan', suffix: 'Gelar belakang' };
+const TEMPLATE_LABELS: Record<TemplateKey, string> = { friend: 'Teman', parent: 'Orang Tua' };
+
+/** Guests of the parents' friends are written to as such by default. */
+function templateForGroup(group: string): TemplateKey {
+  return group.startsWith('parent_') ? 'parent' : 'friend';
+}
 
 const SAVE_ERRORS: Record<string, string> = {
   version_conflict: 'Tamu ini berubah di perangkat lain. Muat ulang lalu periksa data terbaru.',
   name_required: 'Nama tamu belum diisi.',
   second_name_required: 'Nama kedua belum diisi.',
   titles_required: 'Pilih minimal satu gelar untuk kategori Personal Bergelar.',
+  template_key_invalid: 'Template pesan belum dipilih dengan benar.',
+  template_placeholder_missing: 'Setiap template harus memuat {{nama_tamu}} dan {{link_undangan}}.',
+  template_placeholder_invalid: 'Ada placeholder yang tidak dikenali di template.',
   title_required: 'Tulis gelar manual terlebih dahulu.',
   titles_not_allowed: 'Gelar hanya berlaku untuk kategori Personal Bergelar.',
   category_invalid: 'Kategori belum dipilih dengan benar.',
@@ -234,7 +248,7 @@ function renderGuests(): void {
     name.append(escapeText(renderGuestName(guest)));
     const meta = document.createElement('div');
     meta.className = 'gm-row-meta';
-    meta.append(escapeText(wordingLabel(guest)));
+    meta.append(escapeText(`${wordingLabel(guest)} · ${TEMPLATE_LABELS[guest.template_key] ?? TEMPLATE_LABELS.friend}`));
     info.append(name, meta);
 
     const group = document.createElement('div');
@@ -287,10 +301,10 @@ async function loadGuests(): Promise<void> {
 async function loadSupportingData(): Promise<void> {
   const [titlePayload, settingsPayload] = await Promise.all([
     request<{ titles: Title[] }>('/titles'),
-    request<{ settings: { message_template: string; version: number } }>('/settings'),
+    request<{ settings: { templates: Record<TemplateKey, string>; version: number } }>('/settings'),
   ]);
   state.titles = titlePayload.titles;
-  state.template = settingsPayload.settings.message_template;
+  state.templates = settingsPayload.settings.templates;
   state.templateVersion = settingsPayload.settings.version;
   renderTitlePickers();
 }
@@ -510,6 +524,8 @@ function resetGuestForm(): void {
   ($('guest-status') as HTMLSelectElement).value = 'pending';
   ($('guest-style') as HTMLSelectElement).value = 'default';
   ($('guest-second-name') as HTMLInputElement).value = '';
+  ($('guest-template') as HTMLSelectElement).value = templateForGroup(($('guest-group') as HTMLSelectElement).value);
+  state.templatePicked = false;
   state.editing = null;
   state.selectedTitles = { 1: [], 2: [] };
   state.stashedTitles = { 1: [], 2: [] };
@@ -536,7 +552,9 @@ function openGuestDialog(guest: Guest | null = null): void {
     ($('guest-second-name') as HTMLInputElement).value = guest.second_name || '';
     ($('guest-category') as HTMLSelectElement).value = guest.category;
     ($('guest-group') as HTMLSelectElement).value = guest.relationship_group;
+    ($('guest-template') as HTMLSelectElement).value = guest.template_key || 'friend';
     ($('guest-status') as HTMLSelectElement).value = guest.status;
+    state.templatePicked = true;
     for (const person of PEOPLE) {
       state.selectedTitles[person] = guest.titles.filter((title) => title.person === person);
       setTitleRadio(person, state.selectedTitles[person].length > 0);
@@ -558,6 +576,11 @@ $('guest-category').addEventListener('change', () => {
 $('guest-style').addEventListener('change', () => {
   syncStyleFields();
   updateGuestPreview();
+});
+$('guest-template').addEventListener('change', () => { state.templatePicked = true; });
+$('guest-group').addEventListener('change', () => {
+  if (state.templatePicked) return;
+  ($('guest-template') as HTMLSelectElement).value = templateForGroup(($('guest-group') as HTMLSelectElement).value);
 });
 $('guest-name').addEventListener('input', updateGuestPreview);
 $('guest-second-name').addEventListener('input', updateGuestPreview);
@@ -640,6 +663,7 @@ guestForm.addEventListener('submit', async (event) => {
     wording_style: style,
     second_name: wording.second_name,
     relationship_group: ($('guest-group') as HTMLSelectElement).value,
+    template_key: ($('guest-template') as HTMLSelectElement).value,
     titles: formTitles().map(({ label, placement, person }) => ({ label, placement, person })),
     status: ($('guest-status') as HTMLSelectElement).value,
   };
@@ -684,6 +708,7 @@ async function updateStatus(guest: Guest, status: DeliveryStatus): Promise<void>
       category: guest.category,
       wording_style: guest.wording_style,
       second_name: guest.second_name,
+      template_key: guest.template_key,
       relationship_group: guest.relationship_group,
       titles: guest.titles.map(({ label, placement, person }) => ({ label, placement, person })),
       status,
@@ -693,12 +718,14 @@ async function updateStatus(guest: Guest, status: DeliveryStatus): Promise<void>
 }
 
 async function copyMessage(guest: Guest): Promise<void> {
-  if (!state.template.trim()) {
-    showToast('Simpan template pesan terlebih dahulu.');
-    templateDialog.showModal();
+  const key = guest.template_key || 'friend';
+  const template = state.templates[key] ?? '';
+  if (!template.trim()) {
+    showToast(`Template Untuk ${key === 'parent' ? 'Orang Tua' : 'Teman'} masih kosong.`);
+    openTemplateDialog();
     return;
   }
-  const message = state.template
+  const message = template
     .replaceAll('{{nama_tamu}}', renderGuestName(guest))
     .replaceAll('{{link_undangan}}', renderGuestUrl(guest));
   try {
@@ -733,31 +760,41 @@ async function deleteGuest(guest: Guest): Promise<void> {
   } catch (error) { showToast(error instanceof Error ? error.message : 'Data tamu tidak dapat dihapus.'); }
 }
 
-$('template-button').addEventListener('click', () => {
-  ($('message-template') as HTMLTextAreaElement).value = state.template;
+function openTemplateDialog(): void {
+  for (const key of ['friend', 'parent'] as const) {
+    ($(`message-template-${key}`) as HTMLTextAreaElement).value = state.templates[key] ?? '';
+  }
   setError($('template-form-error'), '');
   templateDialog.showModal();
-  ($('message-template') as HTMLTextAreaElement).focus();
-});
+  ($('message-template-friend') as HTMLTextAreaElement).focus();
+}
+
+$('template-button').addEventListener('click', openTemplateDialog);
 
 templateForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   const errorElement = $('template-form-error');
   setError(errorElement, '');
-  const template = ($('message-template') as HTMLTextAreaElement).value;
+  const templates = {
+    friend: ($('message-template-friend') as HTMLTextAreaElement).value,
+    parent: ($('message-template-parent') as HTMLTextAreaElement).value,
+  };
   const submit = templateForm.querySelector('button[type="submit"]') as HTMLButtonElement;
   submit.disabled = true;
   try {
-    const payload = await request<{ settings: { message_template: string; version: number } }>('/settings/message-template', {
-      method: 'PUT',
-      body: JSON.stringify({ template, version: state.templateVersion }),
-    });
-    state.template = payload.settings.message_template;
+    const payload = await request<{ settings: { templates: Record<TemplateKey, string>; version: number } }>(
+      '/settings/message-template',
+      { method: 'PUT', body: JSON.stringify({ templates, version: state.templateVersion }) },
+    );
+    state.templates = payload.settings.templates;
     state.templateVersion = payload.settings.version;
     templateDialog.close();
     showToast('Template pesan disimpan.');
   } catch (error) {
-    setError(errorElement, error instanceof Error ? error.message : 'Template tidak dapat disimpan.');
+    const code = (error as ApiError).code;
+    setError(errorElement, code && code in SAVE_ERRORS
+      ? SAVE_ERRORS[code]
+      : error instanceof Error ? error.message : 'Template tidak dapat disimpan.');
   } finally { submit.disabled = false; }
 });
 

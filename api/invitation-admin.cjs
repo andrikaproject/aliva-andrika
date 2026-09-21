@@ -23,6 +23,9 @@ const WORDING_STYLES = new Map([
 ]);
 const GROUPS = new Set(['friend_andrika', 'friend_aliva', 'parent_friend_andrika', 'parent_friend_aliva']);
 const STATUSES = new Set(['pending', 'copied', 'sent']);
+// One message for friends, another for the parents' guests. A guest picks
+// which of the two their invitation is written in.
+const TEMPLATE_KEYS = ['friend', 'parent'];
 const PLACEMENTS = new Set(['prefix', 'suffix']);
 const TITLES = ['Bapak', 'Ibu', 'Saudara', 'Saudari', 'H.', 'Hj.', 'Dr.', 'dr.', 'Prof.', 'Ir.'];
 // Degrees are written after the name, so they ship as their own list.
@@ -85,7 +88,8 @@ function initializeInvitationAdmin(db) {
 
     CREATE TABLE IF NOT EXISTS invitation_settings (
       id INTEGER PRIMARY KEY CHECK (id = 1),
-      message_template TEXT NOT NULL DEFAULT '',
+      message_template_friend TEXT NOT NULL DEFAULT '',
+      message_template_parent TEXT NOT NULL DEFAULT '',
       version INTEGER NOT NULL DEFAULT 1,
       updated_at TEXT NOT NULL
     );
@@ -100,6 +104,30 @@ function initializeInvitationAdmin(db) {
   if (!guestColumns.has('second_name')) {
     db.exec(`ALTER TABLE invitation_guests ADD COLUMN second_name TEXT NOT NULL DEFAULT ''`);
   }
+  if (!guestColumns.has('template_key')) {
+    db.exec(`
+      ALTER TABLE invitation_guests
+      ADD COLUMN template_key TEXT NOT NULL DEFAULT 'friend' CHECK (template_key IN ('friend', 'parent'))
+    `);
+    // Guests filed under the parents' friends were always written to as such.
+    db.exec(`
+      UPDATE invitation_guests SET template_key = 'parent'
+      WHERE relationship_group IN ('parent_friend_andrika', 'parent_friend_aliva')
+    `);
+  }
+
+  // The single message becomes two. Its text seeds both, so whichever a
+  // guest is written in, the wording the couple already wrote is there.
+  const settingColumns = new Set(db.prepare('PRAGMA table_info(invitation_settings)').all().map((column) => column.name));
+  for (const key of TEMPLATE_KEYS) {
+    if (!settingColumns.has(`message_template_${key}`)) {
+      db.exec(`ALTER TABLE invitation_settings ADD COLUMN message_template_${key} TEXT NOT NULL DEFAULT ''`);
+      if (settingColumns.has('message_template')) {
+        db.exec(`UPDATE invitation_settings SET message_template_${key} = message_template WHERE id = 1`);
+      }
+    }
+  }
+  if (settingColumns.has('message_template')) db.exec('ALTER TABLE invitation_settings DROP COLUMN message_template');
 
   const titleColumns = new Set(db.prepare('PRAGMA table_info(invitation_titles)').all().map((column) => column.name));
   if (!titleColumns.has('placement')) {
@@ -137,8 +165,8 @@ function initializeInvitationAdmin(db) {
   for (const label of TITLES) insertTitle.run(label, normalizeKey(label), 'prefix', createdAt);
   for (const label of SUFFIX_TITLES) insertTitle.run(label, normalizeKey(label), 'suffix', createdAt);
   db.prepare(`
-    INSERT OR IGNORE INTO invitation_settings (id, message_template, version, updated_at)
-    VALUES (1, '', 1, ?)
+    INSERT OR IGNORE INTO invitation_settings (id, message_template_friend, message_template_parent, version, updated_at)
+    VALUES (1, '', '', 1, ?)
   `).run(createdAt);
 }
 
@@ -260,6 +288,22 @@ function validateWordingStyle(value) {
   return typeof value === 'string' && WORDING_STYLES.has(value);
 }
 
+function validateTemplateKey(value) {
+  return typeof value === 'string' && TEMPLATE_KEYS.includes(value);
+}
+
+function readSettings(db) {
+  const row = db.prepare(`
+    SELECT message_template_friend, message_template_parent, version, updated_at
+    FROM invitation_settings WHERE id = 1
+  `).get();
+  return {
+    templates: { friend: row.message_template_friend, parent: row.message_template_parent },
+    version: Number(row.version),
+    updated_at: row.updated_at,
+  };
+}
+
 /**
  * Titles as {label, placement, person}. A bare string keeps its original
  * meaning — a prefix on the first person — so older clients still work.
@@ -303,6 +347,7 @@ function serializeGuest(db, row) {
     category: row.category,
     wording_style: row.wording_style || 'default',
     second_name: row.second_name || '',
+    template_key: row.template_key || 'friend',
     relationship_group: row.relationship_group,
     titles: titleRowsFor(db, row.id),
     status: row.status,
@@ -348,9 +393,14 @@ function validateGuestInput(payload, current = {}) {
   const secondName = payload.second_name === undefined
     ? textValue(current.second_name || '', MAX_NAME_LENGTH)
     : textValue(payload.second_name, MAX_NAME_LENGTH);
+  // A guest of the parents' friends is written to as such unless said otherwise.
+  const templateKey = payload.template_key === undefined
+    ? (current.template_key || (String(relationshipGroup).startsWith('parent_') ? 'parent' : 'friend'))
+    : payload.template_key;
 
   if (!name) return { error: ['name_required', 'Name is required.'] };
   if (!validateWordingStyle(style)) return { error: ['wording_style_invalid', 'Wording style is invalid.'] };
+  if (!validateTemplateKey(templateKey)) return { error: ['template_key_invalid', 'Message template is invalid.'] };
   if (!validateGroup(relationshipGroup)) return { error: ['relationship_group_invalid', 'Relationship group is invalid.'] };
 
   const namedPeople = WORDING_STYLES.get(style);
@@ -369,6 +419,7 @@ function validateGuestInput(payload, current = {}) {
         titles: namedPeople > 1 ? titles : titles.filter((title) => title.person === 1),
         style,
         secondName: namedPeople > 1 ? secondName : '',
+        templateKey,
       },
     };
   }
@@ -377,7 +428,7 @@ function validateGuestInput(payload, current = {}) {
   const ownTitles = titles.filter((title) => title.person === 1);
   if (category === 'titled' && ownTitles.length === 0) return { error: ['titles_required', 'At least one title is required.'] };
   if (category !== 'titled' && ownTitles.length > 0) return { error: ['titles_not_allowed', 'Titles are only allowed for Personal Bergelar.'] };
-  return { value: { name, category, relationshipGroup, titles: ownTitles, style, secondName: '' } };
+  return { value: { name, category, relationshipGroup, titles: ownTitles, style, secondName: '', templateKey } };
 }
 
 function listGuests(db, url) {
@@ -412,7 +463,7 @@ function listGuests(db, url) {
 
   const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
   const rows = db.prepare(`
-    SELECT id, raw_name, category, wording_style, second_name, relationship_group, status, version, copied_at, sent_at, created_at, updated_at
+    SELECT id, raw_name, category, wording_style, second_name, template_key, relationship_group, status, version, copied_at, sent_at, created_at, updated_at
     FROM invitation_guests
     ${where}
     ORDER BY updated_at DESC, id DESC
@@ -549,13 +600,14 @@ function createInvitationAdmin({ db, readJson, sendJson, sendError, sendEmpty, g
       const row = runTransaction(db, () => {
         const result = db.prepare(`
           INSERT INTO invitation_guests
-            (raw_name, category, wording_style, second_name, relationship_group, status, version, created_at, updated_at)
-          VALUES (?, ?, ?, ?, ?, 'pending', 1, ?, ?)
+            (raw_name, category, wording_style, second_name, template_key, relationship_group, status, version, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, 'pending', 1, ?, ?)
         `).run(
           validated.value.name,
           validated.value.category,
           validated.value.style,
           validated.value.secondName,
+          validated.value.templateKey,
           validated.value.relationshipGroup,
           createdAt,
           createdAt,
@@ -563,7 +615,7 @@ function createInvitationAdmin({ db, readJson, sendJson, sendError, sendEmpty, g
         const id = Number(result.lastInsertRowid);
         insertGuestTitles(db, id, validated.value.titles, createdAt);
         return db.prepare(`
-          SELECT id, raw_name, category, wording_style, second_name, relationship_group, status, version, copied_at, sent_at, created_at, updated_at
+          SELECT id, raw_name, category, wording_style, second_name, template_key, relationship_group, status, version, copied_at, sent_at, created_at, updated_at
           FROM invitation_guests WHERE id = ?
         `).get(id);
       });
@@ -582,7 +634,7 @@ function createInvitationAdmin({ db, readJson, sendJson, sendError, sendEmpty, g
         return;
       }
       const currentRow = db.prepare(`
-        SELECT id, raw_name, category, wording_style, second_name, relationship_group, status, version, copied_at, sent_at, created_at, updated_at
+        SELECT id, raw_name, category, wording_style, second_name, template_key, relationship_group, status, version, copied_at, sent_at, created_at, updated_at
         FROM invitation_guests WHERE id = ?
       `).get(id);
       if (!currentRow) {
@@ -622,8 +674,8 @@ function createInvitationAdmin({ db, readJson, sendJson, sendError, sendEmpty, g
       const row = runTransaction(db, () => {
         db.prepare(`
           UPDATE invitation_guests
-          SET raw_name = ?, category = ?, wording_style = ?, second_name = ?, relationship_group = ?,
-              status = ?, version = version + 1,
+          SET raw_name = ?, category = ?, wording_style = ?, second_name = ?, template_key = ?,
+              relationship_group = ?, status = ?, version = version + 1,
               copied_at = ?, sent_at = ?, updated_at = ?
           WHERE id = ? AND version = ?
         `).run(
@@ -631,6 +683,7 @@ function createInvitationAdmin({ db, readJson, sendJson, sendError, sendEmpty, g
           validated.value.category,
           validated.value.style,
           validated.value.secondName,
+          validated.value.templateKey,
           validated.value.relationshipGroup,
           status,
           copiedAt,
@@ -642,7 +695,7 @@ function createInvitationAdmin({ db, readJson, sendJson, sendError, sendEmpty, g
         db.prepare('DELETE FROM invitation_guest_titles WHERE guest_id = ?').run(id);
         insertGuestTitles(db, id, validated.value.titles, updatedAt);
         return db.prepare(`
-          SELECT id, raw_name, category, wording_style, second_name, relationship_group, status, version, copied_at, sent_at, created_at, updated_at
+          SELECT id, raw_name, category, wording_style, second_name, template_key, relationship_group, status, version, copied_at, sent_at, created_at, updated_at
           FROM invitation_guests WHERE id = ?
         `).get(id);
       });
@@ -699,8 +752,7 @@ function createInvitationAdmin({ db, readJson, sendJson, sendError, sendEmpty, g
     }
 
     if (subpath === '/settings' && request.method === 'GET') {
-      const settings = db.prepare('SELECT message_template, version, updated_at FROM invitation_settings WHERE id = 1').get();
-      sendJson(response, 200, { settings });
+      sendJson(response, 200, { settings: readSettings(db) });
       return;
     }
 
@@ -712,23 +764,26 @@ function createInvitationAdmin({ db, readJson, sendJson, sendError, sendEmpty, g
         sendError(response, error.code === 'body_too_large' ? 413 : 400, error.code || 'invalid_json', error.message);
         return;
       }
-      const validationError = validateTemplate(payload.template);
-      if (validationError) {
-        sendError(response, 422, ...validationError);
-        return;
+      const current = readSettings(db);
+      const templates = { ...current.templates, ...(payload.templates || {}) };
+      for (const key of TEMPLATE_KEYS) {
+        const validationError = validateTemplate(templates[key]);
+        if (validationError) {
+          sendError(response, 422, ...validationError);
+          return;
+        }
       }
-      const current = db.prepare('SELECT version FROM invitation_settings WHERE id = 1').get();
-      if (!Number.isInteger(payload.version) || payload.version !== Number(current.version)) {
+      if (!Number.isInteger(payload.version) || payload.version !== current.version) {
         sendError(response, 409, 'version_conflict', 'The message template changed on another device.');
         return;
       }
       const updatedAt = nowIso();
       db.prepare(`
-        UPDATE invitation_settings SET message_template = ?, version = version + 1, updated_at = ?
+        UPDATE invitation_settings
+        SET message_template_friend = ?, message_template_parent = ?, version = version + 1, updated_at = ?
         WHERE id = 1 AND version = ?
-      `).run(payload.template, updatedAt, payload.version);
-      const settings = db.prepare('SELECT message_template, version, updated_at FROM invitation_settings WHERE id = 1').get();
-      sendJson(response, 200, { settings });
+      `).run(templates.friend, templates.parent, updatedAt, payload.version);
+      sendJson(response, 200, { settings: readSettings(db) });
       return;
     }
 

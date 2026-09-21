@@ -134,6 +134,14 @@ import '../styles/guest-manager.css';
               <option value="parent_friend_aliva">Teman Orang Tua Aliva</option>
             </select>
           </div>
+          <div class="gm-field gm-field--wide">
+            <label class="gm-label" for="guest-template">Template pesan</label>
+            <select id="guest-template" class="gm-input gm-select" name="template_key" required>
+              <option value="friend">Template Untuk Teman</option>
+              <option value="parent">Template Untuk Orang Tua</option>
+            </select>
+            <p class="gm-help">Pesan yang disalin lewat tombol Salin Pesan. Mengikuti kelompok tamu sampai Anda memilih sendiri.</p>
+          </div>
         </div>
 
         <div id="title-sections">
@@ -233,14 +241,20 @@ import '../styles/guest-manager.css';
       <form id="template-form" class="gm-dialog-form" novalidate>
         <div class="gm-dialog-header">
           <div>
-            <p class="gm-eyebrow">Satu template untuk semua kategori</p>
+            <p class="gm-eyebrow">Dua template, dipilih per tamu</p>
             <h2 id="template-dialog-heading">Template Pesan</h2>
           </div>
           <button class="gm-icon-button" type="button" data-close-dialog="template-dialog" aria-label="Tutup template">×</button>
         </div>
         <p class="gm-help">Gunakan <code>{'{{nama_tamu}}'}</code> dan <code>{'{{link_undangan}}'}</code>. Pesan belum dapat disalin sebelum kedua placeholder tersedia.</p>
-        <label class="gm-label" for="message-template">Pesan formal</label>
-        <textarea id="message-template" class="gm-input gm-textarea" rows="12" maxlength="8000"></textarea>
+        <div class="gm-field gm-template-field">
+          <label class="gm-label" for="message-template-friend">Template Untuk Teman</label>
+          <textarea id="message-template-friend" class="gm-input gm-textarea" rows="10" maxlength="8000"></textarea>
+        </div>
+        <div class="gm-field gm-template-field">
+          <label class="gm-label" for="message-template-parent">Template Untuk Orang Tua</label>
+          <textarea id="message-template-parent" class="gm-input gm-textarea" rows="10" maxlength="8000"></textarea>
+        </div>
         <p id="template-form-error" class="gm-error" role="alert" hidden></p>
         <div class="gm-dialog-actions">
           <button class="gm-button gm-button--quiet" type="button" data-close-dialog="template-dialog">Batal</button>
