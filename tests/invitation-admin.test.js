@@ -181,20 +181,6 @@ test('wording styles are stored, validated and filterable', async () => {
     method: 'POST',
     body: JSON.stringify({
       name: 'Sari',
-      category: 'titled',
-      wording_style: 'ibu_bapak_family',
-      second_name: 'Dodi',
-      relationship_group: 'friend_andrika',
-      titles: ['Dr.'],
-    }),
-  });
-  assert.equal(result.response.status, 422);
-  assert.equal(result.body.code, 'titles_not_allowed');
-
-  result = await send('/api/invitation-admin/guests', {
-    method: 'POST',
-    body: JSON.stringify({
-      name: 'Sari',
       category: 'personal',
       wording_style: 'tidak-ada',
       relationship_group: 'friend_andrika',
@@ -220,6 +206,80 @@ test('wording styles are stored, validated and filterable', async () => {
   assert.equal(result.body.guest.second_name, 'Dodi');
   assert.equal(result.body.guest.category, 'personal');
   const styled = result.body.guest;
+
+  // A style names people, so each of them may carry titles of their own.
+  result = await send('/api/invitation-admin/guests', {
+    method: 'POST',
+    body: JSON.stringify({
+      name: 'Rina',
+      category: 'personal',
+      wording_style: 'ibu_bapak_family',
+      second_name: 'Agus',
+      relationship_group: 'friend_aliva',
+      titles: [
+        { label: 'Dr.', placement: 'prefix', person: 1 },
+        { label: 'S.Kom', placement: 'suffix', person: 1 },
+        { label: 'S.T', placement: 'suffix', person: 2 },
+      ],
+    }),
+  });
+  assert.equal(result.response.status, 201);
+  assert.deepEqual(
+    result.body.guest.titles.map(({ label, placement, person }) => ({ label, placement, person })),
+    [
+      { label: 'Dr.', placement: 'prefix', person: 1 },
+      { label: 'S.Kom', placement: 'suffix', person: 1 },
+      { label: 'S.T', placement: 'suffix', person: 2 },
+    ],
+  );
+  const titled = result.body.guest;
+
+  // The same degree may sit on both halves of a couple.
+  result = await send(`/api/invitation-admin/guests/${titled.id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({
+      version: titled.version,
+      name: 'Rina',
+      category: 'personal',
+      wording_style: 'ibu_bapak_family',
+      second_name: 'Agus',
+      relationship_group: 'friend_aliva',
+      titles: [
+        { label: 'S.Kom', placement: 'suffix', person: 1 },
+        { label: 'S.Kom', placement: 'suffix', person: 2 },
+      ],
+      status: 'pending',
+    }),
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.body.guest.titles.length, 2);
+
+  // A one-name style has nobody to hang the second person's titles on.
+  result = await send(`/api/invitation-admin/guests/${titled.id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({
+      version: result.body.guest.version,
+      name: 'Rina',
+      category: 'personal',
+      wording_style: 'ibu_family',
+      second_name: 'Agus',
+      relationship_group: 'friend_aliva',
+      titles: [
+        { label: 'S.Kom', placement: 'suffix', person: 1 },
+        { label: 'S.T', placement: 'suffix', person: 2 },
+      ],
+      status: 'pending',
+    }),
+  });
+  assert.equal(result.response.status, 200);
+  assert.deepEqual(result.body.guest.titles.map((title) => title.person), [1]);
+  assert.equal(result.body.guest.second_name, '');
+
+  result = await send(`/api/invitation-admin/guests/${titled.id}`, {
+    method: 'DELETE',
+    body: JSON.stringify({ version: result.body.guest.version }),
+  });
+  assert.equal(result.response.status, 204);
 
   result = await send('/api/invitation-admin/guests?wording_style=ibu_bapak_family');
   assert.equal(result.body.total, 1);
@@ -270,10 +330,33 @@ test('a guest list created before styles existed keeps its rows', async () => {
       updated_at TEXT NOT NULL
     );
   `);
+  db.exec(`
+    CREATE TABLE invitation_titles (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      label TEXT NOT NULL,
+      normalized_label TEXT NOT NULL UNIQUE,
+      is_default INTEGER NOT NULL DEFAULT 0 CHECK (is_default IN (0, 1)),
+      is_active INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0, 1)),
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE invitation_guest_titles (
+      guest_id INTEGER NOT NULL REFERENCES invitation_guests(id) ON DELETE CASCADE,
+      title_id INTEGER NOT NULL REFERENCES invitation_titles(id) ON DELETE RESTRICT,
+      position INTEGER NOT NULL CHECK (position >= 0),
+      PRIMARY KEY (guest_id, position),
+      UNIQUE (guest_id, title_id)
+    );
+  `);
   db.prepare(`
     INSERT INTO invitation_guests (raw_name, category, relationship_group, created_at, updated_at)
     VALUES ('Budi Santoso', 'personal', 'friend_aliva', '2026-01-01T00:00:00.000Z', '2026-01-01T00:00:00.000Z')
   `).run();
+  db.prepare(`
+    INSERT INTO invitation_titles (id, label, normalized_label, is_default, created_at)
+    VALUES (1, 'Dr.', 'dr.', 1, '2026-01-01T00:00:00.000Z')
+  `).run();
+  db.prepare('INSERT INTO invitation_guest_titles (guest_id, title_id, position) VALUES (1, 1, 0)').run();
 
   const noop = () => {};
   createInvitationAdmin({
@@ -289,5 +372,17 @@ test('a guest list created before styles existed keeps its rows', async () => {
   assert.equal(row.raw_name, 'Budi Santoso');
   assert.equal(row.wording_style, 'default');
   assert.equal(row.second_name, '');
+
+  // The title a guest already carried survives the rebuilt link table, and
+  // belongs to the first person it was always printed in front of.
+  const link = db.prepare(`
+    SELECT t.label, t.placement, gt.person, gt.position
+    FROM invitation_guest_titles gt JOIN invitation_titles t ON t.id = gt.title_id
+  `).get();
+  assert.deepEqual({ ...link }, { label: 'Dr.', placement: 'prefix', person: 1, position: 0 });
+  assert.equal(
+    db.prepare(`SELECT COUNT(*) n FROM invitation_titles WHERE placement = 'suffix'`).get().n > 0,
+    true,
+  );
   db.close();
 });

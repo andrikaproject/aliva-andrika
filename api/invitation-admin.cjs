@@ -23,7 +23,13 @@ const WORDING_STYLES = new Map([
 ]);
 const GROUPS = new Set(['friend_andrika', 'friend_aliva', 'parent_friend_andrika', 'parent_friend_aliva']);
 const STATUSES = new Set(['pending', 'copied', 'sent']);
+const PLACEMENTS = new Set(['prefix', 'suffix']);
 const TITLES = ['Bapak', 'Ibu', 'Saudara', 'Saudari', 'H.', 'Hj.', 'Dr.', 'dr.', 'Prof.', 'Ir.'];
+// Degrees are written after the name, so they ship as their own list.
+const SUFFIX_TITLES = [
+  'S.Kom', 'S.Si', 'S.T', 'S.E', 'S.H', 'S.Pd', 'S.Sos', 'S.Psi', 'S.Ked', 'S.Farm', 'S.Ag', 'S.IP',
+  'A.Md', 'M.M', 'M.Kom', 'M.Si', 'M.T', 'M.Pd',
+];
 
 function initializeInvitationAdmin(db) {
   db.exec(`
@@ -62,6 +68,7 @@ function initializeInvitationAdmin(db) {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       label TEXT NOT NULL,
       normalized_label TEXT NOT NULL UNIQUE,
+      placement TEXT NOT NULL DEFAULT 'prefix' CHECK (placement IN ('prefix', 'suffix')),
       is_default INTEGER NOT NULL DEFAULT 0 CHECK (is_default IN (0, 1)),
       is_active INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0, 1)),
       created_at TEXT NOT NULL
@@ -70,9 +77,10 @@ function initializeInvitationAdmin(db) {
     CREATE TABLE IF NOT EXISTS invitation_guest_titles (
       guest_id INTEGER NOT NULL REFERENCES invitation_guests(id) ON DELETE CASCADE,
       title_id INTEGER NOT NULL REFERENCES invitation_titles(id) ON DELETE RESTRICT,
+      person INTEGER NOT NULL DEFAULT 1 CHECK (person IN (1, 2)),
       position INTEGER NOT NULL CHECK (position >= 0),
-      PRIMARY KEY (guest_id, position),
-      UNIQUE (guest_id, title_id)
+      PRIMARY KEY (guest_id, person, position),
+      UNIQUE (guest_id, person, title_id)
     );
 
     CREATE TABLE IF NOT EXISTS invitation_settings (
@@ -93,12 +101,41 @@ function initializeInvitationAdmin(db) {
     db.exec(`ALTER TABLE invitation_guests ADD COLUMN second_name TEXT NOT NULL DEFAULT ''`);
   }
 
+  const titleColumns = new Set(db.prepare('PRAGMA table_info(invitation_titles)').all().map((column) => column.name));
+  if (!titleColumns.has('placement')) {
+    db.exec(`ALTER TABLE invitation_titles ADD COLUMN placement TEXT NOT NULL DEFAULT 'prefix'`);
+  }
+
+  // The link table gains the person a title belongs to. Its primary key has
+  // to change with it, which SQLite only allows by rebuilding the table.
+  const linkColumns = new Set(db.prepare('PRAGMA table_info(invitation_guest_titles)').all().map((column) => column.name));
+  if (!linkColumns.has('person')) {
+    db.exec(`
+      BEGIN IMMEDIATE;
+      CREATE TABLE invitation_guest_titles_rebuilt (
+        guest_id INTEGER NOT NULL REFERENCES invitation_guests(id) ON DELETE CASCADE,
+        title_id INTEGER NOT NULL REFERENCES invitation_titles(id) ON DELETE RESTRICT,
+        person INTEGER NOT NULL DEFAULT 1 CHECK (person IN (1, 2)),
+        position INTEGER NOT NULL CHECK (position >= 0),
+        PRIMARY KEY (guest_id, person, position),
+        UNIQUE (guest_id, person, title_id)
+      );
+      INSERT INTO invitation_guest_titles_rebuilt (guest_id, title_id, person, position)
+        SELECT guest_id, title_id, 1, position FROM invitation_guest_titles;
+      DROP TABLE invitation_guest_titles;
+      ALTER TABLE invitation_guest_titles_rebuilt RENAME TO invitation_guest_titles;
+      COMMIT;
+    `);
+  }
+
   const createdAt = new Date().toISOString();
   const insertTitle = db.prepare(`
-    INSERT OR IGNORE INTO invitation_titles (label, normalized_label, is_default, created_at)
-    VALUES (?, ?, 1, ?)
+    INSERT INTO invitation_titles (label, normalized_label, placement, is_default, created_at)
+    VALUES (?, ?, ?, 1, ?)
+    ON CONFLICT(normalized_label) DO UPDATE SET placement = excluded.placement, is_default = 1
   `);
-  for (const label of TITLES) insertTitle.run(label, normalizeKey(label), createdAt);
+  for (const label of TITLES) insertTitle.run(label, normalizeKey(label), 'prefix', createdAt);
+  for (const label of SUFFIX_TITLES) insertTitle.run(label, normalizeKey(label), 'suffix', createdAt);
   db.prepare(`
     INSERT OR IGNORE INTO invitation_settings (id, message_template, version, updated_at)
     VALUES (1, '', 1, ?)
@@ -223,22 +260,40 @@ function validateWordingStyle(value) {
   return typeof value === 'string' && WORDING_STYLES.has(value);
 }
 
+/**
+ * Titles as {label, placement, person}. A bare string keeps its original
+ * meaning — a prefix on the first person — so older clients still work.
+ */
 function normalizeTitles(values) {
   if (!Array.isArray(values)) return [];
-  return values
-    .map((value) => textValue(value, MAX_TITLE_LENGTH))
-    .filter(Boolean)
-    .slice(0, MAX_TITLES);
+  const counts = new Map();
+  const titles = [];
+  for (const value of values) {
+    const raw = typeof value === 'string' ? { label: value } : (value && typeof value === 'object' ? value : {});
+    const label = textValue(raw.label, MAX_TITLE_LENGTH);
+    if (!label) continue;
+    const person = Number(raw.person) === 2 ? 2 : 1;
+    const taken = counts.get(person) || 0;
+    if (taken >= MAX_TITLES) continue;
+    counts.set(person, taken + 1);
+    titles.push({ label, placement: raw.placement === 'suffix' ? 'suffix' : 'prefix', person });
+  }
+  return titles;
 }
 
 function titleRowsFor(db, guestId) {
   return db.prepare(`
-    SELECT t.id, t.label
+    SELECT t.id, t.label, t.placement, gt.person
     FROM invitation_guest_titles gt
     JOIN invitation_titles t ON t.id = gt.title_id
     WHERE gt.guest_id = ?
-    ORDER BY gt.position ASC
-  `).all(guestId).map((row) => ({ id: Number(row.id), label: row.label }));
+    ORDER BY gt.person ASC, gt.position ASC
+  `).all(guestId).map((row) => ({
+    id: Number(row.id),
+    label: row.label,
+    placement: row.placement || 'prefix',
+    person: Number(row.person) || 1,
+  }));
 }
 
 function serializeGuest(db, row) {
@@ -261,20 +316,23 @@ function serializeGuest(db, row) {
 
 function insertGuestTitles(db, guestId, titles, createdAt) {
   const upsertTitle = db.prepare(`
-    INSERT INTO invitation_titles (label, normalized_label, is_default, is_active, created_at)
-    VALUES (?, ?, 0, 1, ?)
+    INSERT INTO invitation_titles (label, normalized_label, placement, is_default, is_active, created_at)
+    VALUES (?, ?, ?, 0, 1, ?)
     ON CONFLICT(normalized_label) DO UPDATE SET is_active = 1
   `);
   const findTitle = db.prepare('SELECT id FROM invitation_titles WHERE normalized_label = ?');
   const linkTitle = db.prepare(`
-    INSERT INTO invitation_guest_titles (guest_id, title_id, position) VALUES (?, ?, ?)
+    INSERT INTO invitation_guest_titles (guest_id, title_id, person, position) VALUES (?, ?, ?, ?)
   `);
-  titles.forEach((label, position) => {
+  const positions = new Map();
+  for (const { label, placement, person } of titles) {
     const normalized = normalizeKey(label);
-    upsertTitle.run(label, normalized, createdAt);
+    upsertTitle.run(label, normalized, placement, createdAt);
     const title = findTitle.get(normalized);
-    linkTitle.run(guestId, title.id, position);
-  });
+    const position = positions.get(person) || 0;
+    positions.set(person, position + 1);
+    linkTitle.run(guestId, title.id, person, position);
+  }
 }
 
 function validateGuestInput(payload, current = {}) {
@@ -285,9 +343,7 @@ function validateGuestInput(payload, current = {}) {
   const relationshipGroup = payload.relationship_group === undefined
     ? current.relationship_group
     : payload.relationship_group;
-  const titles = payload.titles === undefined
-    ? (current.titles || []).map((title) => title.label || title)
-    : normalizeTitles(payload.titles);
+  const titles = normalizeTitles(payload.titles === undefined ? (current.titles || []) : payload.titles);
   const style = payload.wording_style === undefined ? (current.wording_style || 'default') : payload.wording_style;
   const secondName = payload.second_name === undefined
     ? textValue(current.second_name || '', MAX_NAME_LENGTH)
@@ -297,20 +353,31 @@ function validateGuestInput(payload, current = {}) {
   if (!validateWordingStyle(style)) return { error: ['wording_style_invalid', 'Wording style is invalid.'] };
   if (!validateGroup(relationshipGroup)) return { error: ['relationship_group_invalid', 'Relationship group is invalid.'] };
 
+  const namedPeople = WORDING_STYLES.get(style);
   if (style !== 'default') {
-    if (titles.length > 0) return { error: ['titles_not_allowed', 'Titles are only allowed for Personal Bergelar.'] };
-    if (WORDING_STYLES.get(style) > 1 && !secondName) {
+    if (namedPeople > 1 && !secondName) {
       return { error: ['second_name_required', 'The second name is required for this wording style.'] };
     }
     // A style carries its own form of address, so the category it is filed
-    // under stays neutral rather than contradicting the printed wording.
-    return { value: { name, category: 'personal', relationshipGroup, titles: [], style, secondName } };
+    // under stays neutral rather than contradicting the printed wording. A
+    // style naming one person has nobody to hang a second person's titles on.
+    return {
+      value: {
+        name,
+        category: 'personal',
+        relationshipGroup,
+        titles: namedPeople > 1 ? titles : titles.filter((title) => title.person === 1),
+        style,
+        secondName: namedPeople > 1 ? secondName : '',
+      },
+    };
   }
 
   if (!validateCategory(category)) return { error: ['category_invalid', 'Invitation category is invalid.'] };
-  if (category === 'titled' && titles.length === 0) return { error: ['titles_required', 'At least one title is required.'] };
-  if (category !== 'titled' && titles.length > 0) return { error: ['titles_not_allowed', 'Titles are only allowed for Personal Bergelar.'] };
-  return { value: { name, category, relationshipGroup, titles, style, secondName: '' } };
+  const ownTitles = titles.filter((title) => title.person === 1);
+  if (category === 'titled' && ownTitles.length === 0) return { error: ['titles_required', 'At least one title is required.'] };
+  if (category !== 'titled' && ownTitles.length > 0) return { error: ['titles_not_allowed', 'Titles are only allowed for Personal Bergelar.'] };
+  return { value: { name, category, relationshipGroup, titles: ownTitles, style, secondName: '' } };
 }
 
 function listGuests(db, url) {
@@ -585,8 +652,14 @@ function createInvitationAdmin({ db, readJson, sendJson, sendError, sendEmpty, g
 
     if (subpath === '/titles' && request.method === 'GET') {
       const titles = db.prepare(`
-        SELECT id, label, is_default FROM invitation_titles WHERE is_active = 1 ORDER BY is_default DESC, id ASC
-      `).all().map((row) => ({ id: Number(row.id), label: row.label, is_default: Boolean(row.is_default) }));
+        SELECT id, label, placement, is_default FROM invitation_titles
+        WHERE is_active = 1 ORDER BY is_default DESC, id ASC
+      `).all().map((row) => ({
+        id: Number(row.id),
+        label: row.label,
+        placement: row.placement || 'prefix',
+        is_default: Boolean(row.is_default),
+      }));
       sendJson(response, 200, { titles });
       return;
     }
@@ -604,14 +677,24 @@ function createInvitationAdmin({ db, readJson, sendJson, sendError, sendEmpty, g
         sendError(response, 422, 'title_required', 'Title is required.');
         return;
       }
+      const placement = PLACEMENTS.has(payload.placement) ? payload.placement : 'prefix';
       const createdAt = nowIso();
+      // An existing label keeps the placement it was created with; the same
+      // degree cannot be a prefix for one guest and a suffix for another.
       db.prepare(`
-        INSERT INTO invitation_titles (label, normalized_label, is_default, is_active, created_at)
-        VALUES (?, ?, 0, 1, ?)
+        INSERT INTO invitation_titles (label, normalized_label, placement, is_default, is_active, created_at)
+        VALUES (?, ?, ?, 0, 1, ?)
         ON CONFLICT(normalized_label) DO UPDATE SET is_active = 1
-      `).run(label, normalizeKey(label), createdAt);
-      const title = db.prepare('SELECT id, label, is_default FROM invitation_titles WHERE normalized_label = ?').get(normalizeKey(label));
-      sendJson(response, 201, { title: { id: Number(title.id), label: title.label, is_default: Boolean(title.is_default) } });
+      `).run(label, normalizeKey(label), placement, createdAt);
+      const title = db.prepare('SELECT id, label, placement, is_default FROM invitation_titles WHERE normalized_label = ?').get(normalizeKey(label));
+      sendJson(response, 201, {
+        title: {
+          id: Number(title.id),
+          label: title.label,
+          placement: title.placement || 'prefix',
+          is_default: Boolean(title.is_default),
+        },
+      });
       return;
     }
 

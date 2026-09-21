@@ -54,10 +54,10 @@ import '../styles/guest-manager.css';
               <option value="titled">Personal Bergelar</option>
             </optgroup>
             <optgroup label="Style Kata">
-              <option value="style:ibu_family">Ibu &amp; Keluarga Besar</option>
-              <option value="style:bapak_family">Bapak &amp; Keluarga Besar</option>
-              <option value="style:ibu_bapak_family">Ibu &amp; Bapak Keluarga Besar</option>
-              <option value="style:bapak_ibu_family">Bapak &amp; Ibu Keluarga Besar</option>
+              <option value="style:ibu_family">Ibu &amp; Keluarga</option>
+              <option value="style:bapak_family">Bapak &amp; Keluarga</option>
+              <option value="style:ibu_bapak_family">Ibu &amp; Bapak Keluarga</option>
+              <option value="style:bapak_ibu_family">Bapak &amp; Ibu Keluarga</option>
             </optgroup>
           </select>
           <label class="sr-only" for="guest-status-filter">Status</label>
@@ -102,10 +102,10 @@ import '../styles/guest-manager.css';
             <label class="gm-label" for="guest-style">Style kata</label>
             <select id="guest-style" class="gm-input gm-select" name="wording_style" required>
               <option value="default">Default Template</option>
-              <option value="ibu_family">Ibu &amp; Keluarga Besar</option>
-              <option value="bapak_family">Bapak &amp; Keluarga Besar</option>
-              <option value="ibu_bapak_family">Ibu &amp; Bapak Keluarga Besar</option>
-              <option value="bapak_ibu_family">Bapak &amp; Ibu Keluarga Besar</option>
+              <option value="ibu_family">Ibu &amp; Keluarga</option>
+              <option value="bapak_family">Bapak &amp; Keluarga</option>
+              <option value="ibu_bapak_family">Ibu &amp; Bapak Keluarga</option>
+              <option value="bapak_ibu_family">Bapak &amp; Ibu Keluarga</option>
             </select>
             <p class="gm-help">Style menentukan sapaan yang tercetak di undangan, dan nama mana saja yang diminta di bawah.</p>
           </div>
@@ -136,21 +136,75 @@ import '../styles/guest-manager.css';
           </div>
         </div>
 
-        <div id="title-controls" class="gm-title-controls" hidden>
-          <label class="gm-label" for="title-picker">Gelar</label>
-          <div class="gm-title-picker">
-            <select id="title-picker" class="gm-input gm-select">
-              <option value="">Pilih gelar</option>
-            </select>
-            <button id="add-custom-title-button" class="gm-button gm-button--quiet" type="button">Tambah manual</button>
-          </div>
-          <div id="custom-title-row" class="gm-custom-title-row" hidden>
-            <label class="sr-only" for="custom-title">Gelar manual</label>
-            <input id="custom-title" class="gm-input" maxlength="32" placeholder="Contoh: H." />
-            <button id="save-custom-title-button" class="gm-button gm-button--quiet" type="button">Simpan gelar</button>
-          </div>
-          <div id="selected-titles" class="gm-selected-titles" aria-live="polite"></div>
-          <p class="gm-help">Urutan gelar dapat diubah sebelum disimpan.</p>
+        <div id="title-sections">
+          <section class="gm-title-block" id="title-block-1" hidden>
+            <fieldset class="gm-choice" id="title-question-1" hidden>
+              <legend class="gm-label" id="title-question-legend-1">Apakah tamu ini mempunyai gelar?</legend>
+              <label class="gm-choice-option">
+                <input type="radio" name="has-title-1" value="tidak" checked />
+                <span>Tidak</span>
+              </label>
+              <label class="gm-choice-option">
+                <input type="radio" name="has-title-1" value="ya" />
+                <span>Ya</span>
+              </label>
+            </fieldset>
+            <div class="gm-title-controls" id="title-controls-1" hidden>
+              <label class="gm-label" id="title-picker-label-1" for="title-picker-1">Gelar</label>
+              <div class="gm-title-picker">
+                <select id="title-picker-1" class="gm-input gm-select">
+                  <option value="">Pilih gelar</option>
+                </select>
+                <button id="add-custom-title-button-1" class="gm-button gm-button--quiet" type="button">Tambah manual</button>
+              </div>
+              <div id="custom-title-row-1" class="gm-custom-title-row" hidden>
+                <label class="sr-only" for="custom-title-1">Gelar manual</label>
+                <input id="custom-title-1" class="gm-input" maxlength="32" placeholder="Contoh: S.Kom" />
+                <label class="sr-only" for="custom-title-placement-1">Posisi gelar manual</label>
+                <select id="custom-title-placement-1" class="gm-input gm-select">
+                  <option value="prefix">Di depan nama</option>
+                  <option value="suffix">Di belakang nama</option>
+                </select>
+                <button id="save-custom-title-button-1" class="gm-button gm-button--quiet" type="button">Simpan gelar</button>
+              </div>
+              <div id="selected-titles-1" class="gm-selected-titles" aria-live="polite"></div>
+              <p class="gm-help">Gelar depan tercetak sebelum nama, gelar belakang setelah nama. Urutannya dapat diubah.</p>
+            </div>
+          </section>
+          <section class="gm-title-block" id="title-block-2" hidden>
+            <fieldset class="gm-choice" id="title-question-2" hidden>
+              <legend class="gm-label" id="title-question-legend-2">Apakah tamu ini mempunyai gelar?</legend>
+              <label class="gm-choice-option">
+                <input type="radio" name="has-title-2" value="tidak" checked />
+                <span>Tidak</span>
+              </label>
+              <label class="gm-choice-option">
+                <input type="radio" name="has-title-2" value="ya" />
+                <span>Ya</span>
+              </label>
+            </fieldset>
+            <div class="gm-title-controls" id="title-controls-2" hidden>
+              <label class="gm-label" id="title-picker-label-2" for="title-picker-2">Gelar</label>
+              <div class="gm-title-picker">
+                <select id="title-picker-2" class="gm-input gm-select">
+                  <option value="">Pilih gelar</option>
+                </select>
+                <button id="add-custom-title-button-2" class="gm-button gm-button--quiet" type="button">Tambah manual</button>
+              </div>
+              <div id="custom-title-row-2" class="gm-custom-title-row" hidden>
+                <label class="sr-only" for="custom-title-2">Gelar manual</label>
+                <input id="custom-title-2" class="gm-input" maxlength="32" placeholder="Contoh: S.Kom" />
+                <label class="sr-only" for="custom-title-placement-2">Posisi gelar manual</label>
+                <select id="custom-title-placement-2" class="gm-input gm-select">
+                  <option value="prefix">Di depan nama</option>
+                  <option value="suffix">Di belakang nama</option>
+                </select>
+                <button id="save-custom-title-button-2" class="gm-button gm-button--quiet" type="button">Simpan gelar</button>
+              </div>
+              <div id="selected-titles-2" class="gm-selected-titles" aria-live="polite"></div>
+              <p class="gm-help">Gelar depan tercetak sebelum nama, gelar belakang setelah nama. Urutannya dapat diubah.</p>
+            </div>
+          </section>
         </div>
 
         <div class="gm-field">

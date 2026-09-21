@@ -1,15 +1,21 @@
 import {
+  MAX_TITLES,
   buildInvitationUrl,
   displayRecipientName,
   styleHonorifics,
   type Honorific,
   type InvitationCategory,
   type RelationshipGroup,
+  type TitlePerson,
+  type TitlePlacement,
   type WordingStyle,
 } from '../lib/invitation-recipient.ts';
 
+const PEOPLE: readonly TitlePerson[] = [1, 2];
+
 type DeliveryStatus = 'pending' | 'copied' | 'sent';
-type Title = { id: number; label: string; is_default?: boolean };
+type Title = { id: number; label: string; placement: TitlePlacement; is_default?: boolean };
+type GuestTitle = Title & { person: TitlePerson };
 type Guest = {
   id: number;
   name: string;
@@ -17,7 +23,7 @@ type Guest = {
   wording_style: WordingStyle;
   second_name: string;
   relationship_group: RelationshipGroup;
-  titles: Title[];
+  titles: GuestTitle[];
   status: DeliveryStatus;
   version: number;
 };
@@ -35,9 +41,10 @@ const state = {
   templateVersion: 1,
   activeGroup: '',
   editing: null as Guest | null,
-  selectedTitles: [] as Title[],
-  // Titles a style put aside; changing one's mind must not cost the picking.
-  stashedTitles: [] as Title[],
+  // Titles per person, and the ones a changed answer put aside: saying "no"
+  // and thinking better of it must not cost the picking.
+  selectedTitles: { 1: [] as Title[], 2: [] as Title[] } as Record<TitlePerson, Title[]>,
+  stashedTitles: { 1: [] as Title[], 2: [] as Title[] } as Record<TitlePerson, Title[]>,
 };
 
 const $ = <T extends HTMLElement>(id: string): T => {
@@ -105,19 +112,22 @@ function categoryLabel(category: InvitationCategory): string {
 
 const STYLE_LABELS: Record<WordingStyle, string> = {
   default: 'Default Template',
-  ibu_family: 'Ibu & Keluarga Besar',
-  bapak_family: 'Bapak & Keluarga Besar',
-  ibu_bapak_family: 'Ibu & Bapak Keluarga Besar',
-  bapak_ibu_family: 'Bapak & Ibu Keluarga Besar',
+  ibu_family: 'Ibu & Keluarga',
+  bapak_family: 'Bapak & Keluarga',
+  ibu_bapak_family: 'Ibu & Bapak Keluarga',
+  bapak_ibu_family: 'Bapak & Ibu Keluarga',
 };
 
+const HONORIFIC_WORDS: Record<Honorific, string> = { ibu: 'Ibu', bapak: 'Bapak' };
 const NAME_FIELD_LABELS: Record<Honorific, string> = { ibu: 'Nama Ibu', bapak: 'Nama Bapak' };
+const PLACEMENT_LABELS: Record<TitlePlacement, string> = { prefix: 'Gelar depan', suffix: 'Gelar belakang' };
 
 const SAVE_ERRORS: Record<string, string> = {
   version_conflict: 'Tamu ini berubah di perangkat lain. Muat ulang lalu periksa data terbaru.',
   name_required: 'Nama tamu belum diisi.',
   second_name_required: 'Nama kedua belum diisi.',
   titles_required: 'Pilih minimal satu gelar untuk kategori Personal Bergelar.',
+  title_required: 'Tulis gelar manual terlebih dahulu.',
   titles_not_allowed: 'Gelar hanya berlaku untuk kategori Personal Bergelar.',
   category_invalid: 'Kategori belum dipilih dengan benar.',
   wording_style_invalid: 'Style kata belum dipilih dengan benar.',
@@ -149,11 +159,16 @@ function groupLabel(group: RelationshipGroup): string {
 
 type GuestWording = Pick<Guest, 'name' | 'category' | 'titles'> & Partial<Pick<Guest, 'wording_style' | 'second_name'>>;
 
+/** Both people's picks as one list, each title knowing whose it is. */
+function formTitles(): GuestTitle[] {
+  return PEOPLE.flatMap((person) => state.selectedTitles[person].map((title) => ({ ...title, person })));
+}
+
 function recipientInput(guest: GuestWording) {
   return {
     name: guest.name,
     category: guest.category,
-    titles: guest.titles.map((title) => title.label),
+    titles: guest.titles.map(({ label, placement, person }) => ({ label, placement, person })),
     style: guest.wording_style ?? 'default',
     secondName: guest.second_name ?? '',
   };
@@ -277,7 +292,7 @@ async function loadSupportingData(): Promise<void> {
   state.titles = titlePayload.titles;
   state.template = settingsPayload.settings.message_template;
   state.templateVersion = settingsPayload.settings.version;
-  renderTitlePicker();
+  renderTitlePickers();
 }
 
 function showDashboard(): void {
@@ -341,41 +356,50 @@ $('guest-group-tabs').addEventListener('click', (event) => {
   void loadGuests();
 });
 
-function renderTitlePicker(): void {
-  const picker = $('title-picker') as HTMLSelectElement;
+function renderTitlePicker(person: TitlePerson): void {
+  const picker = $(`title-picker-${person}`) as HTMLSelectElement;
   picker.replaceChildren(new Option('Pilih gelar', ''));
-  for (const title of state.titles) picker.append(new Option(title.label, String(title.id)));
+  for (const placement of ['prefix', 'suffix'] as const) {
+    const group = document.createElement('optgroup');
+    group.label = PLACEMENT_LABELS[placement];
+    for (const title of state.titles.filter((title) => title.placement === placement)) {
+      group.append(new Option(title.label, String(title.id)));
+    }
+    if (group.childElementCount > 0) picker.append(group);
+  }
   picker.append(new Option('Lainnya', 'custom'));
 }
 
-function renderSelectedTitles(): void {
-  const container = $('selected-titles');
+function renderTitlePickers(): void {
+  PEOPLE.forEach(renderTitlePicker);
+}
+
+function renderSelectedTitles(person: TitlePerson): void {
+  const container = $(`selected-titles-${person}`);
+  const titles = state.selectedTitles[person];
   container.replaceChildren();
-  state.selectedTitles.forEach((title, index) => {
+  titles.forEach((title, index) => {
     const chip = document.createElement('span');
     chip.className = 'gm-title-chip';
-    chip.append(escapeText(`${index + 1}. ${title.label}`));
+    chip.append(escapeText(`${index + 1}. ${title.label}${title.placement === 'suffix' ? ' · belakang' : ''}`));
+    const swap = (from: number, to: number) => {
+      [titles[from], titles[to]] = [titles[to], titles[from]];
+      renderSelectedTitles(person);
+      updateGuestPreview();
+    };
     if (index > 0) {
-      const moveUp = makeButton('↑', '', () => {
-        [state.selectedTitles[index - 1], state.selectedTitles[index]] = [state.selectedTitles[index], state.selectedTitles[index - 1]];
-        renderSelectedTitles();
-        updateGuestPreview();
-      });
+      const moveUp = makeButton('↑', '', () => swap(index - 1, index));
       moveUp.setAttribute('aria-label', `Naikkan gelar ${title.label}`);
       chip.append(moveUp);
     }
-    if (index < state.selectedTitles.length - 1) {
-      const moveDown = makeButton('↓', '', () => {
-        [state.selectedTitles[index], state.selectedTitles[index + 1]] = [state.selectedTitles[index + 1], state.selectedTitles[index]];
-        renderSelectedTitles();
-        updateGuestPreview();
-      });
+    if (index < titles.length - 1) {
+      const moveDown = makeButton('↓', '', () => swap(index, index + 1));
       moveDown.setAttribute('aria-label', `Turunkan gelar ${title.label}`);
       chip.append(moveDown);
     }
     const remove = makeButton('×', '', () => {
-      state.selectedTitles.splice(index, 1);
-      renderSelectedTitles();
+      titles.splice(index, 1);
+      renderSelectedTitles(person);
       updateGuestPreview();
     });
     remove.setAttribute('aria-label', `Hapus gelar ${title.label}`);
@@ -384,11 +408,40 @@ function renderSelectedTitles(): void {
   });
 }
 
+function renderAllSelectedTitles(): void {
+  PEOPLE.forEach(renderSelectedTitles);
+}
+
+/** Answering "no" parks the picks; answering "yes" again brings them back. */
+function setTitleAnswer(person: TitlePerson, wanted: boolean): void {
+  if (wanted) {
+    if (state.selectedTitles[person].length === 0 && state.stashedTitles[person].length > 0) {
+      state.selectedTitles[person] = state.stashedTitles[person];
+      state.stashedTitles[person] = [];
+    }
+  } else if (state.selectedTitles[person].length > 0) {
+    state.stashedTitles[person] = state.selectedTitles[person];
+    state.selectedTitles[person] = [];
+  }
+  renderSelectedTitles(person);
+}
+
+function titleAnswer(person: TitlePerson): boolean {
+  return (document.querySelector(`input[name="has-title-${person}"]:checked`) as HTMLInputElement | null)?.value === 'ya';
+}
+
+function setTitleRadio(person: TitlePerson, wanted: boolean): void {
+  const radio = document.querySelector<HTMLInputElement>(
+    `input[name="has-title-${person}"][value="${wanted ? 'ya' : 'tidak'}"]`,
+  );
+  if (radio) radio.checked = true;
+}
+
 function formWording(): GuestWording {
   return {
     name: ($('guest-name') as HTMLInputElement).value,
     category: ($('guest-category') as HTMLSelectElement).value as InvitationCategory,
-    titles: state.selectedTitles,
+    titles: formTitles(),
     wording_style: ($('guest-style') as HTMLSelectElement).value as WordingStyle,
     second_name: ($('guest-second-name') as HTMLInputElement).value,
   };
@@ -409,16 +462,38 @@ function syncStyleFields(): void {
   if (honorifics.length > 1) $('guest-second-name-label').textContent = NAME_FIELD_LABELS[honorifics[1]];
   else secondInput.value = '';
 
-  if (style !== 'default') {
-    if (state.selectedTitles.length > 0) {
-      state.stashedTitles = state.selectedTitles;
-      state.selectedTitles = [];
-      renderSelectedTitles();
+  syncTitleFields();
+}
+
+/**
+ * Gelar is asked once per person the invitation names. Under the default
+ * template the category already says whether there are any, so the question
+ * is only put to a style, which names people rather than a category.
+ */
+function syncTitleFields(): void {
+  const style = ($('guest-style') as HTMLSelectElement).value as WordingStyle;
+  const category = ($('guest-category') as HTMLSelectElement).value as InvitationCategory;
+  const honorifics = styleHonorifics(style);
+
+  for (const person of PEOPLE) {
+    const named = style === 'default' ? person === 1 && category === 'titled' : honorifics.length >= person;
+    const honorific = honorifics[person - 1];
+    const asks = named && style !== 'default';
+
+    $(`title-block-${person}`).hidden = !named;
+    $(`title-question-${person}`).hidden = !asks;
+    $(`title-controls-${person}`).hidden = !named || (asks && !titleAnswer(person));
+    $(`title-picker-label-${person}`).textContent = honorific
+      ? `Gelar ${HONORIFIC_WORDS[honorific]}`
+      : 'Gelar';
+    if (asks) {
+      $(`title-question-legend-${person}`).textContent =
+        `Apakah ${HONORIFIC_WORDS[honorific]} ini mempunyai gelar?`;
     }
-  } else if (state.stashedTitles.length > 0 && state.selectedTitles.length === 0) {
-    state.selectedTitles = state.stashedTitles;
-    state.stashedTitles = [];
-    renderSelectedTitles();
+
+    // Nobody to hang them on any more: park the picks rather than lose them.
+    if (!named) setTitleAnswer(person, false);
+    else if (!asks) setTitleAnswer(person, true);
   }
 }
 
@@ -426,7 +501,6 @@ function updateGuestPreview(): void {
   const guest = formWording();
   $('guest-preview-name').textContent = renderGuestName(guest);
   $('guest-preview-url').textContent = renderGuestUrl(guest);
-  $('title-controls').hidden = guest.wording_style !== 'default' || guest.category !== 'titled';
 }
 
 function resetGuestForm(): void {
@@ -437,13 +511,16 @@ function resetGuestForm(): void {
   ($('guest-style') as HTMLSelectElement).value = 'default';
   ($('guest-second-name') as HTMLInputElement).value = '';
   state.editing = null;
-  state.selectedTitles = [];
-  state.stashedTitles = [];
-  $('custom-title-row').hidden = true;
-  ($('custom-title') as HTMLInputElement).value = '';
+  state.selectedTitles = { 1: [], 2: [] };
+  state.stashedTitles = { 1: [], 2: [] };
+  for (const person of PEOPLE) {
+    setTitleRadio(person, false);
+    $(`custom-title-row-${person}`).hidden = true;
+    ($(`custom-title-${person}`) as HTMLInputElement).value = '';
+  }
   $('guest-dialog-heading').textContent = 'Tambah Tamu';
   setError($('guest-form-error'), '');
-  renderSelectedTitles();
+  renderAllSelectedTitles();
   syncStyleFields();
   updateGuestPreview();
 }
@@ -460,9 +537,12 @@ function openGuestDialog(guest: Guest | null = null): void {
     ($('guest-category') as HTMLSelectElement).value = guest.category;
     ($('guest-group') as HTMLSelectElement).value = guest.relationship_group;
     ($('guest-status') as HTMLSelectElement).value = guest.status;
-    state.selectedTitles = [...guest.titles];
+    for (const person of PEOPLE) {
+      state.selectedTitles[person] = guest.titles.filter((title) => title.person === person);
+      setTitleRadio(person, state.selectedTitles[person].length > 0);
+    }
     $('guest-dialog-heading').textContent = 'Edit Tamu';
-    renderSelectedTitles();
+    renderAllSelectedTitles();
     syncStyleFields();
     updateGuestPreview();
   }
@@ -472,11 +552,7 @@ function openGuestDialog(guest: Guest | null = null): void {
 
 $('add-guest-button').addEventListener('click', () => openGuestDialog());
 $('guest-category').addEventListener('change', () => {
-  const category = ($('guest-category') as HTMLSelectElement).value;
-  if (category !== 'titled' && state.selectedTitles.length > 0) {
-    state.selectedTitles = [];
-    renderSelectedTitles();
-  }
+  syncTitleFields();
   updateGuestPreview();
 });
 $('guest-style').addEventListener('change', () => {
@@ -485,45 +561,69 @@ $('guest-style').addEventListener('change', () => {
 });
 $('guest-name').addEventListener('input', updateGuestPreview);
 $('guest-second-name').addEventListener('input', updateGuestPreview);
-$('title-picker').addEventListener('change', (event) => {
-  const select = event.currentTarget as HTMLSelectElement;
-  if (select.value === 'custom') {
-    select.value = '';
-    $('custom-title-row').hidden = false;
-    ($('custom-title') as HTMLInputElement).focus();
-    return;
-  }
-  const title = state.titles.find((candidate) => String(candidate.id) === select.value);
-  if (!title || state.selectedTitles.some((selected) => selected.id === title.id)) return;
-  if (state.selectedTitles.length >= 6) return showToast('Maksimal enam gelar dapat dipilih.');
-  state.selectedTitles.push(title);
-  select.value = '';
-  renderSelectedTitles();
-  updateGuestPreview();
-});
+for (const person of PEOPLE) {
+  const picker = $(`title-picker-${person}`) as HTMLSelectElement;
+  const customRow = $(`custom-title-row-${person}`);
+  const customInput = $(`custom-title-${person}`) as HTMLInputElement;
 
-$('add-custom-title-button').addEventListener('click', () => {
-  $('custom-title-row').hidden = false;
-  ($('custom-title') as HTMLInputElement).focus();
-});
+  const openCustomRow = () => {
+    customRow.hidden = false;
+    customInput.focus();
+  };
 
-$('save-custom-title-button').addEventListener('click', async () => {
-  const input = $('custom-title') as HTMLInputElement;
-  const label = input.value.trim();
-  if (!label) return showToast('Tulis gelar manual terlebih dahulu.');
-  try {
-    const payload = await request<{ title: Title }>('/titles', { method: 'POST', body: JSON.stringify({ label }) });
-    state.titles = [...state.titles.filter((title) => title.id !== payload.title.id), payload.title];
-    renderTitlePicker();
-    state.selectedTitles.push(payload.title);
-    input.value = '';
-    $('custom-title-row').hidden = true;
-    renderSelectedTitles();
+  document.querySelectorAll<HTMLInputElement>(`input[name="has-title-${person}"]`).forEach((radio) => {
+    radio.addEventListener('change', () => {
+      setTitleAnswer(person, radio.value === 'ya');
+      syncTitleFields();
+      updateGuestPreview();
+    });
+  });
+
+  picker.addEventListener('change', () => {
+    if (picker.value === 'custom') {
+      picker.value = '';
+      openCustomRow();
+      return;
+    }
+    const title = state.titles.find((candidate) => String(candidate.id) === picker.value);
+    picker.value = '';
+    if (!title) return;
+    const chosen = state.selectedTitles[person];
+    if (chosen.some((selected) => selected.id === title.id)) return;
+    if (chosen.length >= MAX_TITLES) return showToast(`Maksimal ${MAX_TITLES} gelar per orang.`);
+    chosen.push(title);
+    renderSelectedTitles(person);
     updateGuestPreview();
-  } catch (error) {
-    showToast(error instanceof Error ? error.message : 'Gelar manual tidak dapat disimpan.');
-  }
-});
+  });
+
+  $(`add-custom-title-button-${person}`).addEventListener('click', openCustomRow);
+
+  $(`save-custom-title-button-${person}`).addEventListener('click', async () => {
+    const label = customInput.value.trim();
+    if (!label) return showToast('Tulis gelar manual terlebih dahulu.');
+    const placement = ($(`custom-title-placement-${person}`) as HTMLSelectElement).value as TitlePlacement;
+    try {
+      const payload = await request<{ title: Title }>('/titles', {
+        method: 'POST',
+        body: JSON.stringify({ label, placement }),
+      });
+      state.titles = [...state.titles.filter((title) => title.id !== payload.title.id), payload.title];
+      renderTitlePickers();
+      if (!state.selectedTitles[person].some((title) => title.id === payload.title.id)) {
+        state.selectedTitles[person].push(payload.title);
+      }
+      customInput.value = '';
+      customRow.hidden = true;
+      renderSelectedTitles(person);
+      updateGuestPreview();
+    } catch (error) {
+      const code = (error as ApiError).code;
+      showToast(code && code in SAVE_ERRORS
+        ? SAVE_ERRORS[code]
+        : error instanceof Error ? error.message : 'Gelar manual tidak dapat disimpan.');
+    }
+  });
+}
 
 guestForm.addEventListener('submit', async (event) => {
   event.preventDefault();
@@ -540,7 +640,7 @@ guestForm.addEventListener('submit', async (event) => {
     wording_style: style,
     second_name: wording.second_name,
     relationship_group: ($('guest-group') as HTMLSelectElement).value,
-    titles: state.selectedTitles.map((title) => title.label),
+    titles: formTitles().map(({ label, placement, person }) => ({ label, placement, person })),
     status: ($('guest-status') as HTMLSelectElement).value,
   };
   const id = ($('guest-id') as HTMLInputElement).value;
@@ -585,7 +685,7 @@ async function updateStatus(guest: Guest, status: DeliveryStatus): Promise<void>
       wording_style: guest.wording_style,
       second_name: guest.second_name,
       relationship_group: guest.relationship_group,
-      titles: guest.titles.map((title) => title.label),
+      titles: guest.titles.map(({ label, placement, person }) => ({ label, placement, person })),
       status,
     }),
   });

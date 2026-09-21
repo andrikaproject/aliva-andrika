@@ -2,10 +2,11 @@ import { playReliably } from './audio.ts';
 import type { Locale } from '../i18n/index.ts';
 import { getLocale, onLocaleChange, t } from './locale.ts';
 import {
+  decorateRecipientName,
   familyRecipientNames,
   isWordingStyle,
   normalizeGroupName,
-  normalizeTitles,
+  recipientTitlesFromParams,
   sanitizeRecipientPart,
 } from '../lib/invitation-recipient.ts';
 
@@ -92,18 +93,18 @@ export function initInvitation(prefersReducedMotion: boolean): void {
         ? { prefix: 'cover.groupGreetingPrefix', name: 'cover.groupGreetingName' }
         : { prefix: 'cover.guestGreetingPrefix', name: titled ? 'cover.titledGreetingName' : 'cover.guestGreetingName' };
     const safeName = group ? normalizeGroupName(guestName) : sanitizeRecipientPart(guestName);
-    const safeTitles = normalizeTitles(params.getAll('title'));
+    const titles = recipientTitlesFromParams(params);
 
     // A style spells its honorifics differently per language, so the name is
     // rebuilt on every switch rather than captured once.
     const nameFor = (locale: Locale): string =>
       style
         ? familyRecipientNames(
-            { name: guestName, category: 'personal', style, secondName: params.get('to2') ?? '' },
+            { name: guestName, category: 'personal', style, secondName: params.get('to2') ?? '', titles },
             locale,
           )
-        : titled && safeTitles.length > 0
-          ? `${safeTitles.join(' ')} ${safeName}`
+        : titled
+          ? decorateRecipientName(safeName, titles)
           : safeName;
 
     if (nameFor(getLocale())) {

@@ -55,12 +55,28 @@ export const RELATIONSHIP_GROUPS: readonly RelationshipGroup[] = [
 
 export const TITLE_MAX_LENGTH = 32;
 export const RECIPIENT_NAME_MAX_LENGTH = 60;
+/** Per person, so a couple can carry six each. */
 export const MAX_TITLES = 6;
+
+/** Where a degree sits: "Dr." before the name, "S.Kom" after it. */
+export type TitlePlacement = 'prefix' | 'suffix';
+
+/** Which of the people a style names the title belongs to. */
+export type TitlePerson = 1 | 2;
+
+export interface RecipientTitle {
+  label: string;
+  placement?: TitlePlacement;
+  person?: TitlePerson;
+}
+
+/** A bare string is a prefix on the first person — the original shape. */
+export type TitleInput = string | RecipientTitle;
 
 export interface InvitationRecipientInput {
   name: string;
   category: InvitationCategory;
-  titles?: readonly string[];
+  titles?: readonly TitleInput[];
   style?: WordingStyle;
   /** The second person named by a two-honorific style. */
   secondName?: string;
@@ -97,6 +113,49 @@ export function normalizeTitles(values: readonly string[] = []): string[] {
     .slice(0, MAX_TITLES);
 }
 
+/** Titles with their placement and owner settled, capped per person. */
+export function normalizeRecipientTitles(values: readonly TitleInput[] = []): Required<RecipientTitle>[] {
+  const counts = new Map<TitlePerson, number>();
+  const titles: Required<RecipientTitle>[] = [];
+  for (const value of values) {
+    const raw = typeof value === 'string' ? { label: value } : value;
+    const label = sanitizeRecipientPart(raw.label ?? '', TITLE_MAX_LENGTH);
+    if (!label) continue;
+    const person: TitlePerson = raw.person === 2 ? 2 : 1;
+    const taken = counts.get(person) ?? 0;
+    if (taken >= MAX_TITLES) continue;
+    counts.set(person, taken + 1);
+    titles.push({ label, placement: raw.placement === 'suffix' ? 'suffix' : 'prefix', person });
+  }
+  return titles;
+}
+
+function titlesFor(
+  titles: readonly TitleInput[] | undefined,
+  person: TitlePerson,
+  placement: TitlePlacement,
+): string[] {
+  return normalizeRecipientTitles(titles)
+    .filter((title) => title.person === person && title.placement === placement)
+    .map((title) => title.label);
+}
+
+/**
+ * A name wearing its degrees: prefixes lead, suffixes follow behind a comma,
+ * the way they are printed on an Indonesian invitation.
+ */
+export function decorateRecipientName(
+  name: string,
+  titles: readonly TitleInput[] | undefined,
+  person: TitlePerson = 1,
+): string {
+  const prefixes = titlesFor(titles, person, 'prefix');
+  const suffixes = titlesFor(titles, person, 'suffix');
+  const lead = prefixes.length > 0 ? `${prefixes.join(' ')} ` : '';
+  const trail = suffixes.length > 0 ? `, ${suffixes.join(', ')}` : '';
+  return `${lead}${name}${trail}`;
+}
+
 /**
  * The named people alone — "Ibu Sari & Bapak Dodi" — without the family
  * suffix, which the dictionary owns so the cover can translate it.
@@ -107,7 +166,11 @@ export function normalizeTitles(values: readonly string[] = []): string[] {
 export function familyRecipientNames(input: InvitationRecipientInput, locale: 'id' | 'en' = 'id'): string {
   const names = [sanitizeRecipientPart(input.name), sanitizeRecipientPart(input.secondName ?? '')];
   return styleHonorifics(input.style)
-    .map((honorific, index) => (names[index] ? `${HONORIFIC_LABELS[honorific][locale]} ${names[index]}` : ''))
+    .map((honorific, index) => {
+      if (!names[index]) return '';
+      const person: TitlePerson = index === 0 ? 1 : 2;
+      return `${HONORIFIC_LABELS[honorific][locale]} ${decorateRecipientName(names[index], input.titles, person)}`;
+    })
     .filter(Boolean)
     .join(' & ');
 }
@@ -116,7 +179,7 @@ export function displayRecipientName(input: InvitationRecipientInput, locale: 'i
   if (input.style && input.style !== 'default') {
     const named = familyRecipientNames(input, locale);
     if (!named) return '';
-    return locale === 'en' ? `${named} and Family` : `${named} Beserta Keluarga Besar`;
+    return locale === 'en' ? `${named} and Family` : `${named} Beserta Keluarga`;
   }
 
   const name = input.category === 'group' ? normalizeGroupName(input.name) : sanitizeRecipientPart(input.name);
@@ -127,9 +190,7 @@ export function displayRecipientName(input: InvitationRecipientInput, locale: 'i
   }
 
   if (input.category === 'titled') {
-    const titles = normalizeTitles(input.titles);
-    const prefix = titles.length > 0 ? `${titles.join(' ')} ` : '';
-    return `${prefix}${name} ${locale === 'en' ? '& Partner' : '& Pasangan'}`;
+    return `${decorateRecipientName(name, input.titles, 1)} ${locale === 'en' ? '& Partner' : '& Pasangan'}`;
   }
 
   return `${name} ${locale === 'en' ? '& Partner' : '& Pasangan'}`;
@@ -144,8 +205,12 @@ export function buildInvitationUrl(baseUrl: string, input: InvitationRecipientIn
     if (!name) return url.toString();
     url.searchParams.set('to', name);
     url.searchParams.set('style', input.style);
+    appendTitleParams(url, input.titles, 1);
     const secondName = sanitizeRecipientPart(input.secondName ?? '');
-    if (secondName && styleHonorifics(input.style).length > 1) url.searchParams.set('to2', secondName);
+    if (secondName && styleHonorifics(input.style).length > 1) {
+      url.searchParams.set('to2', secondName);
+      appendTitleParams(url, input.titles, 2);
+    }
     return url.toString();
   }
 
@@ -156,7 +221,34 @@ export function buildInvitationUrl(baseUrl: string, input: InvitationRecipientIn
   if (input.category === 'group') url.searchParams.set('type', 'group');
   if (input.category === 'titled') {
     url.searchParams.set('type', 'titled');
-    normalizeTitles(input.titles).forEach((title) => url.searchParams.append('title', title));
+    appendTitleParams(url, input.titles, 1);
   }
   return url.toString();
+}
+
+/** `title`/`title_suffix` for the first person, `title2…` for the second. */
+export const TITLE_PARAMS: Record<TitlePerson, Record<TitlePlacement, string>> = {
+  1: { prefix: 'title', suffix: 'title_suffix' },
+  2: { prefix: 'title2', suffix: 'title2_suffix' },
+};
+
+/** The titles a shared link carries, read back out of its query string. */
+export function recipientTitlesFromParams(params: URLSearchParams): Required<RecipientTitle>[] {
+  const titles: TitleInput[] = [];
+  for (const person of [1, 2] as const) {
+    for (const placement of ['prefix', 'suffix'] as const) {
+      for (const label of params.getAll(TITLE_PARAMS[person][placement])) {
+        titles.push({ label, placement, person });
+      }
+    }
+  }
+  return normalizeRecipientTitles(titles);
+}
+
+function appendTitleParams(url: URL, titles: readonly TitleInput[] | undefined, person: TitlePerson): void {
+  for (const placement of ['prefix', 'suffix'] as const) {
+    for (const label of titlesFor(titles, person, placement)) {
+      url.searchParams.append(TITLE_PARAMS[person][placement], label);
+    }
+  }
 }

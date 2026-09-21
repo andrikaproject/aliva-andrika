@@ -457,8 +457,58 @@ body.guest-manager-page {
   gap: 0.5rem;
 }
 
+/* The manual row also asks where the title sits, so it carries three. */
 .gm-custom-title-row {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 12rem) auto;
   margin-top: 0.65rem;
+}
+
+/* ── Gelar, asked once per person a style names ── */
+.gm-title-block + .gm-title-block {
+  margin-top: 0.4rem;
+}
+
+.gm-choice {
+  margin: 1.2rem 0 0;
+  padding: 1rem;
+  border: 1px solid var(--gm-line);
+  background: #fbf6ed;
+}
+
+/* Floated so the question sits inside the box rather than cutting its
+   top border, which a bare <legend> does. */
+.gm-choice legend {
+  float: left;
+  width: 100%;
+  padding: 0;
+  margin-bottom: 0.7rem;
+}
+
+.gm-choice::after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
+.gm-choice-option {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 0.45rem;
+  margin-right: 1.4rem;
+  color: var(--gm-ink);
+  font-size: 0.92rem;
+}
+
+.gm-choice-option input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--gm-wine);
+}
+
+/* The answer and its follow-up read as one block, not two cards. */
+.gm-choice + .gm-title-controls {
+  margin-top: -1px;
 }
 
 .gm-selected-titles {
