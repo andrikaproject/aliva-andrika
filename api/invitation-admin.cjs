@@ -57,6 +57,7 @@ function initializeInvitationAdmin(db) {
       status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'copied', 'sent')),
       wording_style TEXT NOT NULL DEFAULT 'default',
       second_name TEXT NOT NULL DEFAULT '',
+      with_partner INTEGER NOT NULL DEFAULT 1 CHECK (with_partner IN (0, 1)),
       version INTEGER NOT NULL DEFAULT 1,
       copied_at TEXT,
       sent_at TEXT,
@@ -103,6 +104,13 @@ function initializeInvitationAdmin(db) {
   }
   if (!guestColumns.has('second_name')) {
     db.exec(`ALTER TABLE invitation_guests ADD COLUMN second_name TEXT NOT NULL DEFAULT ''`);
+  }
+  if (!guestColumns.has('with_partner')) {
+    // Every invitation written so far named a partner alongside the guest.
+    db.exec(`
+      ALTER TABLE invitation_guests
+      ADD COLUMN with_partner INTEGER NOT NULL DEFAULT 1 CHECK (with_partner IN (0, 1))
+    `);
   }
   if (!guestColumns.has('template_key')) {
     db.exec(`
@@ -347,6 +355,7 @@ function serializeGuest(db, row) {
     category: row.category,
     wording_style: row.wording_style || 'default',
     second_name: row.second_name || '',
+    with_partner: Number(row.with_partner) !== 0,
     template_key: row.template_key || 'friend',
     relationship_group: row.relationship_group,
     titles: titleRowsFor(db, row.id),
@@ -394,6 +403,9 @@ function validateGuestInput(payload, current = {}) {
     ? textValue(current.second_name || '', MAX_NAME_LENGTH)
     : textValue(payload.second_name, MAX_NAME_LENGTH);
   // A guest of the parents' friends is written to as such unless said otherwise.
+  const withPartner = payload.with_partner === undefined
+    ? current.with_partner === undefined ? true : Number(current.with_partner) !== 0
+    : payload.with_partner !== false;
   const templateKey = payload.template_key === undefined
     ? (current.template_key || (String(relationshipGroup).startsWith('parent_') ? 'parent' : 'friend'))
     : payload.template_key;
@@ -419,6 +431,8 @@ function validateGuestInput(payload, current = {}) {
         titles: namedPeople > 1 ? titles : titles.filter((title) => title.person === 1),
         style,
         secondName: namedPeople > 1 ? secondName : '',
+        // A style prints its own form of address; no partner is appended.
+        withPartner: true,
         templateKey,
       },
     };
@@ -428,7 +442,19 @@ function validateGuestInput(payload, current = {}) {
   const ownTitles = titles.filter((title) => title.person === 1);
   if (category === 'titled' && ownTitles.length === 0) return { error: ['titles_required', 'At least one title is required.'] };
   if (category !== 'titled' && ownTitles.length > 0) return { error: ['titles_not_allowed', 'Titles are only allowed for Personal Bergelar.'] };
-  return { value: { name, category, relationshipGroup, titles: ownTitles, style, secondName: '', templateKey } };
+  return {
+    value: {
+      name,
+      category,
+      relationshipGroup,
+      titles: ownTitles,
+      style,
+      secondName: '',
+      // A whole family is never invited "& Pasangan" to begin with.
+      withPartner: category === 'group' ? true : withPartner,
+      templateKey,
+    },
+  };
 }
 
 function listGuests(db, url) {
@@ -437,6 +463,7 @@ function listGuests(db, url) {
   const search = textValue(url.searchParams.get('search') || '', MAX_NAME_LENGTH);
   const category = url.searchParams.get('category');
   const wordingStyle = url.searchParams.get('wording_style');
+  const withPartner = url.searchParams.get('with_partner');
   const relationshipGroup = url.searchParams.get('relationship_group');
   const status = url.searchParams.get('status');
 
@@ -452,6 +479,10 @@ function listGuests(db, url) {
     clauses.push('wording_style = ?');
     values.push(wordingStyle);
   }
+  if (withPartner === '0' || withPartner === '1') {
+    clauses.push('with_partner = ?');
+    values.push(Number(withPartner));
+  }
   if (validateGroup(relationshipGroup)) {
     clauses.push('relationship_group = ?');
     values.push(relationshipGroup);
@@ -463,7 +494,7 @@ function listGuests(db, url) {
 
   const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
   const rows = db.prepare(`
-    SELECT id, raw_name, category, wording_style, second_name, template_key, relationship_group, status, version, copied_at, sent_at, created_at, updated_at
+    SELECT id, raw_name, category, wording_style, second_name, with_partner, template_key, relationship_group, status, version, copied_at, sent_at, created_at, updated_at
     FROM invitation_guests
     ${where}
     ORDER BY updated_at DESC, id DESC
@@ -600,13 +631,14 @@ function createInvitationAdmin({ db, readJson, sendJson, sendError, sendEmpty, g
       const row = runTransaction(db, () => {
         const result = db.prepare(`
           INSERT INTO invitation_guests
-            (raw_name, category, wording_style, second_name, template_key, relationship_group, status, version, created_at, updated_at)
-          VALUES (?, ?, ?, ?, ?, ?, 'pending', 1, ?, ?)
+            (raw_name, category, wording_style, second_name, with_partner, template_key, relationship_group, status, version, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', 1, ?, ?)
         `).run(
           validated.value.name,
           validated.value.category,
           validated.value.style,
           validated.value.secondName,
+          validated.value.withPartner ? 1 : 0,
           validated.value.templateKey,
           validated.value.relationshipGroup,
           createdAt,
@@ -615,7 +647,7 @@ function createInvitationAdmin({ db, readJson, sendJson, sendError, sendEmpty, g
         const id = Number(result.lastInsertRowid);
         insertGuestTitles(db, id, validated.value.titles, createdAt);
         return db.prepare(`
-          SELECT id, raw_name, category, wording_style, second_name, template_key, relationship_group, status, version, copied_at, sent_at, created_at, updated_at
+          SELECT id, raw_name, category, wording_style, second_name, with_partner, template_key, relationship_group, status, version, copied_at, sent_at, created_at, updated_at
           FROM invitation_guests WHERE id = ?
         `).get(id);
       });
@@ -634,7 +666,7 @@ function createInvitationAdmin({ db, readJson, sendJson, sendError, sendEmpty, g
         return;
       }
       const currentRow = db.prepare(`
-        SELECT id, raw_name, category, wording_style, second_name, template_key, relationship_group, status, version, copied_at, sent_at, created_at, updated_at
+        SELECT id, raw_name, category, wording_style, second_name, with_partner, template_key, relationship_group, status, version, copied_at, sent_at, created_at, updated_at
         FROM invitation_guests WHERE id = ?
       `).get(id);
       if (!currentRow) {
@@ -674,8 +706,8 @@ function createInvitationAdmin({ db, readJson, sendJson, sendError, sendEmpty, g
       const row = runTransaction(db, () => {
         db.prepare(`
           UPDATE invitation_guests
-          SET raw_name = ?, category = ?, wording_style = ?, second_name = ?, template_key = ?,
-              relationship_group = ?, status = ?, version = version + 1,
+          SET raw_name = ?, category = ?, wording_style = ?, second_name = ?, with_partner = ?,
+              template_key = ?, relationship_group = ?, status = ?, version = version + 1,
               copied_at = ?, sent_at = ?, updated_at = ?
           WHERE id = ? AND version = ?
         `).run(
@@ -683,6 +715,7 @@ function createInvitationAdmin({ db, readJson, sendJson, sendError, sendEmpty, g
           validated.value.category,
           validated.value.style,
           validated.value.secondName,
+          validated.value.withPartner ? 1 : 0,
           validated.value.templateKey,
           validated.value.relationshipGroup,
           status,
@@ -695,7 +728,7 @@ function createInvitationAdmin({ db, readJson, sendJson, sendError, sendEmpty, g
         db.prepare('DELETE FROM invitation_guest_titles WHERE guest_id = ?').run(id);
         insertGuestTitles(db, id, validated.value.titles, updatedAt);
         return db.prepare(`
-          SELECT id, raw_name, category, wording_style, second_name, template_key, relationship_group, status, version, copied_at, sent_at, created_at, updated_at
+          SELECT id, raw_name, category, wording_style, second_name, with_partner, template_key, relationship_group, status, version, copied_at, sent_at, created_at, updated_at
           FROM invitation_guests WHERE id = ?
         `).get(id);
       });

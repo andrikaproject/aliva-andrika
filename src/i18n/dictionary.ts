@@ -30,6 +30,7 @@ export interface Dictionary {
     groupGreetingPrefix: string;
     groupGreetingName: string;
     familyGreetingName: string;
+    plainGreetingName: string;
   };
   hero: {
     celebration: string;

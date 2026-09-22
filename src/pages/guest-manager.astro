@@ -50,14 +50,15 @@ import '../styles/guest-manager.css';
             <option value="">Semua kategori</option>
             <optgroup label="Default Template">
               <option value="personal">Personal</option>
+              <option value="personal_solo">Personal Tanpa Pasangan</option>
               <option value="group">Group</option>
               <option value="titled">Personal Bergelar</option>
             </optgroup>
             <optgroup label="Style Kata">
               <option value="style:ibu_family">Ibu &amp; Keluarga</option>
               <option value="style:bapak_family">Bapak &amp; Keluarga</option>
-              <option value="style:ibu_bapak_family">Ibu &amp; Bapak Keluarga</option>
-              <option value="style:bapak_ibu_family">Bapak &amp; Ibu Keluarga</option>
+              <option value="style:ibu_bapak_family">Ibu &amp; Bapak</option>
+              <option value="style:bapak_ibu_family">Bapak &amp; Ibu</option>
             </optgroup>
           </select>
           <label class="sr-only" for="guest-status-filter">Status</label>
@@ -104,8 +105,8 @@ import '../styles/guest-manager.css';
               <option value="default">Default Template</option>
               <option value="ibu_family">Ibu &amp; Keluarga</option>
               <option value="bapak_family">Bapak &amp; Keluarga</option>
-              <option value="ibu_bapak_family">Ibu &amp; Bapak Keluarga</option>
-              <option value="bapak_ibu_family">Bapak &amp; Ibu Keluarga</option>
+              <option value="ibu_bapak_family">Ibu &amp; Bapak</option>
+              <option value="bapak_ibu_family">Bapak &amp; Ibu</option>
             </select>
             <p class="gm-help">Style menentukan sapaan yang tercetak di undangan, dan nama mana saja yang diminta di bawah.</p>
           </div>
@@ -121,6 +122,7 @@ import '../styles/guest-manager.css';
             <label class="gm-label" for="guest-category">Kategori</label>
             <select id="guest-category" class="gm-input gm-select" name="category" required>
               <option value="personal">Personal</option>
+              <option value="personal_solo">Personal Tanpa Pasangan</option>
               <option value="group">Group</option>
               <option value="titled">Personal Bergelar</option>
             </select>

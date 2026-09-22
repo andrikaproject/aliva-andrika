@@ -6,9 +6,9 @@ export const INVITATION_CATEGORIES: readonly InvitationCategory[] = ['personal',
  * How the recipient line is worded.
  *
  * `default` keeps the category-driven wording the invitation shipped with
- * ("… & Pasangan", "Keluarga Besar …"). The rest address one or both parents
- * of a household and always end in the extended family, printed in the order
- * the style names them.
+ * ("… & Pasangan", "Keluarga Besar …"). A style naming one parent carries
+ * the family with it; naming both already covers the household, so it ends
+ * at the two names, printed in the order the style gives them.
  */
 export type WordingStyle =
   | 'default'
@@ -80,6 +80,8 @@ export interface InvitationRecipientInput {
   style?: WordingStyle;
   /** The second person named by a two-honorific style. */
   secondName?: string;
+  /** False invites the person alone, without "& Pasangan" after the name. */
+  withPartner?: boolean;
 }
 
 export function isWordingStyle(value: unknown): value is WordingStyle {
@@ -179,6 +181,8 @@ export function displayRecipientName(input: InvitationRecipientInput, locale: 'i
   if (input.style && input.style !== 'default') {
     const named = familyRecipientNames(input, locale);
     if (!named) return '';
+    // Naming both of them already covers the household.
+    if (styleHonorifics(input.style).length > 1) return named;
     return locale === 'en' ? `${named} and Family` : `${named} Beserta Keluarga`;
   }
 
@@ -189,11 +193,13 @@ export function displayRecipientName(input: InvitationRecipientInput, locale: 'i
     return locale === 'en' ? `The ${name} Family` : `Keluarga Besar ${name}`;
   }
 
+  const partner = input.withPartner === false ? '' : locale === 'en' ? ' & Partner' : ' & Pasangan';
+
   if (input.category === 'titled') {
-    return `${decorateRecipientName(name, input.titles, 1)} ${locale === 'en' ? '& Partner' : '& Pasangan'}`;
+    return `${decorateRecipientName(name, input.titles, 1)}${partner}`;
   }
 
-  return `${name} ${locale === 'en' ? '& Partner' : '& Pasangan'}`;
+  return `${name}${partner}`;
 }
 
 export function buildInvitationUrl(baseUrl: string, input: InvitationRecipientInput): string {
@@ -223,6 +229,7 @@ export function buildInvitationUrl(baseUrl: string, input: InvitationRecipientIn
     url.searchParams.set('type', 'titled');
     appendTitleParams(url, input.titles, 1);
   }
+  if (input.category !== 'group' && input.withPartner === false) url.searchParams.set('solo', '1');
   return url.toString();
 }
 

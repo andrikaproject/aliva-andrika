@@ -54,11 +54,11 @@ test('the wording styles name one or both parents, then the family', () => {
   );
   assert.equal(
     displayRecipientName({ ...both, style: 'ibu_bapak_family' }),
-    'Ibu Sari & Bapak Dodi Beserta Keluarga',
+    'Ibu Sari & Bapak Dodi',
   );
   assert.equal(
     displayRecipientName({ name: 'Dodi', category: 'personal', secondName: 'Sari', style: 'bapak_ibu_family' }),
-    'Bapak Dodi & Ibu Sari Beserta Keluarga',
+    'Bapak Dodi & Ibu Sari',
   );
 });
 
@@ -72,14 +72,14 @@ test('a style ignores the category it is filed under, but wears its titles', () 
 test('a style renders in English without borrowing Indonesian honorifics', () => {
   assert.equal(
     displayRecipientName({ name: 'Sari', category: 'personal', secondName: 'Dodi', style: 'ibu_bapak_family' }, 'en'),
-    'Mrs. Sari & Mr. Dodi and Family',
+    'Mrs. Sari & Mr. Dodi',
   );
 });
 
 test('a half-filled two-name style still previews the name it has', () => {
   assert.equal(
     displayRecipientName({ name: 'Sari', category: 'personal', style: 'ibu_bapak_family' }),
-    'Ibu Sari Beserta Keluarga',
+    'Ibu Sari',
   );
   assert.equal(displayRecipientName({ name: '', category: 'personal', style: 'ibu_family' }), '');
 });
@@ -137,7 +137,7 @@ test('each person a style names carries their own titles', () => {
         { label: 'S.T', placement: 'suffix', person: 2 },
       ],
     }),
-    'Ibu Dr. Sari, S.Kom & Bapak Dodi, S.T Beserta Keluarga',
+    'Ibu Dr. Sari, S.Kom & Bapak Dodi, S.T',
   );
 });
 
@@ -203,6 +203,55 @@ test('a link round-trips its titles back onto the names', () => {
       style: 'ibu_bapak_family',
       titles: recipientTitlesFromParams(params),
     }),
-    'Ibu Dr. Sari, S.Kom & Bapak Dodi, S.T Beserta Keluarga',
+    'Ibu Dr. Sari, S.Kom & Bapak Dodi, S.T',
+  );
+});
+
+test('naming both parents stands on its own, without the family after it', () => {
+  assert.equal(
+    displayRecipientName({ name: 'Sari', category: 'personal', secondName: 'Dodi', style: 'ibu_bapak_family' }),
+    'Ibu Sari & Bapak Dodi',
+  );
+  // Naming one of them still carries the household along.
+  assert.equal(
+    displayRecipientName({ name: 'Sari', category: 'personal', style: 'ibu_family' }),
+    'Ibu Sari Beserta Keluarga',
+  );
+});
+
+test('a guest can be invited on their own, without a partner', () => {
+  assert.equal(
+    displayRecipientName({ name: 'Budi Santoso', category: 'personal', withPartner: false }),
+    'Budi Santoso',
+  );
+  assert.equal(
+    displayRecipientName({ name: 'Budi Santoso', category: 'personal', withPartner: false }, 'en'),
+    'Budi Santoso',
+  );
+  // Titles still print; only the partner is left off.
+  assert.equal(
+    displayRecipientName({
+      name: 'Budi Santoso',
+      category: 'titled',
+      titles: ['Bapak', { label: 'S.Kom', placement: 'suffix' }],
+      withPartner: false,
+    }),
+    'Bapak Budi Santoso, S.Kom',
+  );
+});
+
+test('a solo invitation says so in its link', () => {
+  assert.equal(
+    buildInvitationUrl('https://andrika-aliva.my.id', { name: 'Budi', category: 'personal', withPartner: false }),
+    'https://andrika-aliva.my.id/?to=Budi&solo=1',
+  );
+  assert.equal(
+    buildInvitationUrl('https://andrika-aliva.my.id', { name: 'Budi', category: 'personal', withPartner: true }),
+    'https://andrika-aliva.my.id/?to=Budi',
+  );
+  // A whole family has no partner to leave off.
+  assert.equal(
+    buildInvitationUrl('https://andrika-aliva.my.id', { name: 'Cimahi', category: 'group', withPartner: false }),
+    'https://andrika-aliva.my.id/?to=Cimahi&type=group',
   );
 });

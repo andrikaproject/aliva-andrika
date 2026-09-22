@@ -491,11 +491,78 @@ test('a guest list created before styles existed keeps its rows', async () => {
   assert.equal(settings.version, 3);
   assert.equal('message_template' in settings, false);
   assert.deepEqual(
-    db.prepare('SELECT raw_name, template_key FROM invitation_guests ORDER BY id').all().map((row) => ({ ...row })),
+    db.prepare('SELECT raw_name, template_key, with_partner FROM invitation_guests ORDER BY id').all().map((row) => ({ ...row })),
     [
-      { raw_name: 'Budi Santoso', template_key: 'friend' },
-      { raw_name: 'Pak Broto', template_key: 'parent' },
+      { raw_name: 'Budi Santoso', template_key: 'friend', with_partner: 1 },
+      { raw_name: 'Pak Broto', template_key: 'parent', with_partner: 1 },
     ],
   );
   db.close();
+});
+
+test('a guest can be invited on their own, without a partner', async () => {
+  let result = await send('/api/invitation-admin/guests', {
+    method: 'POST',
+    body: JSON.stringify({
+      name: 'Sendiri',
+      category: 'personal',
+      with_partner: false,
+      relationship_group: 'friend_aliva',
+    }),
+  });
+  assert.equal(result.response.status, 201);
+  assert.equal(result.body.guest.with_partner, false);
+  const solo = result.body.guest;
+
+  // A whole family has no partner to leave off, and neither has a style.
+  result = await send('/api/invitation-admin/guests', {
+    method: 'POST',
+    body: JSON.stringify({
+      name: 'Cimahi',
+      category: 'group',
+      with_partner: false,
+      relationship_group: 'friend_aliva',
+    }),
+  });
+  assert.equal(result.body.guest.with_partner, true);
+  const family = result.body.guest;
+
+  result = await send('/api/invitation-admin/guests', {
+    method: 'POST',
+    body: JSON.stringify({
+      name: 'Sari',
+      category: 'personal',
+      with_partner: false,
+      wording_style: 'ibu_family',
+      relationship_group: 'friend_aliva',
+    }),
+  });
+  assert.equal(result.body.guest.with_partner, true);
+  const styled = result.body.guest;
+
+  result = await send('/api/invitation-admin/guests?category=personal&with_partner=0');
+  assert.deepEqual(result.body.guests.map((row) => row.id), [solo.id]);
+
+  // The choice sticks until it is changed outright.
+  result = await send(`/api/invitation-admin/guests/${solo.id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ version: solo.version, status: 'copied' }),
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.body.guest.with_partner, false);
+
+  result = await send(`/api/invitation-admin/guests/${solo.id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ version: result.body.guest.version, with_partner: true, status: 'copied' }),
+  });
+  assert.equal(result.body.guest.with_partner, true);
+
+  for (const guest of [{ ...solo, version: result.body.guest.version }, family, styled]) {
+    const listed = await send('/api/invitation-admin/guests');
+    const row = listed.body.guests.find((candidate) => candidate.id === guest.id);
+    await send(`/api/invitation-admin/guests/${guest.id}`, {
+      method: 'DELETE',
+      body: JSON.stringify({ version: row.version }),
+    });
+  }
 });

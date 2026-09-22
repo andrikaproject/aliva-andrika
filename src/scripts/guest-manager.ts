@@ -23,6 +23,7 @@ type Guest = {
   category: InvitationCategory;
   wording_style: WordingStyle;
   second_name: string;
+  with_partner: boolean;
   template_key: TemplateKey;
   relationship_group: RelationshipGroup;
   titles: GuestTitle[];
@@ -50,6 +51,7 @@ const state = {
   // and thinking better of it must not cost the picking.
   selectedTitles: { 1: [] as Title[], 2: [] as Title[] } as Record<TitlePerson, Title[]>,
   stashedTitles: { 1: [] as Title[], 2: [] as Title[] } as Record<TitlePerson, Title[]>,
+  stashedSecondName: '',
 };
 
 const $ = <T extends HTMLElement>(id: string): T => {
@@ -111,16 +113,34 @@ function statusLabel(status: DeliveryStatus): string {
   return status === 'sent' ? 'Sudah dikirim' : status === 'copied' ? 'Sudah disalin' : 'Belum dikirim';
 }
 
-function categoryLabel(category: InvitationCategory): string {
-  return category === 'titled' ? 'Personal Bergelar' : category === 'group' ? 'Group' : 'Personal';
+function categoryLabel(category: InvitationCategory, withPartner = true): string {
+  if (category === 'titled') return 'Personal Bergelar';
+  if (category === 'group') return 'Group';
+  return withPartner ? 'Personal' : 'Personal Tanpa Pasangan';
+}
+
+/**
+ * The category dropdown offers one entry the database has no category for:
+ * a personal invitation with no partner after the name.
+ */
+const SOLO_CATEGORY = 'personal_solo';
+
+function readCategoryChoice(value: string): { category: InvitationCategory; withPartner: boolean } {
+  return value === SOLO_CATEGORY
+    ? { category: 'personal', withPartner: false }
+    : { category: value as InvitationCategory, withPartner: true };
+}
+
+function categoryChoiceOf(guest: Pick<Guest, 'category' | 'with_partner'>): string {
+  return guest.category === 'personal' && guest.with_partner === false ? SOLO_CATEGORY : guest.category;
 }
 
 const STYLE_LABELS: Record<WordingStyle, string> = {
   default: 'Default Template',
   ibu_family: 'Ibu & Keluarga',
   bapak_family: 'Bapak & Keluarga',
-  ibu_bapak_family: 'Ibu & Bapak Keluarga',
-  bapak_ibu_family: 'Bapak & Ibu Keluarga',
+  ibu_bapak_family: 'Ibu & Bapak',
+  bapak_ibu_family: 'Bapak & Ibu',
 };
 
 const HONORIFIC_WORDS: Record<Honorific, string> = { ibu: 'Ibu', bapak: 'Bapak' };
@@ -150,16 +170,22 @@ const SAVE_ERRORS: Record<string, string> = {
 };
 
 /** What the row shows under the name: the style, or the old category. */
-function wordingLabel(guest: Pick<Guest, 'category' | 'wording_style'>): string {
+function wordingLabel(guest: Pick<Guest, 'category' | 'wording_style' | 'with_partner'>): string {
   return guest.wording_style && guest.wording_style !== 'default'
     ? STYLE_LABELS[guest.wording_style]
-    : categoryLabel(guest.category);
+    : categoryLabel(guest.category, guest.with_partner !== false);
 }
 
 /** The filter lists categories and styles together; styles carry a prefix. */
 function applyWordingFilter(params: URLSearchParams, value: string): void {
-  if (value.startsWith('style:')) params.set('wording_style', value.slice('style:'.length));
-  else if (value) params.set('category', value);
+  if (value.startsWith('style:')) {
+    params.set('wording_style', value.slice('style:'.length));
+    return;
+  }
+  if (!value) return;
+  const choice = readCategoryChoice(value);
+  params.set('category', choice.category);
+  if (!choice.withPartner) params.set('with_partner', '0');
 }
 
 function groupLabel(group: RelationshipGroup): string {
@@ -171,7 +197,8 @@ function groupLabel(group: RelationshipGroup): string {
   }[group];
 }
 
-type GuestWording = Pick<Guest, 'name' | 'category' | 'titles'> & Partial<Pick<Guest, 'wording_style' | 'second_name'>>;
+type GuestWording = Pick<Guest, 'name' | 'category' | 'titles'>
+  & Partial<Pick<Guest, 'wording_style' | 'second_name' | 'with_partner'>>;
 
 /** Both people's picks as one list, each title knowing whose it is. */
 function formTitles(): GuestTitle[] {
@@ -182,6 +209,7 @@ function recipientInput(guest: GuestWording) {
   return {
     name: guest.name,
     category: guest.category,
+    withPartner: guest.with_partner !== false,
     titles: guest.titles.map(({ label, placement, person }) => ({ label, placement, person })),
     style: guest.wording_style ?? 'default',
     secondName: guest.second_name ?? '',
@@ -217,7 +245,11 @@ function filteredGuests(): Guest[] {
     if (state.activeGroup && guest.relationship_group !== state.activeGroup) return false;
     if (wording.startsWith('style:')) {
       if (guest.wording_style !== wording.slice('style:'.length)) return false;
-    } else if (wording && (guest.category !== wording || guest.wording_style !== 'default')) return false;
+    } else if (wording) {
+      const choice = readCategoryChoice(wording);
+      if (guest.wording_style !== 'default' || guest.category !== choice.category) return false;
+      if (!choice.withPartner && guest.with_partner !== false) return false;
+    }
     if (status && guest.status !== status) return false;
     if (query && !`${guest.name} ${renderGuestName(guest)}`.toLocaleLowerCase('id-ID').includes(query)) return false;
     return true;
@@ -452,9 +484,11 @@ function setTitleRadio(person: TitlePerson, wanted: boolean): void {
 }
 
 function formWording(): GuestWording {
+  const choice = readCategoryChoice(($('guest-category') as HTMLSelectElement).value);
   return {
     name: ($('guest-name') as HTMLInputElement).value,
-    category: ($('guest-category') as HTMLSelectElement).value as InvitationCategory,
+    category: choice.category,
+    with_partner: choice.withPartner,
     titles: formTitles(),
     wording_style: ($('guest-style') as HTMLSelectElement).value as WordingStyle,
     second_name: ($('guest-second-name') as HTMLInputElement).value,
@@ -473,8 +507,17 @@ function syncStyleFields(): void {
   $('category-field').hidden = style !== 'default';
   $('guest-name-label').textContent = honorifics.length ? NAME_FIELD_LABELS[honorifics[0]] : 'Nama yang diundang';
   $('second-name-field').hidden = honorifics.length < 2;
-  if (honorifics.length > 1) $('guest-second-name-label').textContent = NAME_FIELD_LABELS[honorifics[1]];
-  else secondInput.value = '';
+  if (honorifics.length > 1) {
+    $('guest-second-name-label').textContent = NAME_FIELD_LABELS[honorifics[1]];
+    // Parked when a one-name style took over; handed back on return.
+    if (!secondInput.value && state.stashedSecondName) {
+      secondInput.value = state.stashedSecondName;
+      state.stashedSecondName = '';
+    }
+  } else if (secondInput.value) {
+    state.stashedSecondName = secondInput.value;
+    secondInput.value = '';
+  }
 
   syncTitleFields();
 }
@@ -486,7 +529,7 @@ function syncStyleFields(): void {
  */
 function syncTitleFields(): void {
   const style = ($('guest-style') as HTMLSelectElement).value as WordingStyle;
-  const category = ($('guest-category') as HTMLSelectElement).value as InvitationCategory;
+  const { category } = readCategoryChoice(($('guest-category') as HTMLSelectElement).value);
   const honorifics = styleHonorifics(style);
 
   for (const person of PEOPLE) {
@@ -529,6 +572,7 @@ function resetGuestForm(): void {
   state.editing = null;
   state.selectedTitles = { 1: [], 2: [] };
   state.stashedTitles = { 1: [], 2: [] };
+  state.stashedSecondName = '';
   for (const person of PEOPLE) {
     setTitleRadio(person, false);
     $(`custom-title-row-${person}`).hidden = true;
@@ -550,7 +594,7 @@ function openGuestDialog(guest: Guest | null = null): void {
     ($('guest-name') as HTMLInputElement).value = guest.name;
     ($('guest-style') as HTMLSelectElement).value = guest.wording_style || 'default';
     ($('guest-second-name') as HTMLInputElement).value = guest.second_name || '';
-    ($('guest-category') as HTMLSelectElement).value = guest.category;
+    ($('guest-category') as HTMLSelectElement).value = categoryChoiceOf(guest);
     ($('guest-group') as HTMLSelectElement).value = guest.relationship_group;
     ($('guest-template') as HTMLSelectElement).value = guest.template_key || 'friend';
     ($('guest-status') as HTMLSelectElement).value = guest.status;
@@ -657,9 +701,11 @@ guestForm.addEventListener('submit', async (event) => {
   if (styleHonorifics(style).length > 1 && !wording.second_name!.trim()) {
     return setError(errorElement, `${$('guest-second-name-label').textContent} belum diisi.`);
   }
+  const choice = readCategoryChoice(($('guest-category') as HTMLSelectElement).value);
   const payload = {
     name: wording.name,
-    category: ($('guest-category') as HTMLSelectElement).value,
+    category: choice.category,
+    with_partner: choice.withPartner,
     wording_style: style,
     second_name: wording.second_name,
     relationship_group: ($('guest-group') as HTMLSelectElement).value,
@@ -706,6 +752,7 @@ async function updateStatus(guest: Guest, status: DeliveryStatus): Promise<void>
       version: guest.version,
       name: guest.name,
       category: guest.category,
+      with_partner: guest.with_partner,
       wording_style: guest.wording_style,
       second_name: guest.second_name,
       template_key: guest.template_key,

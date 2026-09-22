@@ -8,6 +8,7 @@ import {
   normalizeGroupName,
   recipientTitlesFromParams,
   sanitizeRecipientPart,
+  styleHonorifics,
 } from '../lib/invitation-recipient.ts';
 
 /** Long enough for the tear to finish before the cover leaves the DOM. */
@@ -87,11 +88,25 @@ export function initInvitation(prefersReducedMotion: boolean): void {
     const type = params.get('type')?.toLowerCase();
     const group = !style && type === 'group';
     const titled = !style && type === 'titled';
+    // ?solo=1 invites the person by name alone, without "& Pasangan"; a
+    // style naming both parents likewise stands on its own two names.
+    const solo = params.get('solo') === '1';
+    const namesBoth = style !== null && styleHonorifics(style).length > 1;
     const keys = style
-      ? { prefix: 'cover.groupGreetingPrefix', name: 'cover.familyGreetingName' }
+      ? {
+          prefix: 'cover.groupGreetingPrefix',
+          name: namesBoth ? 'cover.plainGreetingName' : 'cover.familyGreetingName',
+        }
       : group
         ? { prefix: 'cover.groupGreetingPrefix', name: 'cover.groupGreetingName' }
-        : { prefix: 'cover.guestGreetingPrefix', name: titled ? 'cover.titledGreetingName' : 'cover.guestGreetingName' };
+        : {
+            prefix: 'cover.guestGreetingPrefix',
+            name: solo
+              ? 'cover.plainGreetingName'
+              : titled
+                ? 'cover.titledGreetingName'
+                : 'cover.guestGreetingName',
+          };
     const safeName = group ? normalizeGroupName(guestName) : sanitizeRecipientPart(guestName);
     const titles = recipientTitlesFromParams(params);
 
