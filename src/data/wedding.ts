@@ -76,7 +76,7 @@ export const schedule = [
 
 export const rsvp = {
   /** Printed in the RSVP intro; the API does not enforce it. */
-  deadlineDate: '2026-10-01',
+  deadlineDate: '2026-10-05',
   minGuests: 1,
   maxGuests: 4,
   maxMessageLength: 500,

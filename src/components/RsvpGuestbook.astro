@@ -4,10 +4,13 @@ import { DEFAULT_LOCALE, translate } from '../i18n/index.ts';
 
 const t = (key: string) => translate(DEFAULT_LOCALE, key);
 
+// Pinned to WIB: formatted in the builder's own zone, midnight on the 5th in
+// Jakarta is still the 4th anywhere west of it, UTC included.
 const deadline = new Intl.DateTimeFormat(DEFAULT_LOCALE === 'id' ? 'id-ID' : 'en-GB', {
   day: 'numeric',
   month: 'long',
   year: 'numeric',
+  timeZone: 'Asia/Jakarta',
 }).format(new Date(`${rsvp.deadlineDate}T00:00:00+07:00`));
 ---
 

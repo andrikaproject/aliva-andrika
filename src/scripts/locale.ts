@@ -76,10 +76,12 @@ function paint(locale: Locale): void {
   document.querySelectorAll<HTMLElement>('[data-rsvp-deadline][data-deadline-date]').forEach((element) => {
     const iso = element.dataset.deadlineDate;
     if (!iso) return;
+    // WIB, as on the server, so a guest abroad does not see the day before.
     element.textContent = new Intl.DateTimeFormat(locale === 'id' ? 'id-ID' : 'en-GB', {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
+      timeZone: 'Asia/Jakarta',
     }).format(new Date(`${iso}T00:00:00+07:00`));
   });
 
