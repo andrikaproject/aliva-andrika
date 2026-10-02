@@ -27,8 +27,25 @@
   font-size: 1.1rem;
 }
 
+/* One bank inside a card. A second bank under the same name repeats the
+   card's short gold rule, so the two read as a list, not one long block. */
+#gift .gift-account {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+}
+
+#gift .gift-account + .gift-account::before {
+  content: '';
+  width: 2rem;
+  height: 1px;
+  margin: 0.25rem auto 1.25rem;
+  background: hsl(var(--accent));
+}
+
 #gift .gift-card__bank {
-  margin-bottom: 0.8rem;
+  margin: 0;
 }
 
 #gift .gift-card__holder-label,
@@ -54,7 +71,7 @@
 }
 
 #gift .gift-card__account-label {
-  margin-bottom: 0;
+  margin-bottom: 0.75rem;
 }
 
 #gift .gift-card__number {

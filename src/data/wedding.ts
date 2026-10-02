@@ -84,9 +84,19 @@ export const rsvp = {
 } as const;
 
 export const gift = {
-  accounts: [
-    { bank: 'BNI', holder: couple.groom.fullName, number: '459408723' },
-    { bank: 'BNI', holder: couple.bride.fullName, number: '0727960012' },
+  /** One card per person; a second bank sits inside the same card. */
+  holders: [
+    {
+      name: couple.groom.fullName,
+      accounts: [
+        { bank: 'BNI', number: '459408723' },
+        { bank: 'BSI', number: '7182229525' },
+      ],
+    },
+    {
+      name: couple.bride.fullName,
+      accounts: [{ bank: 'BNI', number: '0727960012' }],
+    },
   ],
   delivery: {
     recipient: 'Aliva Eka / Andrika',
